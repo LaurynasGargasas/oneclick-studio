@@ -38,14 +38,23 @@ export function Settings() {
   }
 
   async function handleTestConnection() {
-    if (!isTauri) return;
     setTestState("testing");
     setTestMsg("");
     try {
-      const msg = await invoke<string>("test_api_connection", {
-        endpoint,
-        apiKey,
-      });
+      let msg: string;
+      if (isTauri) {
+        msg = await invoke<string>("test_api_connection", { endpoint, apiKey });
+      } else {
+        // Browser preview — call the models endpoint directly via fetch
+        const res = await fetch(`${endpoint.replace(/\/$/, "")}/models`, {
+          headers: { Authorization: `Bearer ${apiKey}` },
+        });
+        if (!res.ok) {
+          const body = await res.text().catch(() => "");
+          throw new Error(`HTTP ${res.status}: ${body}`);
+        }
+        msg = `OK — ${res.status}`;
+      }
       setTestState("ok");
       setTestMsg(msg);
     } catch (e) {
@@ -62,6 +71,17 @@ export function Settings() {
           Settings
         </h1>
       </header>
+
+      {!isTauri && (
+        <div className="border border-hud-amber/40 bg-hud-amber/5 px-4 py-3">
+          <div className="hud-label text-hud-amber mb-1">Preview Mode</div>
+          <p className="font-mono text-[0.7rem] text-fg-muted">
+            Settings typed here are not saved — the database requires the Tauri runtime.
+            You can still test the connection; the key is sent from your browser.
+            Run <span className="text-hud-cyan">npm run tauri dev</span> for persistent storage.
+          </p>
+        </div>
+      )}
 
       {/* API Configuration */}
       <Panel className="p-6">
@@ -109,7 +129,7 @@ export function Settings() {
               variant="secondary"
               onClick={handleTestConnection}
               loading={testState === "testing"}
-              disabled={!isTauri || !apiKey}
+              disabled={!apiKey}
             >
               Test Connection
             </Button>
