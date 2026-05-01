@@ -1,16 +1,6 @@
 import { create } from "zustand";
-import Database from "@tauri-apps/plugin-sql";
 import { isTauri } from "@/lib/tauri";
-
-const DB_URL = "sqlite:seedance.db";
-
-let dbPromise: Promise<Database> | null = null;
-async function getDb(): Promise<Database> {
-  if (!dbPromise) {
-    dbPromise = Database.load(DB_URL);
-  }
-  return dbPromise;
-}
+import { getDb } from "@/lib/db";
 
 interface SettingsRow {
   key: string;
@@ -61,13 +51,14 @@ export const useSettings = create<SettingsState>((set) => ({
 
   async load() {
     if (!isTauri) {
-      // Browser preview mode — defaults only.
       set({ loaded: true });
       return;
     }
     try {
       const db = await getDb();
-      const rows = await db.select<SettingsRow[]>("SELECT key, value FROM settings");
+      const rows = await db.select<SettingsRow[]>(
+        "SELECT key, value FROM settings",
+      );
       const partial: Partial<typeof DEFAULTS> = {};
       for (const row of rows) {
         const camelKey = KEY_MAP[row.key];

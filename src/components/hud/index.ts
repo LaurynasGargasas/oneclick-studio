@@ -7,3 +7,7 @@ export { ScanlineOverlay } from "./ScanlineOverlay";
 export { StatusBadge, type Status } from "./StatusBadge";
 export { HudReticle } from "./HudReticle";
 export { HudInput } from "./HudInput";
+export { HudTextarea } from "./HudTextarea";
+export { Modal } from "./Modal";
+export { Select, type SelectOption } from "./Select";
+export { IconButton } from "./IconButton";

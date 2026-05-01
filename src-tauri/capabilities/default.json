@@ -5,9 +5,18 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:webview:allow-internal-toggle-devtools",
     "opener:default",
     "dialog:default",
+    "dialog:allow-open",
     "fs:default",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        "$APPDATA/**",
+        "$APPLOCALDATA/**"
+      ]
+    },
     "os:default",
     "sql:default",
     "sql:allow-load",

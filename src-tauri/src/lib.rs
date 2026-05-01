@@ -1,3 +1,5 @@
+mod commands;
+
 use tauri_plugin_sql::{Migration, MigrationKind};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -19,6 +21,13 @@ pub fn run() {
                 .add_migrations("sqlite:seedance.db", migrations)
                 .build(),
         )
+        .invoke_handler(tauri::generate_handler![
+            commands::elements::save_new_element_images,
+            commands::elements::append_element_image,
+            commands::elements::delete_image_file,
+            commands::elements::delete_element_dir,
+            commands::elements::new_uuid,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
