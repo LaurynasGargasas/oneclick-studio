@@ -4,12 +4,20 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let migrations = vec![Migration {
-        version: 1,
-        description: "create_initial_schema",
-        sql: include_str!("../migrations/001_initial.sql"),
-        kind: MigrationKind::Up,
-    }];
+    let migrations = vec![
+        Migration {
+            version: 1,
+            description: "create_initial_schema",
+            sql: include_str!("../migrations/001_initial.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 2,
+            description: "settings_model_id",
+            sql: include_str!("../migrations/002_settings_model.sql"),
+            kind: MigrationKind::Up,
+        },
+    ];
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -22,11 +30,18 @@ pub fn run() {
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
+            // elements
             commands::elements::save_new_element_images,
             commands::elements::append_element_image,
             commands::elements::delete_image_file,
             commands::elements::delete_element_dir,
             commands::elements::new_uuid,
+            // generations / API
+            commands::generations::test_api_connection,
+            commands::generations::submit_generation,
+            commands::generations::poll_generation,
+            commands::generations::download_generation_video,
+            commands::generations::read_image_as_data_uri,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

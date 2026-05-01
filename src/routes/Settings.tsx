@@ -1,29 +1,56 @@
 import { useEffect, useState } from "react";
-import { Save, Activity, Database, Palette } from "lucide-react";
+import { invoke } from "@tauri-apps/api/core";
+import { Save, Activity, Database, Palette, CheckCircle, XCircle } from "lucide-react";
 import { Button, Panel, HudInput } from "@/components/hud";
 import { useSettings } from "@/stores/settingsStore";
+import { isTauri } from "@/lib/tauri";
+
+type TestState = "idle" | "testing" | "ok" | "fail";
 
 export function Settings() {
   const settings = useSettings();
   const [endpoint, setEndpoint] = useState(settings.apiEndpoint);
   const [apiKey, setApiKey] = useState(settings.apiKey);
+  const [modelId, setModelId] = useState(settings.modelId);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [testState, setTestState] = useState<TestState>("idle");
+  const [testMsg, setTestMsg] = useState("");
 
   useEffect(() => {
     setEndpoint(settings.apiEndpoint);
     setApiKey(settings.apiKey);
-  }, [settings.apiEndpoint, settings.apiKey]);
+    setModelId(settings.modelId);
+  }, [settings.apiEndpoint, settings.apiKey, settings.modelId]);
 
   async function handleSave() {
     setSaving(true);
     try {
       await settings.set("api_endpoint", endpoint);
       await settings.set("api_key", apiKey);
+      await settings.set("model_id", modelId);
       setSaved(true);
+      setTestState("idle");
       setTimeout(() => setSaved(false), 2000);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleTestConnection() {
+    if (!isTauri) return;
+    setTestState("testing");
+    setTestMsg("");
+    try {
+      const msg = await invoke<string>("test_api_connection", {
+        endpoint,
+        apiKey,
+      });
+      setTestState("ok");
+      setTestMsg(msg);
+    } catch (e) {
+      setTestState("fail");
+      setTestMsg(String(e));
     }
   }
 
@@ -61,17 +88,44 @@ export function Settings() {
             placeholder="•••••••••••••••••••••••••••"
             hint="Stored locally in your app database. Never sent anywhere except the configured endpoint."
           />
+          <HudInput
+            label="Model ID"
+            mono
+            value={modelId}
+            onChange={(e) => setModelId(e.target.value)}
+            placeholder="seedance-1-0-lite-t2v-250528"
+            hint="Find your exact model ID in the BytePlus console under ModelArk → My Models."
+          />
 
           <div className="flex items-center gap-3 pt-2">
-            <Button onClick={handleSave} loading={saving} iconLeft={<Save className="w-3.5 h-3.5" />}>
+            <Button
+              onClick={handleSave}
+              loading={saving}
+              iconLeft={<Save className="w-3.5 h-3.5" />}
+            >
               {saved ? "Saved" : "Save"}
             </Button>
-            <Button variant="secondary" disabled>
+            <Button
+              variant="secondary"
+              onClick={handleTestConnection}
+              loading={testState === "testing"}
+              disabled={!isTauri || !apiKey}
+            >
               Test Connection
             </Button>
-            <span className="font-mono text-[0.65rem] text-fg-dim ml-auto">
-              Test connection wired up in Phase 4
-            </span>
+
+            {testState === "ok" && (
+              <span className="flex items-center gap-1.5 font-mono text-[0.65rem] text-hud-green">
+                <CheckCircle className="w-3.5 h-3.5" />
+                {testMsg}
+              </span>
+            )}
+            {testState === "fail" && (
+              <span className="flex items-center gap-1.5 font-mono text-[0.65rem] text-hud-red max-w-sm truncate">
+                <XCircle className="w-3.5 h-3.5 shrink-0" />
+                {testMsg}
+              </span>
+            )}
           </div>
         </div>
       </Panel>
