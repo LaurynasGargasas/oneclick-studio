@@ -1,7 +1,9 @@
 import { Film, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button, Panel } from "@/components/hud";
 
 export function GenerationsFeed() {
+  const navigate = useNavigate();
   return (
     <div className="p-8 max-w-[1600px] mx-auto">
       {/* Header */}
@@ -12,12 +14,12 @@ export function GenerationsFeed() {
             Generations
           </h1>
         </div>
-        <Button iconLeft={<Plus className="w-4 h-4" />} size="md">
+        <Button iconLeft={<Plus className="w-4 h-4" />} size="md" onClick={() => navigate("/generate")}>
           New Generation
         </Button>
       </header>
 
-      {/* Empty state */}
+      {/* Empty state — replaced with live feed in Phase 6 */}
       <Panel className="p-16 hud-grid-bg" glow="none">
         <div className="flex flex-col items-center justify-center text-center gap-4">
           <div className="relative w-16 h-16 border border-border-hud flex items-center justify-center">
@@ -30,7 +32,9 @@ export function GenerationsFeed() {
             </p>
           </div>
           <div className="mt-3">
-            <Button variant="secondary" size="sm">Begin Generation</Button>
+            <Button variant="secondary" size="sm" onClick={() => navigate("/generate")}>
+              Begin Generation
+            </Button>
           </div>
         </div>
       </Panel>
