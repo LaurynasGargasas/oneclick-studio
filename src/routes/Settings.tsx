@@ -45,8 +45,8 @@ export function Settings() {
       if (isTauri) {
         msg = await invoke<string>("test_api_connection", { endpoint, apiKey });
       } else {
-        // Browser preview — call the models endpoint directly via fetch
-        const res = await fetch(`${endpoint.replace(/\/$/, "")}/models`, {
+        // Browser preview — route through Vite dev proxy to avoid CORS
+        const res = await fetch("/api-proxy/models", {
           headers: { Authorization: `Bearer ${apiKey}` },
         });
         if (!res.ok) {

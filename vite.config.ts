@@ -32,5 +32,13 @@ export default defineConfig(async () => ({
     watch: {
       ignored: ["**/src-tauri/**"],
     },
+    proxy: {
+      "/api-proxy": {
+        target: "https://ark.ap-southeast.bytepluses.com",
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api-proxy/, "/api/v3"),
+        secure: true,
+      },
+    },
   },
 }));
