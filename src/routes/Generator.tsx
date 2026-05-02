@@ -13,7 +13,6 @@ import { useProjects } from "@/stores/projectsStore";
 import { useGenerations } from "@/stores/generationsStore";
 import { useSettings } from "@/stores/settingsStore";
 import { ELEMENT_TYPES, ELEMENT_TYPE_META, type ElementType } from "@/lib/elementTypes";
-import { isTauri } from "@/lib/tauri";
 import { cn } from "@/lib/cn";
 
 // ---------------------------------------------------------------------------
@@ -363,12 +362,8 @@ export function Generator() {
 
   async function handleSubmit() {
     if (!prompt.trim()) return;
-    if (!isTauri) {
-      setError("Generation requires the Tauri runtime. Run npm run tauri dev.");
-      return;
-    }
     if (!settings.apiKey) {
-      setError("No API key configured. Go to Settings and save your key.");
+      setError("No API key configured. Go to Settings and save your key first.");
       return;
     }
 
@@ -512,12 +507,7 @@ export function Generator() {
             >
               {submitting ? "Submitting…" : "Generate"}
             </Button>
-            {!isTauri && (
-              <span className="font-mono text-[0.65rem] text-fg-muted">
-                Preview mode — generation requires Tauri runtime
-              </span>
-            )}
-            {isTauri && !settings.apiKey && (
+            {!settings.apiKey && (
               <span className="font-mono text-[0.65rem] text-hud-amber">
                 No API key — configure in Settings
               </span>

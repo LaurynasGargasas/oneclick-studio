@@ -45,9 +45,7 @@ export interface SubmitOptions {
   camera_fixed?: boolean;
   watermark?: boolean;
   audio_enabled?: boolean;
-  /** Pass the elements store items for @tag resolution */
   elements: Array<{ tag: string; id: string; images: Array<{ file_path: string }> }>;
-  /** API credentials from settings */
   api: { endpoint: string; api_key: string; model_id: string };
 }
 
@@ -66,7 +64,7 @@ interface GenerationsState {
 }
 
 // ---------------------------------------------------------------------------
-// DB helpers
+// DB row type
 // ---------------------------------------------------------------------------
 
 interface GenerationRow {
@@ -103,10 +101,123 @@ function rowToGeneration(r: GenerationRow): Generation {
 }
 
 // ---------------------------------------------------------------------------
+// Browser-mode HTTP helpers (used when !isTauri, routes through Vite proxy)
+// ---------------------------------------------------------------------------
+
+function normStatus(s: string): GenerationStatus {
+  switch (s.toLowerCase()) {
+    case "pending":
+    case "queued":
+    case "created":
+      return "pending";
+    case "running":
+    case "processing":
+    case "in_progress":
+      return "processing";
+    case "succeeded":
+    case "success":
+    case "completed":
+    case "done":
+      return "completed";
+    case "failed":
+    case "error":
+    case "cancelled":
+    case "canceled":
+      return "failed";
+    default:
+      return "processing";
+  }
+}
+
+type RawContentItem = { type: string; image_url?: { url: string } };
+
+function extractVideoUrl(data: Record<string, unknown>): string | null {
+  // Shape 1: output.choices[0].message.content[].{type:"video_url", image_url:{url}}
+  type Choice = { message?: { content?: RawContentItem[] }; content?: RawContentItem[] };
+  const output = data.output as { choices?: Choice[] } | undefined;
+  if (output?.choices) {
+    for (const choice of output.choices) {
+      const items = choice.message?.content ?? choice.content ?? [];
+      for (const item of items) {
+        if (item.type === "video_url" && item.image_url?.url) return item.image_url.url;
+      }
+    }
+  }
+  // Shape 2: task_result.videos[0].url
+  const tr = data.task_result as
+    | { videos?: Array<{ url?: string; video_url?: string }> }
+    | undefined;
+  if (tr?.videos?.[0]) {
+    return tr.videos[0].url ?? tr.videos[0].video_url ?? null;
+  }
+  return null;
+}
+
+async function browserSubmit(
+  api: { api_key: string; model_id: string },
+  content: ContentItem[],
+  params: {
+    resolution: string;
+    duration: number;
+    seed: number | null;
+    camera_fixed: boolean;
+    watermark: boolean;
+  },
+): Promise<string> {
+  const res = await fetch("/api-proxy/contents/generations/tasks", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${api.api_key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: api.model_id,
+      content,
+      parameters: {
+        resolution: params.resolution,
+        duration: params.duration,
+        ...(params.seed !== null ? { seed: params.seed } : {}),
+        camera_fixed: params.camera_fixed,
+        watermark: params.watermark,
+      },
+    }),
+  });
+
+  const raw = await res.text();
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${raw}`);
+
+  const data = JSON.parse(raw) as Record<string, unknown>;
+  const taskId = (data.id ?? data.task_id) as string | undefined;
+  if (!taskId) throw new Error(`No task_id in response: ${raw}`);
+  return taskId;
+}
+
+async function browserPoll(
+  taskId: string,
+  apiKey: string,
+): Promise<{ status: GenerationStatus; video_url: string | null; error: string | null }> {
+  const res = await fetch(`/api-proxy/contents/generations/tasks/${taskId}`, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+
+  const raw = await res.text();
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${raw}`);
+
+  const data = JSON.parse(raw) as Record<string, unknown>;
+  const rawStatus = ((data.status ?? data.task_status ?? "unknown") as string);
+  const status = normStatus(rawStatus);
+  const video_url = status === "completed" ? extractVideoUrl(data) : null;
+  const errData = data.error as { message?: string } | undefined;
+  const error =
+    status === "failed" ? (errData?.message ?? `Task failed: ${rawStatus}`) : null;
+
+  return { status, video_url, error };
+}
+
+// ---------------------------------------------------------------------------
 // Store
 // ---------------------------------------------------------------------------
 
-// Holds active polling interval IDs, keyed by generation id.
 const intervals = new Map<string, ReturnType<typeof setInterval>>();
 
 export const useGenerations = create<GenerationsState>((set, get) => ({
@@ -158,9 +269,12 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
       .join(" ");
 
     const now = Date.now();
-    const id: string = await invoke("new_uuid");
+    // Use Tauri UUID command when available, otherwise fall back to browser crypto
+    const id: string = isTauri
+      ? await invoke<string>("new_uuid")
+      : crypto.randomUUID();
 
-    // Persist as "pending" first so it appears in the feed immediately
+    // Persist to SQLite (Tauri only)
     if (isTauri) {
       const db = await getDb();
       await db.execute(
@@ -171,30 +285,13 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
            cost_credits, created_at, completed_at)
          VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         [
-          id,
-          project_id,
-          prompt,
-          promptResolved,
-          duration,
-          resolution,
-          aspect_ratio,
-          quality,
-          seed,
-          camera_fixed ? 1 : 0,
-          watermark ? 1 : 0,
-          audio_enabled ? 1 : 0,
-          "pending",
-          null,
-          null,
-          null,
-          null,
-          null,
-          now,
-          null,
+          id, project_id, prompt, promptResolved, duration, resolution,
+          aspect_ratio, quality, seed,
+          camera_fixed ? 1 : 0, watermark ? 1 : 0, audio_enabled ? 1 : 0,
+          "pending", null, null, null, null, null, now, null,
         ],
       );
 
-      // Link resolved elements
       if (resolved.resolvedTags.length > 0) {
         const elemMap = new Map(elements.map((e) => [e.tag, e.id]));
         for (const tag of resolved.resolvedTags) {
@@ -210,47 +307,30 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
     }
 
     const newGen: Generation = {
-      id,
-      project_id,
-      prompt_raw: prompt,
-      prompt_resolved: promptResolved,
-      duration_s: duration,
-      resolution,
-      aspect_ratio,
-      quality,
-      seed,
-      camera_fixed,
-      watermark,
-      audio_enabled,
-      status: "pending",
-      task_id: null,
-      video_path: null,
-      thumbnail_path: null,
-      error_message: null,
-      cost_credits: null,
-      created_at: now,
-      completed_at: null,
+      id, project_id, prompt_raw: prompt, prompt_resolved: promptResolved,
+      duration_s: duration, resolution, aspect_ratio, quality, seed,
+      camera_fixed, watermark, audio_enabled,
+      status: "pending", task_id: null, video_path: null,
+      thumbnail_path: null, error_message: null, cost_credits: null,
+      created_at: now, completed_at: null,
     };
 
     set((s) => ({ items: [newGen, ...s.items] }));
 
-    // Submit to the API
+    // Submit to API — Tauri uses Rust command; browser uses fetch proxy
     try {
-      const taskId: string = await invoke("submit_generation", {
-        endpoint: api.endpoint,
-        apiKey: api.api_key,
-        model: api.model_id,
-        content,
-        parameters: {
-          resolution,
-          duration,
-          seed: seed ?? null,
-          camera_fixed,
-          watermark,
-        },
-      });
+      const taskId: string = isTauri
+        ? await invoke<string>("submit_generation", {
+            endpoint: api.endpoint,
+            apiKey: api.api_key,
+            model: api.model_id,
+            content,
+            parameters: { resolution, duration, seed: seed ?? null, camera_fixed, watermark },
+          })
+        : await browserSubmit(api, content, {
+            resolution, duration, seed: seed ?? null, camera_fixed, watermark,
+          });
 
-      // Update DB + local state with task_id and processing status
       if (isTauri) {
         const db = await getDb();
         await db.execute(
@@ -259,8 +339,6 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
         );
       }
       get()._updateLocal(id, { task_id: taskId, status: "processing" });
-
-      // Start polling
       get().startPolling(id, api);
     } catch (err) {
       const msg = String(err);
@@ -283,49 +361,64 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
     if (!gen?.task_id) return;
 
     try {
-      const result = await invoke<{
-        task_id: string;
-        status: string;
-        video_url: string | null;
-        error: string | null;
-        raw_status: string;
-      }>("poll_generation", {
-        endpoint: api.endpoint,
-        apiKey: api.api_key,
-        taskId: gen.task_id,
-      });
+      let status: GenerationStatus;
+      let video_url: string | null = null;
+      let errorMsg: string | null = null;
 
-      const patch: Partial<Generation> = { status: result.status as GenerationStatus };
+      if (isTauri) {
+        const result = await invoke<{
+          task_id: string;
+          status: string;
+          video_url: string | null;
+          error: string | null;
+          raw_status: string;
+        }>("poll_generation", {
+          endpoint: api.endpoint,
+          apiKey: api.api_key,
+          taskId: gen.task_id,
+        });
+        status = result.status as GenerationStatus;
+        video_url = result.video_url;
+        errorMsg = result.error;
+      } else {
+        const result = await browserPoll(gen.task_id, api.api_key);
+        status = result.status;
+        video_url = result.video_url;
+        errorMsg = result.error;
+      }
 
-      if (result.status === "completed" && result.video_url) {
-        // Download video to local storage
-        let videoPath: string | null = null;
-        try {
-          videoPath = await invoke<string>("download_generation_video", {
-            url: result.video_url,
-            generationId,
-          });
-        } catch (dlErr) {
-          console.warn("Video download failed:", dlErr);
+      const patch: Partial<Generation> = { status };
+
+      if (status === "completed") {
+        if (isTauri && video_url) {
+          // Download to local file in Tauri
+          try {
+            patch.video_path = await invoke<string>("download_generation_video", {
+              url: video_url,
+              generationId,
+            });
+          } catch (dlErr) {
+            console.warn("Video download failed:", dlErr);
+            patch.video_path = video_url; // Fall back to URL
+          }
+        } else {
+          // Browser mode: store the remote URL directly so the player can use it
+          patch.video_path = video_url;
         }
-        patch.video_path = videoPath;
         patch.completed_at = Date.now();
         get().stopPolling(generationId);
-      } else if (result.status === "failed") {
-        patch.error_message = result.error ?? "Unknown error";
+      } else if (status === "failed") {
+        patch.error_message = errorMsg ?? "Unknown error";
         patch.completed_at = Date.now();
         get().stopPolling(generationId);
       }
 
       if (isTauri && Object.keys(patch).length > 0) {
         const db = await getDb();
-        const sets = Object.keys(patch)
-          .map((k) => `${k} = ?`)
-          .join(", ");
-        const vals = [...Object.values(patch), generationId];
+        const sets = Object.keys(patch).map((k) => `${k} = ?`).join(", ");
         await db.execute(
           `UPDATE generations SET ${sets} WHERE id = ?`,
-          vals,
+          [...Object.values(patch), generationId],
         );
       }
       get()._updateLocal(generationId, patch);
@@ -337,25 +430,19 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
   // ---- polling lifecycle ---------------------------------------------------
   startPolling(generationId, api) {
     if (intervals.has(generationId)) return;
-    const iv = setInterval(() => {
-      void get().poll(generationId, api);
-    }, 5000);
+    const iv = setInterval(() => void get().poll(generationId, api), 5000);
     intervals.set(generationId, iv);
     set((s) => {
       const next = new Set(s.pollingIds);
       next.add(generationId);
       return { pollingIds: next };
     });
-    // Immediate first poll
     void get().poll(generationId, api);
   },
 
   stopPolling(generationId) {
     const iv = intervals.get(generationId);
-    if (iv) {
-      clearInterval(iv);
-      intervals.delete(generationId);
-    }
+    if (iv) { clearInterval(iv); intervals.delete(generationId); }
     set((s) => {
       const next = new Set(s.pollingIds);
       next.delete(generationId);
@@ -364,14 +451,11 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
   },
 
   stopAllPolling() {
-    for (const [id, iv] of intervals) {
-      clearInterval(iv);
-      intervals.delete(id);
-    }
+    for (const [, iv] of intervals) clearInterval(iv);
+    intervals.clear();
     set({ pollingIds: new Set() });
   },
 
-  // ---- internal ------------------------------------------------------------
   _updateLocal(id, patch) {
     set((s) => ({
       items: s.items.map((g) => (g.id === id ? { ...g, ...patch } : g)),
