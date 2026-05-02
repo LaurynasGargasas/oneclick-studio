@@ -78,11 +78,17 @@ struct PollResponse {
     output: Option<PollOutput>,
     error: Option<ApiError>,
     task_result: Option<TaskResult>,
+    // Dreamina envelope: { code, data: { status, video_info } }
+    data: Option<DreaminaData>,
 }
 
 #[derive(Debug, Deserialize)]
 struct PollOutput {
     choices: Option<Vec<Choice>>,
+    // Dreamina-Seedance-2.0 flat shapes
+    video_url: Option<String>,
+    video_urls: Option<Vec<String>>,
+    url: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -99,6 +105,21 @@ struct ChoiceMessage {
 #[derive(Debug, Deserialize)]
 struct TaskResult {
     videos: Option<Vec<VideoResult>>,
+    video_url: Option<String>,
+    url: Option<String>,
+}
+
+// Dreamina-style: data.video_info.video_url
+#[derive(Debug, Deserialize)]
+struct VideoInfo {
+    video_url: Option<String>,
+    url: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct DreaminaData {
+    video_info: Option<VideoInfo>,
+    video_url: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -135,7 +156,7 @@ fn normalise_status(raw: &str) -> &str {
 }
 
 fn extract_video_url(poll: &PollResponse) -> Option<String> {
-    // Try output.choices[0].message.content[].video_url first
+    // Shape A: output.choices[0].message.content[].{type:"video_url", image_url:{url}}
     if let Some(output) = &poll.output {
         if let Some(choices) = &output.choices {
             for choice in choices {
@@ -155,13 +176,43 @@ fn extract_video_url(poll: &PollResponse) -> Option<String> {
                 }
             }
         }
+        // Shape B: output.video_url (Dreamina-Seedance-2.0 flat)
+        if let Some(url) = &output.video_url {
+            return Some(url.clone());
+        }
+        // Shape C: output.video_urls[0]
+        if let Some(urls) = &output.video_urls {
+            if let Some(url) = urls.first() {
+                return Some(url.clone());
+            }
+        }
+        // Shape D: output.url
+        if let Some(url) = &output.url {
+            return Some(url.clone());
+        }
     }
-    // Try task_result.videos fallback (alternate schema)
+    // Shape E: task_result.video_url / task_result.videos[0]
     if let Some(tr) = &poll.task_result {
+        if let Some(url) = &tr.video_url {
+            return Some(url.clone());
+        }
+        if let Some(url) = &tr.url {
+            return Some(url.clone());
+        }
         if let Some(videos) = &tr.videos {
             if let Some(v) = videos.first() {
                 return v.url.as_ref().or(v.video_url.as_ref()).cloned();
             }
+        }
+    }
+    // Shape F: Dreamina envelope data.video_info.video_url
+    if let Some(data) = &poll.data {
+        if let Some(vi) = &data.video_info {
+            if let Some(url) = &vi.video_url { return Some(url.clone()); }
+            if let Some(url) = &vi.url { return Some(url.clone()); }
+        }
+        if let Some(url) = &data.video_url {
+            return Some(url.clone());
         }
     }
     None

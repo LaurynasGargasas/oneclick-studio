@@ -132,9 +132,15 @@ function normStatus(s: string): GenerationStatus {
 type RawContentItem = { type: string; image_url?: { url: string } };
 
 function extractVideoUrl(data: Record<string, unknown>): string | null {
-  // Shape 1: output.choices[0].message.content[].{type:"video_url", image_url:{url}}
   type Choice = { message?: { content?: RawContentItem[] }; content?: RawContentItem[] };
-  const output = data.output as { choices?: Choice[] } | undefined;
+
+  // Shape A: output.choices[0].message.content[].{type:"video_url", image_url:{url}}
+  const output = data.output as {
+    choices?: Choice[];
+    video_url?: string;
+    video_urls?: string[];
+    url?: string;
+  } | undefined;
   if (output?.choices) {
     for (const choice of output.choices) {
       const items = choice.message?.content ?? choice.content ?? [];
@@ -143,13 +149,32 @@ function extractVideoUrl(data: Record<string, unknown>): string | null {
       }
     }
   }
-  // Shape 2: task_result.videos[0].url
-  const tr = data.task_result as
-    | { videos?: Array<{ url?: string; video_url?: string }> }
-    | undefined;
-  if (tr?.videos?.[0]) {
-    return tr.videos[0].url ?? tr.videos[0].video_url ?? null;
-  }
+  // Shape B: output.video_url (Dreamina-Seedance-2.0)
+  if (output?.video_url) return output.video_url;
+  // Shape C: output.video_urls[0]
+  if (output?.video_urls?.[0]) return output.video_urls[0];
+  // Shape D: output.url
+  if (output?.url) return output.url;
+
+  // Shape E: task_result
+  const tr = data.task_result as {
+    video_url?: string;
+    url?: string;
+    videos?: Array<{ url?: string; video_url?: string }>;
+  } | undefined;
+  if (tr?.video_url) return tr.video_url;
+  if (tr?.url) return tr.url;
+  if (tr?.videos?.[0]) return tr.videos[0].url ?? tr.videos[0].video_url ?? null;
+
+  // Shape F: Dreamina envelope data.video_info.video_url
+  const dreaminaData = data.data as {
+    video_url?: string;
+    video_info?: { url?: string; video_url?: string };
+  } | undefined;
+  if (dreaminaData?.video_info?.video_url) return dreaminaData.video_info.video_url;
+  if (dreaminaData?.video_info?.url) return dreaminaData.video_info.url;
+  if (dreaminaData?.video_url) return dreaminaData.video_url;
+
   return null;
 }
 
@@ -204,6 +229,8 @@ async function browserPoll(
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${raw}`);
 
   const data = JSON.parse(raw) as Record<string, unknown>;
+  // Log raw response so we can see the exact shape BytePlus returns
+  console.debug("[poll] raw response:", JSON.stringify(data, null, 2));
   const rawStatus = ((data.status ?? data.task_status ?? "unknown") as string);
   const status = normStatus(rawStatus);
   const video_url = status === "completed" ? extractVideoUrl(data) : null;

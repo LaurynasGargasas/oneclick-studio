@@ -135,6 +135,18 @@ export function GenerationDetailModal({ generation: g, onClose }: Props) {
                   {g.error_message ?? "Generation failed"}
                 </p>
               </div>
+            ) : g.status === "completed" ? (
+              // Completed but no video URL could be extracted
+              <div className="absolute inset-0 hud-grid-bg flex flex-col items-center justify-center gap-3 px-6 text-center">
+                <AlertCircle className="w-8 h-8 text-hud-amber" strokeWidth={1.5} />
+                <div className="hud-label text-hud-amber">Video URL missing</div>
+                <p className="font-mono text-[0.6rem] text-fg-muted leading-relaxed">
+                  The API returned success but no video URL was found.<br />
+                  Check your model ID in Settings — it must match exactly<br />
+                  what BytePlus shows under Coding Plan for this model.<br />
+                  Open DevTools (F12 → Console) to see the raw API response.
+                </p>
+              </div>
             ) : (
               <div className="absolute inset-0 hud-grid-bg flex flex-col items-center justify-center gap-3">
                 <div className="hud-label text-hud-amber hud-pulse">
