@@ -14,12 +14,16 @@ pub struct ContentItem {
     pub r#type: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
+    /// Used when sending reference images to the API
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub image_url: Option<ImageUrlWrapper>,
+    pub image_url: Option<UrlWrapper>,
+    /// Returned by the API for completed video output items
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub video_url: Option<UrlWrapper>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ImageUrlWrapper {
+pub struct UrlWrapper {
     pub url: String,
 }
 
@@ -168,6 +172,11 @@ fn extract_video_url(poll: &PollResponse) -> Option<String> {
                 if let Some(items) = items {
                     for item in items {
                         if item.r#type == "video_url" {
+                            // Check video_url field first (correct field name for video items)
+                            if let Some(w) = &item.video_url {
+                                return Some(w.url.clone());
+                            }
+                            // Fall back to image_url in case some endpoints reuse that field
                             if let Some(w) = &item.image_url {
                                 return Some(w.url.clone());
                             }
@@ -326,7 +335,7 @@ pub async fn poll_generation(
 
     let status_code = resp.status();
     let raw = resp.text().await.unwrap_or_default();
-    log::debug!("poll_generation {task_id} → {status_code}: {raw}");
+    log::info!("poll_generation {task_id} → {status_code}: {raw}");
 
     if !status_code.is_success() {
         return Err(format!("HTTP {status_code}: {raw}"));

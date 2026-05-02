@@ -129,7 +129,11 @@ function normStatus(s: string): GenerationStatus {
   }
 }
 
-type RawContentItem = { type: string; image_url?: { url: string } };
+type RawContentItem = {
+  type: string;
+  image_url?: { url: string };
+  video_url?: { url: string }; // correct field name for video output items
+};
 
 function extractVideoUrl(data: Record<string, unknown>): string | null {
   type Choice = { message?: { content?: RawContentItem[] }; content?: RawContentItem[] };
@@ -145,7 +149,11 @@ function extractVideoUrl(data: Record<string, unknown>): string | null {
     for (const choice of output.choices) {
       const items = choice.message?.content ?? choice.content ?? [];
       for (const item of items) {
-        if (item.type === "video_url" && item.image_url?.url) return item.image_url.url;
+        if (item.type === "video_url") {
+          // video_url is the correct field; image_url is the fallback
+          if (item.video_url?.url) return item.video_url.url;
+          if (item.image_url?.url) return item.image_url.url;
+        }
       }
     }
   }

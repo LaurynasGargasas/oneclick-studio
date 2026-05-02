@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { Play, Pause, Volume2, VolumeX, Download, ExternalLink, AlertCircle } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Download, ExternalLink, AlertCircle, RefreshCw } from "lucide-react";
 import { Modal, StatusBadge, Button } from "@/components/hud";
 import { isTauri } from "@/lib/tauri";
 import { relativeTime } from "@/lib/relativeTime";
+import { useGenerations } from "@/stores/generationsStore";
+import { useSettings } from "@/stores/settingsStore";
 import type { Generation } from "@/stores/generationsStore";
 
 interface Props {
@@ -24,6 +26,48 @@ function InfoRow({ label, value }: { label: string; value: string | number | nul
     <div className="flex items-baseline justify-between gap-4 py-1.5 border-b border-border-hud/40">
       <span className="hud-label text-fg-dim shrink-0">{label}</span>
       <span className="font-mono text-xs text-fg text-right truncate">{String(value)}</span>
+    </div>
+  );
+}
+
+function CompletedNoVideo({ generation }: { generation: Generation }) {
+  const poll = useGenerations((s) => s.poll);
+  const _updateLocal = useGenerations((s) => s._updateLocal);
+  const settings = useSettings();
+  const [repolling, setRepolling] = useState(false);
+
+  async function handleRepoll() {
+    if (!generation.task_id) return;
+    setRepolling(true);
+    // Reset status so polling re-runs
+    _updateLocal(generation.id, { status: "processing" });
+    try {
+      await poll(generation.id, {
+        endpoint: settings.apiEndpoint,
+        api_key: settings.apiKey,
+      });
+    } finally {
+      setRepolling(false);
+    }
+  }
+
+  return (
+    <div className="absolute inset-0 hud-grid-bg flex flex-col items-center justify-center gap-4 px-6 text-center">
+      <AlertCircle className="w-8 h-8 text-hud-amber" strokeWidth={1.5} />
+      <div className="hud-label text-hud-amber">Video URL Missing</div>
+      <p className="font-mono text-[0.6rem] text-fg-muted leading-relaxed max-w-xs">
+        The API returned success but no video URL was found in the response.
+        Click Re-fetch to poll the task again with the updated extractor.
+      </p>
+      <Button
+        variant="secondary"
+        size="sm"
+        loading={repolling}
+        iconLeft={<RefreshCw className="w-3.5 h-3.5" />}
+        onClick={handleRepoll}
+      >
+        Re-fetch Video
+      </Button>
     </div>
   );
 }
@@ -136,17 +180,8 @@ export function GenerationDetailModal({ generation: g, onClose }: Props) {
                 </p>
               </div>
             ) : g.status === "completed" ? (
-              // Completed but no video URL could be extracted
-              <div className="absolute inset-0 hud-grid-bg flex flex-col items-center justify-center gap-3 px-6 text-center">
-                <AlertCircle className="w-8 h-8 text-hud-amber" strokeWidth={1.5} />
-                <div className="hud-label text-hud-amber">Video URL missing</div>
-                <p className="font-mono text-[0.6rem] text-fg-muted leading-relaxed">
-                  The API returned success but no video URL was found.<br />
-                  Check your model ID in Settings — it must match exactly<br />
-                  what BytePlus shows under Coding Plan for this model.<br />
-                  Open DevTools (F12 → Console) to see the raw API response.
-                </p>
-              </div>
+              // Completed but no video URL — add re-poll button
+              <CompletedNoVideo generation={g} />
             ) : (
               <div className="absolute inset-0 hud-grid-bg flex flex-col items-center justify-center gap-3">
                 <div className="hud-label text-hud-amber hud-pulse">
