@@ -21,7 +21,8 @@
         "fullscreen": false,
         "decorations": true,
         "transparent": false,
-        "backgroundColor": "#0a0e14"
+        "backgroundColor": "#0a0e14",
+        "dragDropEnabled": false
       }
     ],
     "security": {
@@ -30,7 +31,8 @@
         "enable": true,
         "scope": [
           "$APPDATA/**",
-          "$APPLOCALDATA/**"
+          "$APPLOCALDATA/**",
+          "$HOME/Library/Application Support/**"
         ]
       }
     }
@@ -44,6 +46,19 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "minimumSystemVersion": "10.15",
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    }
   }
 }

@@ -137,7 +137,10 @@ export const useElements = create<ElementsState>((set, get) => ({
         ? (
             await invoke<SavedImagePayload[]>("save_new_element_images", {
               elementId,
-              images,
+              images: images.map((img) => ({
+                dataUrl: img.data_url,
+                originalName: img.original_name,
+              })),
             })
           ).map(fromSavedPayload)
         : [];
@@ -231,7 +234,7 @@ export const useElements = create<ElementsState>((set, get) => ({
 
     const savedRaw = await invoke<SavedImagePayload>("append_element_image", {
       elementId,
-      image,
+      image: { dataUrl: image.data_url, originalName: image.original_name },
       sortOrder,
     });
     const saved = fromSavedPayload(savedRaw);

@@ -1,16 +1,27 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { invoke } from "@tauri-apps/api/core";
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { Play, Pause, Volume2, VolumeX, Download, ExternalLink, AlertCircle, RefreshCw } from "lucide-react";
+import { save as saveDialog } from "@tauri-apps/plugin-dialog";
+import { openPath } from "@tauri-apps/plugin-opener";
+import { Play, Pause, Volume2, VolumeX, ExternalLink, AlertCircle, RefreshCw, Trash2, Wand2, Copy, Check, Download } from "lucide-react";
 import { Modal, StatusBadge, Button } from "@/components/hud";
 import { isTauri } from "@/lib/tauri";
 import { relativeTime } from "@/lib/relativeTime";
 import { useGenerations } from "@/stores/generationsStore";
 import { useSettings } from "@/stores/settingsStore";
+import { toast } from "@/stores/toastStore";
 import type { Generation } from "@/stores/generationsStore";
 
 interface Props {
   generation: Generation | null;
   onClose: () => void;
+}
+
+function formatTime(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
 function toVideoSrc(path: string): string {
@@ -73,12 +84,90 @@ function CompletedNoVideo({ generation }: { generation: Generation }) {
 }
 
 export function GenerationDetailModal({ generation: g, onClose }: Props) {
+  const navigate = useNavigate();
+  const remove = useGenerations((s) => s.remove);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleDownload() {
+    if (!g?.video_path) return;
+    const shortId = g.id.slice(0, 8);
+    const dest = await saveDialog({
+      defaultPath: `seedance-${shortId}.mp4`,
+      filters: [{ name: "Video", extensions: ["mp4"] }],
+    });
+    if (!dest) return; // user cancelled
+    setDownloading(true);
+    try {
+      await invoke("save_video_to_path", { src: g.video_path, dest });
+      toast.success("Video saved", dest as string);
+      await openPath(dest as string);
+    } catch (e) {
+      toast.error("Save failed", String(e));
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  function handleCopyPrompt() {
+    if (!g) return;
+    void navigator.clipboard.writeText(g.prompt_raw);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  // Space to play/pause
+  useEffect(() => {
+    if (!g) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.code === "Space" && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        togglePlay();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  // Reset state when generation changes
+  useEffect(() => {
+    setDeleteConfirm(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setPlaying(false);
+  }, [g?.id]);
 
   if (!g) return null;
+
+  async function handleDelete() {
+    if (!deleteConfirm) { setDeleteConfirm(true); return; }
+    onClose();
+    await remove(g!.id);
+  }
+
+  function handleRegenerate() {
+    onClose();
+    navigate("/generate", {
+      state: {
+        draft: {
+          prompt: g!.prompt_raw,
+          duration: g!.duration_s,
+          resolution: g!.resolution,
+          aspectRatio: g!.aspect_ratio,
+          audioEnabled: g!.audio_enabled,
+          cameraFixed: g!.camera_fixed,
+          seed: g!.seed !== null ? String(g!.seed) : "",
+        },
+      },
+    });
+  }
 
   const videoSrc = g.video_path ? toVideoSrc(g.video_path) : null;
   const isRemoteUrl = g.video_path?.startsWith("http");
@@ -119,8 +208,10 @@ export function GenerationDetailModal({ generation: g, onClose }: Props) {
                   className="w-full h-full object-contain"
                   onPlay={() => setPlaying(true)}
                   onPause={() => setPlaying(false)}
-                  onEnded={() => setPlaying(false)}
+                  onEnded={() => { setPlaying(false); setCurrentTime(0); }}
                   onError={() => setVideoError(true)}
+                  onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime ?? 0)}
+                  onLoadedMetadata={() => setDuration(videoRef.current?.duration ?? 0)}
                   loop
                 />
                 {/* Controls overlay */}
@@ -171,6 +262,43 @@ export function GenerationDetailModal({ generation: g, onClose }: Props) {
                     </div>
                   </button>
                 )}
+
+                {/* Timeline scrubber */}
+                {duration > 0 && (
+                  <div className="absolute bottom-0 left-0 right-0 z-10">
+                    {/* Time labels */}
+                    <div className="flex justify-between px-2 pb-0.5">
+                      <span className="font-mono text-[0.55rem] text-fg-muted tabular-nums">
+                        {formatTime(currentTime)}
+                      </span>
+                      <span className="font-mono text-[0.55rem] text-fg-dim tabular-nums">
+                        {formatTime(duration)}
+                      </span>
+                    </div>
+                    {/* Track */}
+                    <div
+                      className="relative h-1.5 bg-bg-elevated/80 cursor-pointer group/timeline mx-0"
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const ratio = (e.clientX - rect.left) / rect.width;
+                        if (videoRef.current) {
+                          videoRef.current.currentTime = Math.max(0, Math.min(ratio * duration, duration));
+                        }
+                      }}
+                    >
+                      {/* Progress fill */}
+                      <div
+                        className="h-full bg-hud-cyan transition-none"
+                        style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+                      />
+                      {/* Thumb */}
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-hud-cyan border border-bg-base rounded-full -ml-1.5 opacity-0 group-hover/timeline:opacity-100 transition-opacity"
+                        style={{ left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </>
             ) : g.status === "failed" ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center">
@@ -192,36 +320,30 @@ export function GenerationDetailModal({ generation: g, onClose }: Props) {
             )}
           </div>
 
-          {/* Download button (Tauri local file only) */}
-          {g.status === "completed" && g.video_path && !isRemoteUrl && (
-            <div className="p-3 border-t border-border-hud flex justify-end">
-              <Button
-                variant="secondary"
-                size="sm"
-                iconLeft={<Download className="w-3.5 h-3.5" />}
-                onClick={() => {
-                  if (isTauri) {
-                    // Open file location using the opener plugin
-                    import("@tauri-apps/plugin-opener").then(({ openPath }) => {
-                      void openPath(g.video_path!);
-                    }).catch(console.warn);
-                  }
-                }}
-              >
-                Open File
-              </Button>
-            </div>
-          )}
-          {g.status === "completed" && isRemoteUrl && (
-            <div className="p-3 border-t border-border-hud flex justify-end">
-              <Button
-                variant="secondary"
-                size="sm"
-                iconLeft={<ExternalLink className="w-3.5 h-3.5" />}
-                onClick={() => window.open(g.video_path!, "_blank")}
-              >
-                Open in Browser
-              </Button>
+          {/* Download / open buttons */}
+          {g.status === "completed" && g.video_path && (
+            <div className="p-3 border-t border-border-hud flex items-center justify-end gap-2">
+              {isTauri && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  loading={downloading}
+                  iconLeft={<Download className="w-3.5 h-3.5" />}
+                  onClick={() => void handleDownload()}
+                >
+                  Save Video
+                </Button>
+              )}
+              {isRemoteUrl && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  iconLeft={<ExternalLink className="w-3.5 h-3.5" />}
+                  onClick={() => window.open(g.video_path!, "_blank")}
+                >
+                  Open URL
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -239,7 +361,20 @@ export function GenerationDetailModal({ generation: g, onClose }: Props) {
           </div>
 
           <div>
-            <div className="hud-label text-fg-dim mb-2">// Prompt</div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="hud-label text-fg-dim">// Prompt</div>
+              <button
+                type="button"
+                onClick={handleCopyPrompt}
+                className="flex items-center gap-1 font-mono text-[0.6rem] text-fg-dim hover:text-hud-cyan transition-colors"
+                title="Copy prompt"
+              >
+                {copied
+                  ? <><Check className="w-3 h-3 text-hud-cyan" /> Copied</>
+                  : <><Copy className="w-3 h-3" /> Copy</>
+                }
+              </button>
+            </div>
             <p className="font-mono text-xs text-fg leading-relaxed bg-bg-elevated/40 border border-border-hud/40 p-3">
               {g.prompt_raw}
             </p>
@@ -254,8 +389,15 @@ export function GenerationDetailModal({ generation: g, onClose }: Props) {
               <InfoRow label="Quality" value={g.quality} />
               {g.seed !== null && <InfoRow label="Seed" value={g.seed} />}
               <InfoRow label="Camera Fixed" value={g.camera_fixed ? "Yes" : "No"} />
-              <InfoRow label="Watermark" value={g.watermark ? "Yes" : "No"} />
               <InfoRow label="Audio" value={g.audio_enabled ? "Enabled" : "Disabled"} />
+              {g.cost_credits !== null && g.cost_credits !== undefined && (
+                <InfoRow
+                  label="Tokens Used"
+                  value={g.cost_credits >= 1000
+                    ? `${(g.cost_credits / 1000).toFixed(1)}K`
+                    : String(g.cost_credits)}
+                />
+              )}
               {g.task_id && <InfoRow label="Task ID" value={g.task_id} />}
               {g.completed_at && (
                 <InfoRow
@@ -264,6 +406,36 @@ export function GenerationDetailModal({ generation: g, onClose }: Props) {
                 />
               )}
             </div>
+          </div>
+          {/* Actions */}
+          <div className="pt-2 border-t border-border-hud flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              iconLeft={<Wand2 className="w-3.5 h-3.5" />}
+              onClick={handleRegenerate}
+              className="flex-1"
+            >
+              Re-generate
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              iconLeft={<Trash2 className="w-3.5 h-3.5" />}
+              onClick={() => void handleDelete()}
+              className={deleteConfirm ? "border-hud-red text-hud-red hover:bg-hud-red/10" : ""}
+            >
+              {deleteConfirm ? "Confirm Delete" : "Delete"}
+            </Button>
+            {deleteConfirm && (
+              <button
+                type="button"
+                className="font-mono text-[0.6rem] text-fg-dim hover:text-fg transition-colors shrink-0"
+                onClick={() => setDeleteConfirm(false)}
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </div>
       </div>

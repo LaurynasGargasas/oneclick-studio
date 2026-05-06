@@ -20,6 +20,9 @@ pub struct ContentItem {
     /// Returned by the API for completed video output items
     #[serde(skip_serializing_if = "Option::is_none")]
     pub video_url: Option<UrlWrapper>,
+    /// Role of this content item (e.g. "reference" for input images)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub role: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -36,23 +39,37 @@ pub struct GenerationParameters {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub camera_fixed: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub watermark: Option<bool>,
+    /// Whether to generate native audio. Maps to generate_audio in the API.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub fps: Option<u32>,
+    pub generate_audio: Option<bool>,
+    /// Aspect ratio sent to the API, e.g. "9:16", "16:9", "1:1".
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ratio: Option<String>,
 }
 
 // ---------------------------------------------------------------------------
 // Submit
 // ---------------------------------------------------------------------------
 
+/// BytePlus Seedance 2.0 uses a **flat** request body — all parameters are
+/// top-level fields, NOT nested inside a "parameters" object.
 #[derive(Debug, Serialize)]
 struct SubmitRequest {
     model: String,
     content: Vec<ContentItem>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    parameters: Option<GenerationParameters>,
+    duration: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    ratio: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    resolution: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    seed: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    watermark: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    generate_audio: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -74,6 +91,12 @@ impl SubmitResponse {
 // ---------------------------------------------------------------------------
 
 #[derive(Debug, Deserialize)]
+struct TokenUsage {
+    total_tokens: Option<i64>,
+    completion_tokens: Option<i64>,
+}
+
+#[derive(Debug, Deserialize)]
 struct PollResponse {
     id: Option<String>,
     task_id: Option<String>,
@@ -84,6 +107,16 @@ struct PollResponse {
     task_result: Option<TaskResult>,
     // Dreamina envelope: { code, data: { status, video_info } }
     data: Option<DreaminaData>,
+    // Shape G: Dreamina Seedance 2.0 flat: { content: { video_url } }
+    content: Option<ContentVideoUrl>,
+    // Token usage returned on completion
+    usage: Option<TokenUsage>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ContentVideoUrl {
+    video_url: Option<String>,
+    url: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -147,6 +180,8 @@ pub struct TaskStatus {
     pub video_url: Option<String>,
     pub error: Option<String>,
     pub raw_status: String,
+    /// Total tokens consumed (available when status = completed)
+    pub total_tokens: Option<i64>,
 }
 
 fn normalise_status(raw: &str) -> &str {
@@ -224,6 +259,11 @@ fn extract_video_url(poll: &PollResponse) -> Option<String> {
             return Some(url.clone());
         }
     }
+    // Shape G: Dreamina Seedance 2.0 — top-level content.video_url
+    if let Some(content) = &poll.content {
+        if let Some(url) = &content.video_url { return Some(url.clone()); }
+        if let Some(url) = &content.url { return Some(url.clone()); }
+    }
     None
 }
 
@@ -272,10 +312,17 @@ pub async fn submit_generation(
         endpoint.trim_end_matches('/')
     );
 
+    // Flatten GenerationParameters into top-level fields (BytePlus flat format)
+    let p = parameters.as_ref();
     let body = SubmitRequest {
         model,
         content,
-        parameters,
+        duration:       p.and_then(|x| x.duration),
+        ratio:          p.and_then(|x| x.ratio.clone()),
+        resolution:     p.and_then(|x| x.resolution.clone()),
+        seed:           p.and_then(|x| x.seed),
+        watermark:      p.and_then(|x| x.watermark),
+        generate_audio: p.and_then(|x| x.generate_audio),
     };
 
     log::info!("submit_generation POST {url}");
@@ -366,6 +413,10 @@ pub async fn poll_generation(
     } else {
         None
     };
+    let total_tokens = parsed
+        .usage
+        .as_ref()
+        .and_then(|u| u.total_tokens.or(u.completion_tokens));
 
     Ok(TaskStatus {
         task_id,
@@ -373,6 +424,7 @@ pub async fn poll_generation(
         video_url,
         error: error_msg,
         raw_status,
+        total_tokens,
     })
 }
 
@@ -423,6 +475,32 @@ pub async fn download_generation_video(
     dest.to_str()
         .map(str::to_owned)
         .ok_or_else(|| "Non-UTF8 path".to_string())
+}
+
+/// Save a video (remote URL or local path) to a user-chosen destination path.
+/// Called from TS after the save dialog resolves.
+#[tauri::command]
+pub async fn save_video_to_path(src: String, dest: String) -> Result<(), String> {
+    if src.starts_with("http://") || src.starts_with("https://") {
+        let client = reqwest::Client::new();
+        let resp = client
+            .get(&src)
+            .send()
+            .await
+            .map_err(|e| format!("Download error: {e}"))?;
+        if !resp.status().is_success() {
+            return Err(format!("HTTP {}", resp.status()));
+        }
+        let bytes = resp.bytes().await.map_err(|e| format!("Read bytes: {e}"))?;
+        tokio::fs::write(&dest, &bytes)
+            .await
+            .map_err(|e| format!("Write: {e}"))?;
+    } else {
+        tokio::fs::copy(&src, &dest)
+            .await
+            .map_err(|e| format!("Copy: {e}"))?;
+    }
+    Ok(())
 }
 
 /// Read a local image file and return it as a base64 data URI.

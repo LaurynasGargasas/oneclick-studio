@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
   type DragEvent,
   type ChangeEvent,
@@ -41,7 +42,7 @@ interface PendingImageItem {
   size: number;
 }
 
-const MAX_IMAGES = 9;
+const MAX_IMAGES = 20;
 const MAX_SIZE = 30 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
@@ -59,6 +60,7 @@ export function ElementUploader({ open, onClose }: Props) {
   const items = useElements((s) => s.items);
   const [images, setImages] = useState<PendingImageItem[]>([]);
   const [dragActive, setDragActive] = useState(false);
+  const dragCounter = useRef(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [autoTag, setAutoTag] = useState(true);
@@ -136,9 +138,32 @@ export function ElementUploader({ open, onClose }: Props) {
     });
   }
 
+  function onDragEnter(e: DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setDragActive(true);
+    }
+  }
+
+  function onDragLeave(e: DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) setDragActive(false);
+  }
+
+  function onDragOver(e: DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
   function onDrop(e: DragEvent) {
     e.preventDefault();
+    e.stopPropagation();
     setDragActive(false);
+    dragCounter.current = 0;
     if (e.dataTransfer.files.length) {
       void handleFiles(e.dataTransfer.files);
     }
@@ -192,20 +217,17 @@ export function ElementUploader({ open, onClose }: Props) {
           <div className="flex items-baseline justify-between">
             <span className="hud-label text-fg-muted">References</span>
             <span className="font-mono text-[0.65rem] text-fg-dim">
-              {images.length}/{MAX_IMAGES} · max 30MB · jpg/png/webp
+              {images.length}/{MAX_IMAGES} · max 10MB each · jpg/png/webp
             </span>
           </div>
 
           <div
-            onDragEnter={(e) => {
-              e.preventDefault();
-              setDragActive(true);
-            }}
-            onDragLeave={() => setDragActive(false)}
-            onDragOver={(e) => e.preventDefault()}
+            onDragEnter={onDragEnter}
+            onDragLeave={onDragLeave}
+            onDragOver={onDragOver}
             onDrop={onDrop}
             className={cn(
-              "relative grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 p-3 min-h-[180px]",
+              "relative grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-2 p-3 min-h-[180px]",
               "border-2 border-dashed transition-colors",
               dragActive
                 ? "border-hud-cyan bg-hud-cyan/5"

@@ -17,6 +17,12 @@ pub fn run() {
             sql: include_str!("../migrations/002_settings_model.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 3,
+            description: "settings_imgbb_key",
+            sql: include_str!("../migrations/003_imgbb_key.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
@@ -41,7 +47,14 @@ pub fn run() {
             commands::generations::submit_generation,
             commands::generations::poll_generation,
             commands::generations::download_generation_video,
+            commands::generations::save_video_to_path,
             commands::generations::read_image_as_data_uri,
+            // file uploads / public hosting
+            commands::files::upload_local_image,
+            commands::files::upload_data_url,
+            commands::files::upload_to_imgbb,
+            // system
+            commands::system::create_desktop_shortcut,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

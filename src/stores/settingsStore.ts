@@ -11,6 +11,7 @@ interface SettingsState {
   apiEndpoint: string;
   apiKey: string;
   modelId: string;
+  imgbbApiKey: string;
   defaultResolution: string;
   defaultDuration: string;
   defaultAspectRatio: string;
@@ -27,6 +28,7 @@ const DEFAULTS = {
   apiEndpoint: "https://ark.ap-southeast.bytepluses.com/api/v3",
   apiKey: "",
   modelId: "seedance-1-0-lite-t2v-250528",
+  imgbbApiKey: "",
   defaultResolution: "720p",
   defaultDuration: "6",
   defaultAspectRatio: "16:9",
@@ -39,6 +41,7 @@ const KEY_MAP: Record<string, keyof typeof DEFAULTS> = {
   api_endpoint: "apiEndpoint",
   api_key: "apiKey",
   model_id: "modelId",
+  imgbb_api_key: "imgbbApiKey",
   default_resolution: "defaultResolution",
   default_duration: "defaultDuration",
   default_aspect_ratio: "defaultAspectRatio",

@@ -15,7 +15,7 @@ dist-ssr
 
 # Rust / Tauri build output
 src-tauri/target
-src-tauri/Cargo.lock
+# Cargo.lock is intentionally tracked for reproducible CI builds
 
 # Local databases & app data
 *.db

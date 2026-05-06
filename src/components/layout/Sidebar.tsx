@@ -1,26 +1,22 @@
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Film, Folder, Boxes, Settings as SettingsIcon, Sparkles } from "lucide-react";
+import { Film, Folder, Boxes, Settings as SettingsIcon, Sparkles, Wand2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useSettings } from "@/stores/settingsStore";
+import { useGenerations } from "@/stores/generationsStore";
 
-interface NavItem {
-  to: string;
-  label: string;
-  icon: typeof Film;
-  badge?: string;
-}
-
-const items: NavItem[] = [
-  { to: "/", label: "Feed", icon: Film },
-  { to: "/projects", label: "Projects", icon: Folder },
-  { to: "/elements", label: "Elements", icon: Boxes },
-  { to: "/settings", label: "Settings", icon: SettingsIcon },
+const NAV_ITEMS = [
+  { to: "/", label: "Feed", icon: Film, end: true },
+  { to: "/generate", label: "Generate", icon: Wand2, end: false },
+  { to: "/projects", label: "Projects", icon: Folder, end: false },
+  { to: "/elements", label: "Elements", icon: Boxes, end: false },
+  { to: "/settings", label: "Settings", icon: SettingsIcon, end: false },
 ];
 
 export function Sidebar() {
   const apiKey = useSettings((s) => s.apiKey);
   const apiConfigured = apiKey.length > 0;
+  const renderingCount = useGenerations((s) => s.pollingIds.size);
 
   return (
     <aside className="relative flex flex-col w-[220px] flex-shrink-0 border-r border-border-hud bg-bg-panel/40 backdrop-blur-md">
@@ -49,11 +45,11 @@ export function Sidebar() {
       {/* Nav */}
       <nav className="flex flex-col gap-1 p-3 flex-1">
         <div className="hud-label text-fg-dim px-3 py-2">Navigation</div>
-        {items.map((item) => (
+        {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === "/"}
+            end={item.end}
             className={({ isActive }) =>
               cn(
                 "group relative flex items-center gap-3 px-3 py-2.5",
@@ -75,9 +71,15 @@ export function Sidebar() {
                   />
                 )}
                 <item.icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.5} />
-                <span className="font-mono text-[0.7rem] uppercase tracking-[0.15em]">
+                <span className="font-mono text-[0.7rem] uppercase tracking-[0.15em] flex-1">
                   {item.label}
                 </span>
+                {/* Rendering badge on Feed item */}
+                {item.to === "/" && renderingCount > 0 && (
+                  <span className="font-mono text-[0.55rem] tabular-nums px-1.5 py-0.5 bg-hud-amber/20 border border-hud-amber/50 text-hud-amber hud-pulse">
+                    {renderingCount}
+                  </span>
+                )}
               </>
             )}
           </NavLink>
@@ -105,6 +107,14 @@ export function Sidebar() {
               Local DB
             </span>
           </div>
+          {renderingCount > 0 && (
+            <div className="mt-1 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-hud-amber hud-pulse" />
+              <span className="font-mono text-[0.65rem] uppercase tracking-[0.1em] text-hud-amber">
+                {renderingCount} Rendering
+              </span>
+            </div>
+          )}
         </div>
 
         <NavLink

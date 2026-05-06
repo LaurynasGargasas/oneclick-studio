@@ -12,3 +12,4 @@ export { Modal } from "./Modal";
 export { Select, type SelectOption } from "./Select";
 export { IconButton } from "./IconButton";
 export { ColorPicker } from "./ColorPicker";
+export { ToastContainer } from "./Toast";

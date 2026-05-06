@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Play, AlertCircle, Clock, Loader } from "lucide-react";
+import { Play, AlertCircle, Clock, Loader, Trash2 } from "lucide-react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { StatusBadge } from "@/components/hud";
 import { CornerBrackets } from "@/components/hud/CornerBrackets";
@@ -12,6 +12,7 @@ import type { Generation } from "@/stores/generationsStore";
 interface Props {
   generation: Generation;
   onClick: () => void;
+  onDelete: () => void;
 }
 
 /** Convert a video_path (local file or remote URL) to something <video> can use. */
@@ -22,7 +23,7 @@ function toVideoSrc(path: string): string {
   return path;
 }
 
-export function GenerationCard({ generation: g, onClick }: Props) {
+export function GenerationCard({ generation: g, onClick, onDelete }: Props) {
   const [thumbError, setThumbError] = useState(false);
   const videoSrc = g.video_path ? toVideoSrc(g.video_path) : null;
 
@@ -77,9 +78,22 @@ export function GenerationCard({ generation: g, onClick }: Props) {
         ) : g.status === "failed" ? (
           <div className="absolute inset-0 bg-hud-red/5 flex flex-col items-center justify-center gap-2 px-4 text-center">
             <AlertCircle className="w-8 h-8 text-hud-red" strokeWidth={1.5} />
-            <span className="font-mono text-[0.6rem] text-hud-red/80 leading-relaxed line-clamp-3">
-              {g.error_message ?? "Generation failed"}
-            </span>
+            {g.error_message?.includes("InputImageSensitiveContentDetected") ? (
+              <div className="space-y-1.5">
+                <span className="font-mono text-[0.6rem] text-hud-amber font-bold block">
+                  Real person image blocked
+                </span>
+                <span className="font-mono text-[0.55rem] text-hud-amber/80 leading-relaxed block">
+                  BytePlus content policy blocks photorealistic human faces as
+                  reference images. Use an illustration or 3D render instead,
+                  or enable "Skip images" in the generator.
+                </span>
+              </div>
+            ) : (
+              <span className="font-mono text-[0.6rem] text-hud-red/80 leading-relaxed line-clamp-3">
+                {g.error_message ?? "Generation failed"}
+              </span>
+            )}
           </div>
         ) : (
           <div className="absolute inset-0 hud-grid-bg" />
@@ -90,9 +104,19 @@ export function GenerationCard({ generation: g, onClick }: Props) {
       <div className="p-3 border-t border-border-hud">
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <StatusBadge status={g.status} />
-          <span className="font-mono text-[0.6rem] text-fg-dim shrink-0">
-            {relativeTime(g.created_at)}
-          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="font-mono text-[0.6rem] text-fg-dim">
+              {relativeTime(g.created_at)}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-fg-dim hover:text-hud-red focus:opacity-100"
+              aria-label="Delete generation"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
         <p className="font-mono text-xs text-fg leading-snug line-clamp-2">
           {g.prompt_raw}

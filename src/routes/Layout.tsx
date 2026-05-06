@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { ToastContainer } from "@/components/hud";
 import { useSettings } from "@/stores/settingsStore";
 
 export function Layout() {
@@ -33,6 +34,8 @@ export function Layout() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      <ToastContainer />
     </div>
   );
 }

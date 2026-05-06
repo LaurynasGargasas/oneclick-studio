@@ -3,7 +3,8 @@ import { create } from "zustand";
 import { isTauri } from "@/lib/tauri";
 import { getDb } from "@/lib/db";
 import { resolvePrompt } from "@/lib/tagResolver";
-import type { ContentItem } from "@/lib/tagResolver";
+import { toast } from "@/stores/toastStore";
+import type { ContentItem, DirectReference, ApiCredentials } from "@/lib/tagResolver";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -40,13 +41,13 @@ export interface SubmitOptions {
   duration?: number;
   resolution?: string;
   aspect_ratio?: string;
-  quality?: string;
   seed?: number | null;
   camera_fixed?: boolean;
   watermark?: boolean;
   audio_enabled?: boolean;
+  directRefs?: DirectReference[];
   elements: Array<{ tag: string; id: string; images: Array<{ file_path: string }> }>;
-  api: { endpoint: string; api_key: string; model_id: string };
+  api: { endpoint: string; api_key: string; model_id: string; imgbb_api_key?: string };
 }
 
 interface GenerationsState {
@@ -60,6 +61,7 @@ interface GenerationsState {
   startPolling: (generationId: string, api: { endpoint: string; api_key: string }) => void;
   stopPolling: (generationId: string) => void;
   stopAllPolling: () => void;
+  remove: (id: string) => Promise<void>;
   _updateLocal: (id: string, patch: Partial<Generation>) => void;
 }
 
@@ -183,6 +185,11 @@ function extractVideoUrl(data: Record<string, unknown>): string | null {
   if (dreaminaData?.video_info?.url) return dreaminaData.video_info.url;
   if (dreaminaData?.video_url) return dreaminaData.video_url;
 
+  // Shape G: Dreamina Seedance 2.0 — top-level content.video_url
+  const content = data.content as { video_url?: string; url?: string } | undefined;
+  if (content?.video_url) return content.video_url;
+  if (content?.url) return content.url;
+
   return null;
 }
 
@@ -192,11 +199,13 @@ async function browserSubmit(
   params: {
     resolution: string;
     duration: number;
+    ratio: string;
     seed: number | null;
-    camera_fixed: boolean;
     watermark: boolean;
+    generate_audio: boolean;
   },
 ): Promise<string> {
+  // BytePlus Seedance 2.0 uses flat top-level fields, not a nested "parameters" object
   const res = await fetch("/api-proxy/contents/generations/tasks", {
     method: "POST",
     headers: {
@@ -206,13 +215,12 @@ async function browserSubmit(
     body: JSON.stringify({
       model: api.model_id,
       content,
-      parameters: {
-        resolution: params.resolution,
-        duration: params.duration,
-        ...(params.seed !== null ? { seed: params.seed } : {}),
-        camera_fixed: params.camera_fixed,
-        watermark: params.watermark,
-      },
+      duration: params.duration,
+      ratio: params.ratio,
+      resolution: params.resolution,
+      ...(params.seed !== null ? { seed: params.seed } : {}),
+      watermark: params.watermark,
+      generate_audio: params.generate_audio,
     }),
   });
 
@@ -286,7 +294,6 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
       duration = 5,
       resolution = "720p",
       aspect_ratio = "16:9",
-      quality = "standard",
       seed = null,
       camera_fixed = false,
       watermark = false,
@@ -295,8 +302,19 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
       api,
     } = opts;
 
-    // Resolve @tags → content array
-    const resolved = await resolvePrompt(prompt, elements);
+    // camera_fixed has no API parameter — inject a cinematography instruction into the prompt
+    const effectivePrompt = camera_fixed
+      ? `${prompt}. Static locked-off camera, no camera movement.`
+      : prompt;
+
+    // Resolve @tags + direct references → content array
+    // Pass API credentials so images are uploaded as public URLs (avoids BytePlus content moderation)
+    const apiCreds: ApiCredentials = {
+      endpoint: api.endpoint,
+      api_key: api.api_key,
+      imgbb_api_key: api.imgbb_api_key || undefined,
+    };
+    const resolved = await resolvePrompt(effectivePrompt, elements, opts.directRefs ?? [], apiCreds);
     const content: ContentItem[] = resolved.content;
     const promptResolved = content
       .filter((c) => c.type === "text")
@@ -321,7 +339,7 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
          VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         [
           id, project_id, prompt, promptResolved, duration, resolution,
-          aspect_ratio, quality, seed,
+          aspect_ratio, "pro", seed,
           camera_fixed ? 1 : 0, watermark ? 1 : 0, audio_enabled ? 1 : 0,
           "pending", null, null, null, null, null, now, null,
         ],
@@ -343,7 +361,7 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
 
     const newGen: Generation = {
       id, project_id, prompt_raw: prompt, prompt_resolved: promptResolved,
-      duration_s: duration, resolution, aspect_ratio, quality, seed,
+      duration_s: duration, resolution, aspect_ratio, quality: "pro", seed,
       camera_fixed, watermark, audio_enabled,
       status: "pending", task_id: null, video_path: null,
       thumbnail_path: null, error_message: null, cost_credits: null,
@@ -360,10 +378,22 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
             apiKey: api.api_key,
             model: api.model_id,
             content,
-            parameters: { resolution, duration, seed: seed ?? null, camera_fixed, watermark },
+            parameters: {
+              resolution,
+              duration,
+              ratio: aspect_ratio,
+              seed: seed ?? null,
+              watermark,
+              generate_audio: audio_enabled,
+            },
           })
         : await browserSubmit(api, content, {
-            resolution, duration, seed: seed ?? null, camera_fixed, watermark,
+            resolution,
+            duration,
+            ratio: aspect_ratio,
+            seed: seed ?? null,
+            watermark,
+            generate_audio: audio_enabled,
           });
 
       if (isTauri) {
@@ -399,6 +429,7 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
       let status: GenerationStatus;
       let video_url: string | null = null;
       let errorMsg: string | null = null;
+      let totalTokens: number | null = null;
 
       if (isTauri) {
         const result = await invoke<{
@@ -407,6 +438,7 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
           video_url: string | null;
           error: string | null;
           raw_status: string;
+          total_tokens: number | null;
         }>("poll_generation", {
           endpoint: api.endpoint,
           apiKey: api.api_key,
@@ -415,6 +447,7 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
         status = result.status as GenerationStatus;
         video_url = result.video_url;
         errorMsg = result.error;
+        totalTokens = result.total_tokens;
       } else {
         const result = await browserPoll(gen.task_id, api.api_key);
         status = result.status;
@@ -423,6 +456,7 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
       }
 
       const patch: Partial<Generation> = { status };
+      if (totalTokens) patch.cost_credits = totalTokens;
 
       if (status === "completed") {
         if (isTauri && video_url) {
@@ -442,10 +476,18 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
         }
         patch.completed_at = Date.now();
         get().stopPolling(generationId);
+        const gen = get().items.find((g) => g.id === generationId);
+        const label = gen?.prompt_raw
+          ? gen.prompt_raw.length > 48
+            ? gen.prompt_raw.slice(0, 45) + "…"
+            : gen.prompt_raw
+          : "Generation";
+        toast.success("Generation complete", label);
       } else if (status === "failed") {
         patch.error_message = errorMsg ?? "Unknown error";
         patch.completed_at = Date.now();
         get().stopPolling(generationId);
+        toast.error("Generation failed", errorMsg ?? undefined);
       }
 
       if (isTauri && Object.keys(patch).length > 0) {
@@ -489,6 +531,15 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
     for (const [, iv] of intervals) clearInterval(iv);
     intervals.clear();
     set({ pollingIds: new Set() });
+  },
+
+  async remove(id) {
+    get().stopPolling(id);
+    if (isTauri) {
+      const db = await getDb();
+      await db.execute("DELETE FROM generations WHERE id = ?", [id]);
+    }
+    set((s) => ({ items: s.items.filter((g) => g.id !== id) }));
   },
 
   _updateLocal(id, patch) {
