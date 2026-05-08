@@ -283,7 +283,7 @@ export function Settings() {
               Create Desktop Shortcut
             </Button>
             <p className="font-mono text-[0.65rem] text-fg-muted">
-              Adds a Seedance Studio .lnk to your Windows desktop.
+              Adds a OneClick Studio .lnk to your Windows desktop.
             </p>
           </div>
         </Panel>

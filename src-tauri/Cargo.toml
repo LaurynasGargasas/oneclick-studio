@@ -1,12 +1,12 @@
 [package]
-name = "seedance-studio"
+name = "oneclick-studio"
 version = "0.1.0"
-description = "Seedance Studio — local-first AI video generation desktop app"
-authors = ["Seedance Studio"]
+description = "OneClick Studio — local-first AI video generation desktop app"
+authors = ["OneClick Studio"]
 edition = "2021"
 
 [lib]
-name = "seedance_studio_lib"
+name = "oneclick_studio_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

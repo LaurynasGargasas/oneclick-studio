@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    seedance_studio_lib::run()
+    oneclick_studio_lib::run()
 }

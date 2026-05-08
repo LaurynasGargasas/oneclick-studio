@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Seedance Studio — Download</title>
+  <title>OneClick Studio — Download</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -163,7 +163,7 @@
     <div class="br"></div>
 
     <p class="label">// Download</p>
-    <h1>Seedance Studio</h1>
+    <h1>OneClick Studio</h1>
     <p class="version" id="version">Loading…</p>
 
     <p class="desc">
@@ -196,21 +196,21 @@
       macOS Gatekeeper quarantines it after download. After dragging to Applications, open
       <strong>Terminal</strong> and run:<br><br>
       <code style="background:rgba(0,0,0,0.4);padding:0.2em 0.5em;border-radius:3px;font-size:0.7rem;color:#e2e8f0;display:inline-block;margin:0.25rem 0;letter-spacing:0.03em;">
-        xattr -cr "/Applications/Seedance Studio.app"
+        xattr -cr "/Applications/OneClick Studio.app"
       </code><br><br>
       Then double-click the app normally. You only need to do this once.
     </div>
 
     <div class="footer">
       <span id="release-date"></span>
-      <a id="gh-link" href="https://github.com/LaurynasGargasas/seedance-studio/releases" target="_blank">
+      <a id="gh-link" href="https://github.com/LaurynasGargasas/oneclick-studio/releases" target="_blank">
         All releases ↗
       </a>
     </div>
   </div>
 
   <script>
-    const REPO = 'LaurynasGargasas/seedance-studio';
+    const REPO = 'LaurynasGargasas/oneclick-studio';
 
     function fmtBytes(b) {
       if (b > 1024 * 1024) return (b / (1024 * 1024)).toFixed(1) + ' MB';

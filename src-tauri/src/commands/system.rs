@@ -14,14 +14,14 @@ pub async fn create_desktop_shortcut(app: tauri::AppHandle) -> Result<String, St
     {
         let exe = std::env::current_exe().map_err(|e| format!("Exe path: {e}"))?;
         let exe_str = exe.to_string_lossy().replace('\'', "''");
-        let shortcut = desktop.join("Seedance Studio.lnk");
+        let shortcut = desktop.join("OneClick Studio.lnk");
         let shortcut_str = shortcut.to_string_lossy().replace('\'', "''");
 
         let script = format!(
             "$ws = New-Object -ComObject WScript.Shell; \
              $sc = $ws.CreateShortcut('{shortcut_str}'); \
              $sc.TargetPath = '{exe_str}'; \
-             $sc.Description = 'Seedance Studio'; \
+             $sc.Description = 'OneClick Studio'; \
              $sc.Save()"
         );
 
@@ -45,10 +45,10 @@ pub async fn create_desktop_shortcut(app: tauri::AppHandle) -> Result<String, St
         let app_bundle = exe
             .parent() // …/MacOS
             .and_then(|p| p.parent()) // …/Contents
-            .and_then(|p| p.parent()) // …/Seedance Studio.app
+            .and_then(|p| p.parent()) // …/OneClick Studio.app
             .ok_or_else(|| "Could not locate .app bundle".to_string())?;
 
-        let symlink = desktop.join("Seedance Studio.app");
+        let symlink = desktop.join("OneClick Studio.app");
         // Remove stale symlink if present
         let _ = std::fs::remove_file(&symlink);
 
