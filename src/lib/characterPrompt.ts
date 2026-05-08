@@ -4,10 +4,11 @@
 // are concatenated in a defined order that reads naturally:
 //
 //   "<age> <ethnicity> <gender>, <body>, <hair color> <hair style>,
-//    <accessories + facial hair>, <clothes>, professional <profession> portrait,
-//    photorealistic, neutral background, studio lighting, head and shoulders"
+//    <accessories + facial hair>, wearing <clothes>, <profession context>,
+//    in <environment>, <organic style suffix>"
 //
-// "Other" values for clothes/profession carry free-text overrides.
+// The style suffix is intentionally anti-"studio" so output looks like a
+// real candid photo rather than a retouched commercial portrait.
 
 // ---------------------------------------------------------------------------
 // Schema types
@@ -29,7 +30,7 @@ export interface SingleSelectGroup {
   options: OptionDef[];
   /** If true, an extra "Other…" chip is rendered with a free-text input. */
   allowOther?: boolean;
-  /** Phrase template when "other" is picked: `${0}` is replaced with user text. */
+  /** Phrase template when "other" is picked: receives raw user text. */
   otherTemplate?: (text: string) => string;
 }
 
@@ -38,6 +39,8 @@ export interface MultiSelectGroup {
   group: string;
   label: string;
   options: OptionDef[];
+  /** If true, an "Other accessories…" free-text field appears below chips. */
+  allowOther?: boolean;
 }
 
 export type OptionGroup = SingleSelectGroup | MultiSelectGroup;
@@ -60,6 +63,8 @@ export const GROUPS: OptionGroup[] = [
     kind: "single",
     group: "ethnicity",
     label: "Ethnicity",
+    allowOther: true,
+    otherTemplate: (t) => t.trim(),
     options: [
       { id: "black", label: "Black", phrase: "Black" },
       { id: "white", label: "White", phrase: "white" },
@@ -71,6 +76,8 @@ export const GROUPS: OptionGroup[] = [
     kind: "single",
     group: "bodyType",
     label: "Body Type",
+    allowOther: true,
+    otherTemplate: (t) => `${t.trim()} build`,
     options: [
       { id: "slim", label: "Slim", phrase: "slim build" },
       { id: "athletic", label: "Athletic", phrase: "athletic build" },
@@ -82,6 +89,8 @@ export const GROUPS: OptionGroup[] = [
     kind: "single",
     group: "hairColor",
     label: "Hair Color",
+    allowOther: true,
+    otherTemplate: (t) => t.trim(),
     options: [
       { id: "blonde", label: "Blonde", phrase: "blonde" },
       { id: "brown", label: "Brown", phrase: "brown" },
@@ -94,21 +103,35 @@ export const GROUPS: OptionGroup[] = [
     kind: "single",
     group: "hairStyle",
     label: "Hair Style",
+    allowOther: true,
+    otherTemplate: (t) => t.trim(),
     options: [
       { id: "short", label: "Short", phrase: "short hair" },
       { id: "long", label: "Long", phrase: "long hair" },
-      { id: "professional", label: "Professional", phrase: "neat professional haircut" },
+      { id: "professional", label: "Professional", phrase: "neatly styled hair" },
       { id: "laidback", label: "Laid Back", phrase: "casually styled hair" },
       { id: "bald", label: "Bald", phrase: "bald" },
+      { id: "buzz", label: "Buzz Cut", phrase: "buzz cut" },
+      { id: "curly", label: "Curly", phrase: "curly hair" },
+      { id: "wavy", label: "Wavy", phrase: "wavy hair" },
+      { id: "straight", label: "Straight", phrase: "straight hair" },
+      { id: "ponytail", label: "Ponytail", phrase: "hair tied in a ponytail" },
+      { id: "bun", label: "Bun", phrase: "hair tied in a bun" },
+      { id: "braids", label: "Braids", phrase: "braided hair" },
+      { id: "afro", label: "Afro", phrase: "afro" },
     ],
   },
   {
     kind: "multi",
     group: "accessories",
     label: "Accessories",
+    allowOther: true,
     options: [
       { id: "glasses", label: "Glasses", phrase: "wearing glasses" },
+      { id: "sunglasses", label: "Sunglasses", phrase: "wearing sunglasses" },
       { id: "freckles", label: "Freckles", phrase: "with freckles" },
+      { id: "chefhat", label: "Chef Hat", phrase: "wearing a chef hat" },
+      { id: "hat", label: "Hat", phrase: "wearing a hat" },
     ],
   },
   {
@@ -139,11 +162,25 @@ export const GROUPS: OptionGroup[] = [
     group: "profession",
     label: "Profession",
     allowOther: true,
-    otherTemplate: (t) => `professional ${t.trim()} portrait`,
+    otherTemplate: (t) => `working as a ${t.trim()}`,
     options: [
-      { id: "chef", label: "Chef", phrase: "professional chef portrait" },
-      { id: "doctor", label: "Doctor", phrase: "professional doctor portrait" },
-      { id: "ugc", label: "UGC", phrase: "UGC creator selfie portrait" },
+      { id: "chef", label: "Chef", phrase: "working as a chef" },
+      { id: "doctor", label: "Doctor", phrase: "working as a doctor" },
+      { id: "ugc", label: "UGC", phrase: "filming UGC content" },
+    ],
+  },
+  {
+    kind: "single",
+    group: "environment",
+    label: "Environment",
+    allowOther: true,
+    otherTemplate: (t) => `in ${t.trim()}`,
+    options: [
+      { id: "office", label: "Office", phrase: "in a modern office" },
+      { id: "prokitchen", label: "Professional Kitchen", phrase: "in a professional kitchen" },
+      { id: "homekitchen", label: "Home Kitchen", phrase: "in a home kitchen" },
+      { id: "home", label: "Home", phrase: "at home in a living room" },
+      { id: "prostudio", label: "Professional Studio", phrase: "in a professional photo studio" },
     ],
   },
 ];
@@ -162,13 +199,20 @@ export interface CharacterSelections {
   facialHair?: string;
   clothes?: string;
   profession?: string;
+  environment?: string;
 
-  // multi-select groups: groupId → array of optionIds
+  // multi-select groups
   accessories: string[];
 
   // free-text "other" inputs
+  ethnicityOther?: string;
+  bodyTypeOther?: string;
+  hairColorOther?: string;
+  hairStyleOther?: string;
   clothesOther?: string;
   professionOther?: string;
+  environmentOther?: string;
+  accessoriesOther?: string;
 
   // age slider — undefined = "no age specified"
   age?: number;
@@ -182,10 +226,33 @@ export const EMPTY_SELECTIONS: CharacterSelections = {
 // Prompt assembly
 // ---------------------------------------------------------------------------
 
+function findGroup(group: string): OptionGroup | undefined {
+  return GROUPS.find((g) => g.group === group);
+}
+
 function findOption(group: string, id?: string): OptionDef | undefined {
   if (!id) return undefined;
-  const g = GROUPS.find((x) => x.group === group);
-  return g?.options.find((o) => o.id === id);
+  return findGroup(group)?.options.find((o) => o.id === id);
+}
+
+/**
+ * Resolve a single-select field to its prompt phrase, handling "Other…".
+ * Returns undefined when nothing is selected (or "other" with no text).
+ */
+function resolveSingle(
+  group: string,
+  value: string | undefined,
+  otherText: string | undefined,
+): string | undefined {
+  if (!value) return undefined;
+  if (value === "other") {
+    const g = findGroup(group);
+    const text = otherText?.trim();
+    if (!text) return undefined;
+    if (g && "otherTemplate" in g && g.otherTemplate) return g.otherTemplate(text);
+    return text;
+  }
+  return findOption(group, value)?.phrase;
 }
 
 /**
@@ -198,26 +265,25 @@ export function buildPrompt(s: CharacterSelections): string {
   // Subject clause: "<age>-year-old <ethnicity> <gender>"
   const subjectBits: string[] = [];
   if (typeof s.age === "number") subjectBits.push(`${s.age}-year-old`);
-  const eth = findOption("ethnicity", s.ethnicity);
-  if (eth) subjectBits.push(eth.phrase);
+  const eth = resolveSingle("ethnicity", s.ethnicity, s.ethnicityOther);
+  if (eth) subjectBits.push(eth);
   const gen = findOption("gender", s.gender);
   if (gen) subjectBits.push(gen.phrase);
   if (subjectBits.length > 0) parts.push(subjectBits.join(" "));
 
   // Body
-  const body = findOption("bodyType", s.bodyType);
-  if (body) parts.push(body.phrase);
+  const body = resolveSingle("bodyType", s.bodyType, s.bodyTypeOther);
+  if (body) parts.push(body);
 
-  // Hair clause: "<color> <style>"  e.g. "blonde short hair", "blonde bald"
-  // Bald overrides color so we don't say "blonde bald".
+  // Hair clause: "<color> <style>"  — bald overrides color
   if (s.hairStyle === "bald") {
     parts.push("bald");
   } else {
     const hairBits: string[] = [];
-    const hc = findOption("hairColor", s.hairColor);
-    const hs = findOption("hairStyle", s.hairStyle);
-    if (hc) hairBits.push(hc.phrase);
-    if (hs) hairBits.push(hs.phrase);
+    const hc = resolveSingle("hairColor", s.hairColor, s.hairColorOther);
+    const hs = resolveSingle("hairStyle", s.hairStyle, s.hairStyleOther);
+    if (hc) hairBits.push(hc);
+    if (hs) hairBits.push(hs);
     if (hairBits.length > 0) parts.push(hairBits.join(" "));
   }
 
@@ -227,29 +293,31 @@ export function buildPrompt(s: CharacterSelections): string {
     const opt = findOption("accessories", a);
     if (opt) faceBits.push(opt.phrase);
   }
+  if (s.accessoriesOther && s.accessoriesOther.trim()) {
+    faceBits.push(`wearing ${s.accessoriesOther.trim()}`);
+  }
   const fh = findOption("facialHair", s.facialHair);
   if (fh) faceBits.push(fh.phrase);
   if (faceBits.length > 0) parts.push(faceBits.join(", "));
 
   // Clothes
-  if (s.clothes === "other" && s.clothesOther && s.clothesOther.trim()) {
-    parts.push(`wearing ${s.clothesOther.trim()}`);
-  } else {
-    const c = findOption("clothes", s.clothes);
-    if (c) parts.push(c.phrase);
-  }
+  const clothes = resolveSingle("clothes", s.clothes, s.clothesOther);
+  if (clothes) parts.push(clothes);
 
   // Profession
-  if (s.profession === "other" && s.professionOther && s.professionOther.trim()) {
-    parts.push(`professional ${s.professionOther.trim()} portrait`);
-  } else {
-    const p = findOption("profession", s.profession);
-    if (p) parts.push(p.phrase);
-  }
+  const prof = resolveSingle("profession", s.profession, s.professionOther);
+  if (prof) parts.push(prof);
 
-  // Style suffix — always added so output is consistent for character work.
+  // Environment
+  const env = resolveSingle("environment", s.environment, s.environmentOther);
+  if (env) parts.push(env);
+
+  // Style suffix — explicitly anti-"studio" / anti-"filtered" so the output
+  // reads as a real candid photo rather than a retouched commercial portrait.
   const styleSuffix =
-    "photorealistic, head and shoulders studio portrait, neutral background, soft studio lighting, sharp focus, high detail";
+    "candid unposed photo, natural ambient light, unfiltered, no retouching, " +
+    "no professional makeup, ordinary documentary moment, slight imperfections, " +
+    "real and grounded, looks like a real photograph, organic and authentic";
 
   if (parts.length === 0) return styleSuffix;
   return `${parts.join(", ")}, ${styleSuffix}`;
@@ -257,6 +325,5 @@ export function buildPrompt(s: CharacterSelections): string {
 
 /** Whether the user has picked enough to make a meaningful generation. */
 export function hasMinimumSelection(s: CharacterSelections): boolean {
-  // Need at least gender — otherwise prompt is generic and unhelpful.
   return Boolean(s.gender);
 }

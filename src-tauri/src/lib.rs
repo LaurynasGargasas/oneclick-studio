@@ -29,6 +29,12 @@ pub fn run() {
             sql: include_str!("../migrations/004_higgsfield.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 5,
+            description: "character_generation_id",
+            sql: include_str!("../migrations/005_character_generation_id.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

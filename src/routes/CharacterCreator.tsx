@@ -1,8 +1,16 @@
 // UGC Character Creator — pick options on the left, get 4 photoreal portraits
-// from Higgsfield Soul 2.0 on the right.
+// from Higgsfield Soul 2.0 on the right.  Past generations show in a History
+// panel below.
 
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles, Pencil, Lock, Loader2, AlertTriangle } from "lucide-react";
+import {
+  Sparkles,
+  Pencil,
+  Lock,
+  Loader2,
+  AlertTriangle,
+  History as HistoryIcon,
+} from "lucide-react";
 import { Panel, Button, HudTextarea, Slider } from "@/components/hud";
 import { OptionChips } from "@/components/character/OptionChips";
 import { CharacterImageModal } from "@/components/character/CharacterImageModal";
@@ -36,7 +44,8 @@ type SingleField =
   | "hairStyle"
   | "facialHair"
   | "clothes"
-  | "profession";
+  | "profession"
+  | "environment";
 
 const GROUP_TO_FIELD: Record<string, SingleField> = {
   gender: "gender",
@@ -47,6 +56,28 @@ const GROUP_TO_FIELD: Record<string, SingleField> = {
   facialHair: "facialHair",
   clothes: "clothes",
   profession: "profession",
+  environment: "environment",
+};
+
+type OtherField =
+  | "ethnicityOther"
+  | "bodyTypeOther"
+  | "hairColorOther"
+  | "hairStyleOther"
+  | "clothesOther"
+  | "professionOther"
+  | "environmentOther"
+  | "accessoriesOther";
+
+const GROUP_TO_OTHER_FIELD: Record<string, OtherField> = {
+  ethnicity: "ethnicityOther",
+  bodyType: "bodyTypeOther",
+  hairColor: "hairColorOther",
+  hairStyle: "hairStyleOther",
+  clothes: "clothesOther",
+  profession: "professionOther",
+  environment: "environmentOther",
+  accessories: "accessoriesOther",
 };
 
 export function CharacterCreator() {
@@ -61,7 +92,7 @@ export function CharacterCreator() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImg, setModalImg] = useState<CharacterImage | null>(null);
 
-  // Auto-load history on mount
+  // Auto-load history on mount; cancel polling on unmount
   useEffect(() => {
     void characters.load();
     return () => {
@@ -70,7 +101,6 @@ export function CharacterCreator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Derive prompt from selections + (maybe) age
   const liveSelections: CharacterSelections = useMemo(
     () => ({ ...selections, age: ageEnabled ? age : undefined }),
     [selections, ageEnabled, age],
@@ -84,7 +114,7 @@ export function CharacterCreator() {
   function updateMulti(value: string[]) {
     setSelections((s) => ({ ...s, accessories: value }));
   }
-  function updateOther(field: "clothesOther" | "professionOther", value: string) {
+  function updateOther(field: OtherField, value: string) {
     setSelections((s) => ({ ...s, [field]: value }));
   }
   function clearAll() {
@@ -99,7 +129,7 @@ export function CharacterCreator() {
     settings.higgsfieldApiKey.trim().length > 0 &&
     settings.higgsfieldApiSecret.trim().length > 0;
 
-  const isPolling = characters.pollingBatchId !== null;
+  const isPolling = characters.pollingGenerationId !== null;
   const canGenerate =
     credentialsOk &&
     !isPolling &&
@@ -121,7 +151,7 @@ export function CharacterCreator() {
         selections: liveSelections,
         api_key: settings.higgsfieldApiKey,
         api_secret: settings.higgsfieldApiSecret,
-        size: "1536x2048", // portrait
+        size: "1536x2048",
         quality: "1080p",
       });
     } catch {
@@ -134,6 +164,48 @@ export function CharacterCreator() {
     setModalImg(img);
     setModalOpen(true);
   }
+
+  // Helper: render a single-select chip group from its schema definition
+  const renderSingle = (g: SingleSelectGroup) => {
+    const field = GROUP_TO_FIELD[g.group];
+    const otherField = g.allowOther ? GROUP_TO_OTHER_FIELD[g.group] : undefined;
+    return (
+      <OptionChips
+        key={g.group}
+        kind="single"
+        label={g.label}
+        options={g.options}
+        value={selections[field] as string | undefined}
+        onChange={(v) => updateSingle(field, v)}
+        allowOther={g.allowOther}
+        otherValue={otherField ? (selections[otherField] as string | undefined) : undefined}
+        onOtherChange={otherField ? (v) => updateOther(otherField, v) : undefined}
+        otherPlaceholder={`e.g. custom ${g.label.toLowerCase()}…`}
+      />
+    );
+  };
+
+  // History grouped by generation_id (newest first)
+  const historyGenerations = useMemo(() => {
+    const map = new Map<string, CharacterImage[]>();
+    for (const img of characters.history) {
+      const arr = map.get(img.generation_id) ?? [];
+      arr.push(img);
+      map.set(img.generation_id, arr);
+    }
+    // Sort each generation's images by created_at, then sort generations
+    // by their newest image desc.  Skip the current generation — it's
+    // already shown above.
+    const groups = Array.from(map.entries())
+      .filter(([gid]) => gid !== characters.generationId)
+      .map(([gid, imgs]) => ({
+        gid,
+        imgs: imgs.slice().sort((a, b) => a.created_at - b.created_at),
+        latestAt: Math.max(...imgs.map((i) => i.created_at)),
+      }))
+      .sort((a, b) => b.latestAt - a.latestAt);
+    return groups;
+  }, [characters.history, characters.generationId]);
 
   return (
     <div className="grid grid-cols-12 gap-5">
@@ -182,22 +254,11 @@ export function CharacterCreator() {
       {/* LEFT — option panels */}
       <div className="col-span-12 lg:col-span-7 flex flex-col gap-4">
         <Panel className="p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="hud-label text-fg">Identity</h2>
-          </div>
+          <h2 className="hud-label text-fg mb-4">Identity</h2>
           <div className="grid grid-cols-2 gap-x-6 gap-y-5">
             {SINGLE_GROUPS.filter((g) =>
               ["gender", "ethnicity", "bodyType", "hairColor"].includes(g.group),
-            ).map((g) => (
-              <OptionChips
-                key={g.group}
-                kind="single"
-                label={g.label}
-                options={g.options}
-                value={selections[GROUP_TO_FIELD[g.group]] as string | undefined}
-                onChange={(v) => updateSingle(GROUP_TO_FIELD[g.group], v)}
-              />
-            ))}
+            ).map(renderSingle)}
 
             {/* Age */}
             <div className="col-span-2">
@@ -236,16 +297,7 @@ export function CharacterCreator() {
           <div className="grid grid-cols-2 gap-x-6 gap-y-5">
             {SINGLE_GROUPS.filter((g) =>
               ["hairStyle", "facialHair"].includes(g.group),
-            ).map((g) => (
-              <OptionChips
-                key={g.group}
-                kind="single"
-                label={g.label}
-                options={g.options}
-                value={selections[GROUP_TO_FIELD[g.group]] as string | undefined}
-                onChange={(v) => updateSingle(GROUP_TO_FIELD[g.group], v)}
-              />
-            ))}
+            ).map(renderSingle)}
             {MULTI_GROUPS.map((g) => (
               <OptionChips
                 key={g.group}
@@ -254,34 +306,21 @@ export function CharacterCreator() {
                 options={g.options}
                 value={selections.accessories}
                 onChange={updateMulti}
+                allowOther={g.allowOther}
+                otherValue={selections.accessoriesOther}
+                onOtherChange={(v) => updateOther("accessoriesOther", v)}
+                otherPlaceholder="e.g. earrings, necklace…"
               />
             ))}
           </div>
         </Panel>
 
         <Panel className="p-5">
-          <h2 className="hud-label text-fg mb-4">Wardrobe & Role</h2>
+          <h2 className="hud-label text-fg mb-4">Wardrobe, Role & Setting</h2>
           <div className="grid grid-cols-2 gap-x-6 gap-y-5">
             {SINGLE_GROUPS.filter((g) =>
-              ["clothes", "profession"].includes(g.group),
-            ).map((g) => {
-              const field = GROUP_TO_FIELD[g.group];
-              const otherField =
-                g.group === "clothes" ? "clothesOther" : "professionOther";
-              return (
-                <OptionChips
-                  key={g.group}
-                  kind="single"
-                  label={g.label}
-                  options={g.options}
-                  value={selections[field] as string | undefined}
-                  onChange={(v) => updateSingle(field, v)}
-                  allowOther={g.allowOther}
-                  otherValue={selections[otherField]}
-                  onOtherChange={(v) => updateOther(otherField, v)}
-                />
-              );
-            })}
+              ["clothes", "profession", "environment"].includes(g.group),
+            ).map(renderSingle)}
           </div>
         </Panel>
       </div>
@@ -351,7 +390,7 @@ export function CharacterCreator() {
             {isPolling && (
               <span className="flex items-center gap-1.5 font-mono text-[0.6rem] uppercase tracking-[0.1em] text-hud-amber">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                Polling Higgsfield…
+                4 separate jobs running…
               </span>
             )}
           </div>
@@ -370,6 +409,38 @@ export function CharacterCreator() {
         </Panel>
       </div>
 
+      {/* HISTORY */}
+      <div className="col-span-12">
+        <Panel className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <HistoryIcon className="w-4 h-4 text-hud-cyan" strokeWidth={1.5} />
+              <h2 className="hud-label text-fg">History</h2>
+            </div>
+            <span className="font-mono text-[0.6rem] text-fg-dim">
+              {historyGenerations.length} past generation
+              {historyGenerations.length === 1 ? "" : "s"}
+            </span>
+          </div>
+
+          {historyGenerations.length === 0 ? (
+            <p className="font-mono text-[0.7rem] text-fg-dim">
+              Past generations will appear here.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {historyGenerations.map((gen) => (
+                <HistoryRow
+                  key={gen.gid}
+                  imgs={gen.imgs}
+                  onImageClick={openImage}
+                />
+              ))}
+            </div>
+          )}
+        </Panel>
+      </div>
+
       <CharacterImageModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -381,7 +452,79 @@ export function CharacterCreator() {
 }
 
 // ---------------------------------------------------------------------------
-// One tile in the 2x2 grid
+// One generation row in the History panel
+// ---------------------------------------------------------------------------
+
+function HistoryRow({
+  imgs,
+  onImageClick,
+}: {
+  imgs: CharacterImage[];
+  onImageClick: (img: CharacterImage) => void;
+}) {
+  const dt = imgs[0] ? new Date(imgs[0].created_at) : null;
+  const promptPreview = (imgs[0]?.prompt ?? "").slice(0, 140);
+  return (
+    <div className="border border-border-hud/60 bg-bg-elevated/20 p-3">
+      <div className="flex items-start justify-between mb-2 gap-3">
+        <p className="font-mono text-[0.65rem] text-fg-muted leading-relaxed line-clamp-2">
+          {promptPreview}
+          {imgs[0]?.prompt && imgs[0].prompt.length > 140 ? "…" : ""}
+        </p>
+        {dt && (
+          <span className="font-mono text-[0.6rem] text-fg-dim flex-shrink-0">
+            {dt.toLocaleString()}
+          </span>
+        )}
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {imgs.map((img) => (
+          <HistoryThumb key={img.id} img={img} onClick={() => onImageClick(img)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HistoryThumb({
+  img,
+  onClick,
+}: {
+  img: CharacterImage;
+  onClick: () => void;
+}) {
+  if (img.status === "completed" && img.image_url) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="relative aspect-[3/4] border border-border-hud overflow-hidden hud-focus group"
+      >
+        <img
+          src={img.image_url}
+          alt="Past character"
+          className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
+        />
+        <div className="absolute inset-0 bg-hud-cyan/0 group-hover:bg-hud-cyan/15 transition-colors" />
+      </button>
+    );
+  }
+  if (img.status === "failed" || img.status === "nsfw" || img.status === "canceled") {
+    return (
+      <div className="aspect-[3/4] border border-hud-red/40 bg-hud-red/5 flex items-center justify-center">
+        <AlertTriangle className="w-3.5 h-3.5 text-hud-red" />
+      </div>
+    );
+  }
+  return (
+    <div className="aspect-[3/4] border border-border-hud bg-bg-elevated/30 flex items-center justify-center">
+      <Loader2 className="w-3.5 h-3.5 text-hud-cyan animate-spin" />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// One tile in the current 2x2 grid
 // ---------------------------------------------------------------------------
 
 function ImageTile({
@@ -418,15 +561,19 @@ function ImageTile({
   }
   if (img.status === "failed" || img.status === "nsfw" || img.status === "canceled") {
     return (
-      <div className="aspect-[3/4] border border-hud-red/40 bg-hud-red/5 flex flex-col items-center justify-center gap-1 p-2">
+      <div className="aspect-[3/4] border border-hud-red/40 bg-hud-red/5 flex flex-col items-center justify-center gap-1 p-2 text-center">
         <AlertTriangle className="w-4 h-4 text-hud-red" />
         <span className="font-mono text-[0.6rem] text-hud-red uppercase tracking-[0.1em]">
           {img.status}
         </span>
+        {img.error_message && (
+          <span className="font-mono text-[0.55rem] text-hud-red/70 line-clamp-3 leading-tight">
+            {img.error_message}
+          </span>
+        )}
       </div>
     );
   }
-  // queued / in_progress — animated placeholder
   return (
     <div className="aspect-[3/4] border border-border-hud bg-bg-elevated/30 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-hud-cyan/0 via-hud-cyan/5 to-hud-cyan/0 animate-pulse" />

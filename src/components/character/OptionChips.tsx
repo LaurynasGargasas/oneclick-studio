@@ -1,6 +1,9 @@
 // Reusable single-/multi-select chip group for the Character Creator.
 // Single-select: clicking a chip selects it; clicking the same chip clears.
+//   `allowOther` adds an "Other" chip + free-text input that becomes the value.
 // Multi-select: each chip toggles independently.
+//   `allowOther` adds a free-text "Other accessories…" field below the chips
+//   that contributes additional comma-separated phrases to the prompt.
 
 import { cn } from "@/lib/cn";
 import { HudInput } from "@/components/hud";
@@ -15,16 +18,20 @@ interface SingleProps extends BaseProps {
   kind: "single";
   value: string | undefined;
   onChange: (v: string | undefined) => void;
-  /** Optional "Other…" chip + free-text input. */
   allowOther?: boolean;
   otherValue?: string;
   onOtherChange?: (v: string) => void;
+  otherPlaceholder?: string;
 }
 
 interface MultiProps extends BaseProps {
   kind: "multi";
   value: string[];
   onChange: (v: string[]) => void;
+  allowOther?: boolean;
+  otherValue?: string;
+  onOtherChange?: (v: string) => void;
+  otherPlaceholder?: string;
 }
 
 export function OptionChips(props: SingleProps | MultiProps) {
@@ -81,10 +88,22 @@ export function OptionChips(props: SingleProps | MultiProps) {
         )}
       </div>
 
+      {/* Single-select "Other…" input shown only when "other" is the value */}
       {props.kind === "single" && props.allowOther && props.value === "other" && (
         <div className="mt-2">
           <HudInput
-            placeholder={`e.g. firefighter uniform`}
+            placeholder={props.otherPlaceholder ?? "Type a value…"}
+            value={props.otherValue ?? ""}
+            onChange={(e) => props.onOtherChange?.(e.target.value)}
+          />
+        </div>
+      )}
+
+      {/* Multi-select "Other…" input is always available below the chips */}
+      {props.kind === "multi" && props.allowOther && (
+        <div className="mt-2">
+          <HudInput
+            placeholder={props.otherPlaceholder ?? "Other (comma separated)…"}
             value={props.otherValue ?? ""}
             onChange={(e) => props.onOtherChange?.(e.target.value)}
           />
