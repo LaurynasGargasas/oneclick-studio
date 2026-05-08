@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Save, Activity, CheckCircle, XCircle, Monitor, ExternalLink, Zap, ImageUp, Download, RefreshCw } from "lucide-react";
+import { Save, Activity, CheckCircle, XCircle, Monitor, ExternalLink, Zap, ImageUp, Download, RefreshCw, UserCog } from "lucide-react";
 import { check as checkForUpdate, type Update } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
@@ -25,6 +25,8 @@ export function Settings() {
   const [apiKey, setApiKey] = useState(settings.apiKey);
   const [modelId, setModelId] = useState(settings.modelId);
   const [imgbbApiKey, setImgbbApiKey] = useState(settings.imgbbApiKey);
+  const [higgsfieldApiKey, setHiggsfieldApiKey] = useState(settings.higgsfieldApiKey);
+  const [higgsfieldApiSecret, setHiggsfieldApiSecret] = useState(settings.higgsfieldApiSecret);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [testState, setTestState] = useState<TestState>("idle");
@@ -120,7 +122,16 @@ export function Settings() {
     setApiKey(settings.apiKey);
     setModelId(settings.modelId);
     setImgbbApiKey(settings.imgbbApiKey);
-  }, [settings.apiEndpoint, settings.apiKey, settings.modelId, settings.imgbbApiKey]);
+    setHiggsfieldApiKey(settings.higgsfieldApiKey);
+    setHiggsfieldApiSecret(settings.higgsfieldApiSecret);
+  }, [
+    settings.apiEndpoint,
+    settings.apiKey,
+    settings.modelId,
+    settings.imgbbApiKey,
+    settings.higgsfieldApiKey,
+    settings.higgsfieldApiSecret,
+  ]);
 
   async function handleSave() {
     setSaving(true);
@@ -129,6 +140,8 @@ export function Settings() {
       await settings.set("api_key", apiKey);
       await settings.set("model_id", modelId);
       await settings.set("imgbb_api_key", imgbbApiKey);
+      await settings.set("higgsfield_api_key", higgsfieldApiKey);
+      await settings.set("higgsfield_api_secret", higgsfieldApiSecret);
       setSaved(true);
       setTestState("idle");
       setTimeout(() => setSaved(false), 2000);
@@ -283,6 +296,54 @@ export function Settings() {
         {imgbbApiKey && (
           <p className="font-mono text-[0.6rem] text-hud-green mt-2">
             ✓ imgbb hosting active — reference images will be uploaded before generation
+          </p>
+        )}
+      </Panel>
+
+      {/* Higgsfield (Soul 2.0) — Character Creator */}
+      <Panel className="p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <UserCog className="w-4 h-4 text-hud-cyan" strokeWidth={1.5} />
+          <h2 className="hud-label text-fg">Higgsfield (Character Creator)</h2>
+        </div>
+
+        <p className="font-mono text-[0.65rem] text-fg-muted mb-4 leading-relaxed">
+          Used by the <span className="text-hud-cyan">UGC Character Creator</span>{" "}
+          to generate photoreal portraits via Soul 2.0. Get your credentials at{" "}
+          <a
+            href="https://cloud.higgsfield.ai/"
+            target="_blank"
+            rel="noreferrer"
+            className="text-hud-cyan hover:underline"
+          >
+            cloud.higgsfield.ai
+          </a>
+          . Both the API key and secret are required.
+        </p>
+
+        <div className="grid grid-cols-1 gap-4">
+          <HudInput
+            label="Higgsfield API Key"
+            type="password"
+            mono
+            value={higgsfieldApiKey}
+            onChange={(e) => setHiggsfieldApiKey(e.target.value)}
+            placeholder="hf_…"
+          />
+          <HudInput
+            label="Higgsfield API Secret"
+            type="password"
+            mono
+            value={higgsfieldApiSecret}
+            onChange={(e) => setHiggsfieldApiSecret(e.target.value)}
+            placeholder="hf_secret_…"
+            hint="Sent as the hf-secret header alongside the API key. Save to apply."
+          />
+        </div>
+
+        {higgsfieldApiKey && higgsfieldApiSecret && (
+          <p className="font-mono text-[0.6rem] text-hud-green mt-3">
+            ✓ Higgsfield credentials configured
           </p>
         )}
       </Panel>

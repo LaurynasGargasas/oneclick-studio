@@ -12,6 +12,8 @@ interface SettingsState {
   apiKey: string;
   modelId: string;
   imgbbApiKey: string;
+  higgsfieldApiKey: string;
+  higgsfieldApiSecret: string;
   defaultResolution: string;
   defaultDuration: string;
   defaultAspectRatio: string;
@@ -29,6 +31,8 @@ const DEFAULTS = {
   apiKey: "",
   modelId: "seedance-1-0-lite-t2v-250528",
   imgbbApiKey: "",
+  higgsfieldApiKey: "",
+  higgsfieldApiSecret: "",
   defaultResolution: "720p",
   defaultDuration: "6",
   defaultAspectRatio: "16:9",
@@ -42,6 +46,8 @@ const KEY_MAP: Record<string, keyof typeof DEFAULTS> = {
   api_key: "apiKey",
   model_id: "modelId",
   imgbb_api_key: "imgbbApiKey",
+  higgsfield_api_key: "higgsfieldApiKey",
+  higgsfield_api_secret: "higgsfieldApiSecret",
   default_resolution: "defaultResolution",
   default_duration: "defaultDuration",
   default_aspect_ratio: "defaultAspectRatio",

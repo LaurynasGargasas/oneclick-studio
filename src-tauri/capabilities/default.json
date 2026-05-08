@@ -24,6 +24,9 @@
     "sql:allow-select",
     "updater:default",
     "process:default",
-    "process:allow-restart"
+    "process:allow-restart",
+    "clipboard-manager:default",
+    "clipboard-manager:allow-write-image",
+    "clipboard-manager:allow-write-text"
   ]
 }

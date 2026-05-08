@@ -23,6 +23,12 @@ pub fn run() {
             sql: include_str!("../migrations/003_imgbb_key.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 4,
+            description: "higgsfield_credentials_and_characters",
+            sql: include_str!("../migrations/004_higgsfield.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
@@ -32,6 +38,7 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations("sqlite:seedance.db", migrations)
@@ -57,6 +64,11 @@ pub fn run() {
             commands::files::upload_to_imgbb,
             // system
             commands::system::create_desktop_shortcut,
+            // character creator (Higgsfield Soul 2.0)
+            commands::character::submit_character_batch,
+            commands::character::poll_character_batch,
+            commands::character::download_image_to_path,
+            commands::character::fetch_image_bytes,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
