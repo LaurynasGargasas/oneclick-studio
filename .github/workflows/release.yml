@@ -1,6 +1,7 @@
 name: Build & Release
 
-# Runs on every push to main (builds artifacts) and on version tags (creates a release)
+# Push to main / PR  → build only (sanity check)
+# Tag v*            → signed build + GitHub Release + latest.json (auto-update manifest)
 on:
   push:
     branches: [main]
@@ -8,110 +9,59 @@ on:
       - 'v*'
   pull_request:
     branches: [main]
-  workflow_dispatch:   # lets you trigger a build manually from the GitHub UI
+  workflow_dispatch:
 
 jobs:
-  # ── Windows build ────────────────────────────────────────────────────────────
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Install frontend dependencies
-        run: npm ci
-
-      - name: Build Tauri app (Windows)
-        run: npm run tauri build
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ''   # leave blank — no code signing yet
-
-      - name: Upload Windows artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-installers
-          path: |
-            src-tauri/target/release/bundle/msi/*.msi
-            src-tauri/target/release/bundle/nsis/*-setup.exe
-          retention-days: 30
-
-  # ── macOS build ──────────────────────────────────────────────────────────────
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Install frontend dependencies
-        run: npm ci
-
-      - name: Build Tauri app (macOS)
-        run: npm run tauri build
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ''   # leave blank — no code signing yet
-
-      - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-installers
-          path: |
-            src-tauri/target/release/bundle/dmg/*.dmg
-            src-tauri/target/release/bundle/macos/*.app.tar.gz
-          retention-days: 30
-
-  # ── GitHub Release (only on version tags) ────────────────────────────────────
-  release:
-    needs: [build-windows, build-macos]
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+  build-and-release:
     permissions:
       contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest'
+            args: '--target universal-apple-darwin'
+          - platform: 'windows-latest'
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download Windows artifacts
-        uses: actions/download-artifact@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: windows-installers
-          path: release-assets/windows
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Download macOS artifacts
-        uses: actions/download-artifact@v4
+      - name: Install Rust stable (universal targets on macOS)
+        uses: dtolnay/rust-toolchain@stable
         with:
-          name: macos-installers
-          path: release-assets/macos
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
         with:
-          name: "OneClick Studio ${{ github.ref_name }}"
-          draft: false
+          workspaces: './src-tauri -> target'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build, sign, release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          # On a v* tag, create / update the GitHub Release.
+          # On any other event, just build (no release upload).
+          tagName: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+          releaseName: ${{ startsWith(github.ref, 'refs/tags/v') && format('OneClick Studio {0}', github.ref_name) || '' }}
+          releaseBody: |
+            See assets below to download. Existing installs will auto-update via Settings → Updates.
+          releaseDraft: false
           prerelease: false
-          generate_release_notes: true
-          files: release-assets/**/*
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: false
+          args: ${{ matrix.args }}

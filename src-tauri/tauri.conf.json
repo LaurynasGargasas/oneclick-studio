@@ -37,9 +37,22 @@
       }
     }
   },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/LaurynasGargasas/oneclick-studio/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ3NDZGN0I4NDIxQ0UyOUIKUldTYjRoeEN1UGRHUjErQ2R1WDB2amRPNml2U1FKNmx4elRST2NhdEd6YWxIVHM3cXU5UTBlenQK",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
