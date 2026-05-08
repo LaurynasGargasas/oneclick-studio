@@ -28,7 +28,7 @@ export function Sidebar() {
           </div>
           <div className="flex flex-col leading-none">
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-hud-cyan hud-text-glow-cyan">
-              Seedance
+              OneClick
             </span>
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-fg-muted">
               Studio
