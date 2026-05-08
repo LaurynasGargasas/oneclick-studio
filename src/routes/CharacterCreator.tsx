@@ -45,7 +45,8 @@ type SingleField =
   | "facialHair"
   | "clothes"
   | "profession"
-  | "environment";
+  | "environment"
+  | "imageStyle";
 
 const GROUP_TO_FIELD: Record<string, SingleField> = {
   gender: "gender",
@@ -57,6 +58,7 @@ const GROUP_TO_FIELD: Record<string, SingleField> = {
   clothes: "clothes",
   profession: "profession",
   environment: "environment",
+  imageStyle: "imageStyle",
 };
 
 type OtherField =
@@ -67,6 +69,7 @@ type OtherField =
   | "clothesOther"
   | "professionOther"
   | "environmentOther"
+  | "imageStyleOther"
   | "accessoriesOther";
 
 const GROUP_TO_OTHER_FIELD: Record<string, OtherField> = {
@@ -77,6 +80,7 @@ const GROUP_TO_OTHER_FIELD: Record<string, OtherField> = {
   clothes: "clothesOther",
   profession: "professionOther",
   environment: "environmentOther",
+  imageStyle: "imageStyleOther",
   accessories: "accessoriesOther",
 };
 
@@ -92,12 +96,11 @@ export function CharacterCreator() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImg, setModalImg] = useState<CharacterImage | null>(null);
 
-  // Auto-load history on mount; cancel polling on unmount
+  // Auto-load history on mount.  We deliberately do NOT cancel polling on
+  // unmount — concurrent generations should keep running in the background
+  // while the user is on a different route.
   useEffect(() => {
     void characters.load();
-    return () => {
-      characters.cancelPolling();
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -129,10 +132,11 @@ export function CharacterCreator() {
     settings.higgsfieldApiKey.trim().length > 0 &&
     settings.higgsfieldApiSecret.trim().length > 0;
 
-  const isPolling = characters.pollingGenerationId !== null;
+  const inFlightCount = characters.inFlightCount;
+  // Generate is no longer gated on in-flight work — multiple generations
+  // run concurrently.  Only credentials + minimum selection block submit.
   const canGenerate =
     credentialsOk &&
-    !isPolling &&
     (editingPrompt
       ? editedPrompt.trim().length > 0
       : hasMinimumSelection(liveSelections));
@@ -218,17 +222,22 @@ export function CharacterCreator() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={clearAll} disabled={isPolling}>
+          {inFlightCount > 0 && (
+            <span className="flex items-center gap-1.5 font-mono text-[0.6rem] uppercase tracking-[0.1em] text-hud-amber">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              {inFlightCount} in flight
+            </span>
+          )}
+          <Button variant="ghost" onClick={clearAll}>
             Clear
           </Button>
           <Button
             variant="primary"
             iconLeft={<Sparkles className="w-3.5 h-3.5" />}
-            loading={isPolling}
             disabled={!canGenerate}
             onClick={() => void handleGenerate()}
           >
-            {isPolling ? "Generating…" : "Generate 4 Images"}
+            Generate 4 Images
           </Button>
         </div>
       </div>
@@ -316,10 +325,12 @@ export function CharacterCreator() {
         </Panel>
 
         <Panel className="p-5">
-          <h2 className="hud-label text-fg mb-4">Wardrobe, Role & Setting</h2>
+          <h2 className="hud-label text-fg mb-4">Wardrobe, Role, Setting & Style</h2>
           <div className="grid grid-cols-2 gap-x-6 gap-y-5">
             {SINGLE_GROUPS.filter((g) =>
-              ["clothes", "profession", "environment"].includes(g.group),
+              ["clothes", "profession", "environment", "imageStyle"].includes(
+                g.group,
+              ),
             ).map(renderSingle)}
           </div>
         </Panel>
@@ -387,10 +398,10 @@ export function CharacterCreator() {
         <Panel className="p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="hud-label text-fg">Output</h2>
-            {isPolling && (
+            {inFlightCount > 0 && (
               <span className="flex items-center gap-1.5 font-mono text-[0.6rem] uppercase tracking-[0.1em] text-hud-amber">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                4 separate jobs running…
+                {inFlightCount} polling
               </span>
             )}
           </div>

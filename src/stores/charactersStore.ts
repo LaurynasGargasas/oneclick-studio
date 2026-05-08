@@ -1,12 +1,21 @@
-// Character store — manages a "generation" (= 4 images created together)
-// and the on-disk history.
+// Character store — manages generations (= 4 images created together) and
+// the on-disk history.
 //
-// Diversity strategy: we no longer ask Higgsfield for batch_size=4 because
-// that produces near-identical variants.  Instead, every "Generate" click
-// fires 4 separate POSTs with batch_size=1, each yielding its own JobSet
-// with one job and its own random seed.  The four images of a single click
-// share a client-generated `generation_id` so the History view can group
-// them as one row.
+// Concurrency model (v0.1.5):
+// ---------------------------
+// Multiple generations can run in parallel.  We don't block the Generate
+// button on in-flight work.  All polling tokens — across every concurrent
+// generation — live in a single GLOBAL pool, ticked by one timer.  When a
+// new generation submits, its 4 placeholders go into the pool alongside
+// any still-running ones.
+//
+// Diversity: each generation fires 4 separate single-image POSTs in
+// parallel so each tile gets its own seed.
+//
+// `images` (the right-hand "Output" panel) shows the MOST RECENT
+// generation only.  All generations — current + finished + still-in-flight
+// from previous clicks — live in `history`, where the History panel
+// renders them grouped by generation_id.
 
 import { invoke } from "@tauri-apps/api/core";
 import { create } from "zustand";
@@ -28,9 +37,9 @@ export type CharacterImageStatus =
   | "canceled";
 
 export interface CharacterImage {
-  id: string;                    // unique per image (job id once submitted)
-  generation_id: string;         // shared by the 4 images of one Generate click
-  job_set_id: string | null;     // Higgsfield job-set id used for polling
+  id: string;                 // unique per image (job id once submitted)
+  generation_id: string;      // shared by the 4 images of one Generate click
+  job_set_id: string | null;  // Higgsfield job-set id used for polling
   prompt: string;
   options_json: string;
   image_url: string | null;
@@ -58,21 +67,23 @@ interface SubmitArgs {
 }
 
 interface CharactersState {
-  // current generation (the 4 in-flight or just-completed images)
+  // Most recent generation (the 4 in-flight or just-completed images)
   generationId: string | null;
   images: CharacterImage[];
 
-  // history — every image we have on disk, newest first.
-  // Includes the current generation's images so the UI has one source of truth.
+  // Every image we have on disk, newest first.
+  // Includes the current generation's images so the UI has one source of
+  // truth and concurrent generations can update independently.
   history: CharacterImage[];
   loaded: boolean;
 
-  // are we still polling at least one image?
-  pollingGenerationId: string | null;
+  // Global count of images still polling across ALL active generations.
+  // Used by the UI to show "X in flight" without blocking submit.
+  inFlightCount: number;
 
   load: () => Promise<void>;
   submit: (args: SubmitArgs) => Promise<string>;
-  cancelPolling: () => void;
+  cancelAllPolling: () => void;
   clearCurrent: () => void;
 }
 
@@ -133,18 +144,32 @@ function isTerminal(s: CharacterImageStatus): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Store
+// Global polling pool — shared across every active generation
 // ---------------------------------------------------------------------------
 
+interface PoolEntry {
+  jobSetId: string;
+  generationId: string;
+  apiKey: string;
+  apiSecret: string;
+}
+
 let pollTimer: number | null = null;
-let pollingTokens = new Map<string /* image id */, string /* job_set_id */>();
+const pollingPool: Map<string /* imageId */, PoolEntry> = new Map();
+// Tracks generations we've already announced as complete via toast, so we
+// don't fire multiple toasts when later poll ticks see the same final state.
+const announcedGenerations = new Set<string>();
+
+// ---------------------------------------------------------------------------
+// Store
+// ---------------------------------------------------------------------------
 
 export const useCharacters = create<CharactersState>((set, get) => ({
   generationId: null,
   images: [],
   history: [],
   loaded: false,
-  pollingGenerationId: null,
+  inFlightCount: 0,
 
   async load() {
     if (!isTauri) {
@@ -191,7 +216,7 @@ export const useCharacters = create<CharactersState>((set, get) => ({
     const optionsJson = JSON.stringify(selections);
     const now = Date.now();
 
-    // 1) Create 4 placeholder images and show them immediately
+    // 1) Show 4 placeholder tiles immediately as the new "current" generation.
     const placeholders: CharacterImage[] = Array.from({ length: 4 }, () => ({
       id: "tmp-" + uuid(),
       generation_id,
@@ -204,16 +229,16 @@ export const useCharacters = create<CharactersState>((set, get) => ({
       created_at: now,
     }));
 
-    set({
+    // The new generation becomes "current"; previous in-flight generations
+    // continue updating in `history` independently.
+    set((s) => ({
       generationId: generation_id,
       images: placeholders,
-      pollingGenerationId: generation_id,
-      history: [...placeholders, ...get().history],
-    });
+      history: [...placeholders, ...s.history],
+    }));
 
-    // 2) Fire 4 parallel single-image submits.  Each yields its own JobSet
-    //    with exactly one job — that's how we get true diversity (the model
-    //    samples a fresh seed per request).
+    // 2) Fire 4 parallel single-image submits (batch_size=1 each, so each
+    //    tile gets its own random seed → real diversity).
     const submitOne = async (placeholderId: string): Promise<CharacterImage> => {
       try {
         const js = await invoke<JobSet>("submit_character_batch", {
@@ -239,7 +264,7 @@ export const useCharacters = create<CharactersState>((set, get) => ({
         };
       } catch (e) {
         return {
-          id: placeholderId, // keep placeholder id so React keys stay stable
+          id: placeholderId,
           generation_id,
           job_set_id: null,
           prompt,
@@ -252,84 +277,80 @@ export const useCharacters = create<CharactersState>((set, get) => ({
       }
     };
 
-    // Submit all four in parallel; replace placeholders one by one as each
-    // request returns.  This gives the user immediate feedback per slot.
     const realImages = await Promise.all(
       placeholders.map((p) => submitOne(p.id)),
     );
 
-    // 3) Replace placeholders with real images
-    replaceImages(set, get, generation_id, placeholders, realImages);
+    // 3) Replace placeholders with real images in BOTH `images` (only if
+    //    this generation is still the current one) and `history`.
+    set((s) => {
+      const placeholderIds = new Set(placeholders.map((p) => p.id));
+      return {
+        images:
+          s.generationId === generation_id ? realImages : s.images,
+        history: [
+          ...realImages,
+          ...s.history.filter((h) => !placeholderIds.has(h.id)),
+        ].slice(0, 1000),
+      };
+    });
     for (const img of realImages) await persistImage(img);
 
-    // Update polling tokens
-    pollingTokens.clear();
+    // 4) Push every still-in-progress image into the global polling pool
+    //    and ensure the polling loop is running.
     for (const img of realImages) {
       if (img.job_set_id && !isTerminal(img.status)) {
-        pollingTokens.set(img.id, img.job_set_id);
+        pollingPool.set(img.id, {
+          jobSetId: img.job_set_id,
+          generationId: generation_id,
+          apiKey: api_key,
+          apiSecret: api_secret,
+        });
       }
     }
+    set({ inFlightCount: pollingPool.size });
 
-    // If everything failed at submit time, stop here.
-    if (pollingTokens.size === 0) {
-      set({ pollingGenerationId: null });
-      const okCount = realImages.filter((i) => i.status === "completed").length;
-      if (okCount === 0) {
-        toast.error("Generation failed", realImages[0]?.error_message ?? "All four submissions failed.");
-      }
+    // If everything failed at submit time, surface a toast.
+    if (realImages.every((i) => i.status === "failed")) {
+      toast.error(
+        "Generation failed",
+        realImages[0]?.error_message ?? "All four submissions failed.",
+      );
+      announcedGenerations.add(generation_id);
       return generation_id;
     }
 
-    // 4) Start polling each in-progress image
-    void startPolling(api_key, api_secret, generation_id, set, get);
+    ensurePollingLoop(set, get);
     return generation_id;
   },
 
-  cancelPolling() {
-    pollingTokens.clear();
+  cancelAllPolling() {
+    pollingPool.clear();
+    announcedGenerations.clear();
     if (pollTimer != null) {
       clearTimeout(pollTimer);
       pollTimer = null;
     }
-    set({ pollingGenerationId: null });
+    set({ inFlightCount: 0 });
   },
 
   clearCurrent() {
-    pollingTokens.clear();
-    if (pollTimer != null) {
-      clearTimeout(pollTimer);
-      pollTimer = null;
-    }
-    set({ generationId: null, images: [], pollingGenerationId: null });
+    // Just clear what's shown as "current".  Polling continues for any
+    // generations still in flight; they'll keep updating in History.
+    set({ generationId: null, images: [] });
   },
 }));
 
 // ---------------------------------------------------------------------------
-// Helpers that need access to set/get
+// Polling helpers
 // ---------------------------------------------------------------------------
 
-function replaceImages(
-  set: (partial: Partial<CharactersState> | ((s: CharactersState) => Partial<CharactersState>)) => void,
-  get: () => CharactersState,
-  generation_id: string,
-  oldImages: CharacterImage[],
-  newImages: CharacterImage[],
-) {
-  set((s) => {
-    const oldIds = new Set(oldImages.map((o) => o.id));
-    return {
-      images: s.generationId === generation_id ? newImages : s.images,
-      history: [
-        ...newImages,
-        ...s.history.filter((h) => !oldIds.has(h.id) && h.generation_id !== generation_id),
-      ].slice(0, 1000),
-    };
-  });
-  void get; // unused
-}
-
 function patchImage(
-  set: (partial: Partial<CharactersState> | ((s: CharactersState) => Partial<CharactersState>)) => void,
+  set: (
+    partial:
+      | Partial<CharactersState>
+      | ((s: CharactersState) => Partial<CharactersState>),
+  ) => void,
   imageId: string,
   patch: Partial<CharacterImage>,
 ) {
@@ -343,67 +364,76 @@ function patchImage(
   });
 }
 
-// ---------------------------------------------------------------------------
-// Polling driver — polls each image's job-set on its own
-// ---------------------------------------------------------------------------
-
-async function startPolling(
-  api_key: string,
-  api_secret: string,
-  generation_id: string,
-  set: (partial: Partial<CharactersState> | ((s: CharactersState) => Partial<CharactersState>)) => void,
+function ensurePollingLoop(
+  set: (
+    partial:
+      | Partial<CharactersState>
+      | ((s: CharactersState) => Partial<CharactersState>),
+  ) => void,
   get: () => CharactersState,
-) {
-  if (pollTimer != null) clearTimeout(pollTimer);
+): void {
+  if (pollTimer != null) return; // already running
 
   const tick = async () => {
-    if (get().pollingGenerationId !== generation_id) return;
-    if (pollingTokens.size === 0) {
-      set({ pollingGenerationId: null });
+    if (pollingPool.size === 0) {
       pollTimer = null;
+      set({ inFlightCount: 0 });
       return;
     }
 
-    // Poll all outstanding job-sets in parallel
-    const entries = Array.from(pollingTokens.entries());
+    // Poll every outstanding job-set in parallel.
+    const entries = Array.from(pollingPool.entries());
     await Promise.all(
-      entries.map(async ([imageId, jobSetId]) => {
+      entries.map(async ([imageId, entry]) => {
         try {
           const js = await invoke<JobSet>("poll_character_batch", {
-            apiKey: api_key,
-            apiSecret: api_secret,
-            jobSetId: jobSetId,
+            apiKey: entry.apiKey,
+            apiSecret: entry.apiSecret,
+            jobSetId: entry.jobSetId,
           });
           const job = js.jobs[0];
           if (!job) return;
           const status = mapStatus(job.status);
           const url = job.results?.raw?.url ?? null;
+          patchImage(set, imageId, { status, image_url: url });
 
-          patchImage(set, imageId, {
-            status,
-            image_url: url,
-          });
-
-          // Persist
           const fresh = get().history.find((h) => h.id === imageId);
           if (fresh) await persistImage(fresh);
 
           if (isTerminal(status)) {
-            pollingTokens.delete(imageId);
+            pollingPool.delete(imageId);
           }
         } catch (e) {
-          // transient — keep polling but log
+          // transient — keep polling
           console.warn("poll error for", imageId, e);
         }
       }),
     );
 
-    if (pollingTokens.size === 0) {
-      set({ pollingGenerationId: null });
+    set({ inFlightCount: pollingPool.size });
+
+    // Check whether any generation just transitioned to "all done" —
+    // surface one toast per generation, exactly once.
+    const stillRunningGenerations = new Set<string>();
+    for (const [, entry] of pollingPool) {
+      stillRunningGenerations.add(entry.generationId);
+    }
+    const allGenerationsThisRun = new Set(entries.map(([, e]) => e.generationId));
+    for (const gid of allGenerationsThisRun) {
+      if (
+        !stillRunningGenerations.has(gid) &&
+        !announcedGenerations.has(gid)
+      ) {
+        announcedGenerations.add(gid);
+        const final = get().history.filter((h) => h.generation_id === gid);
+        const ok = final.filter((i) => i.status === "completed").length;
+        if (ok > 0) toast.success("Generation ready", `${ok}/4 images`);
+      }
+    }
+
+    if (pollingPool.size === 0) {
       pollTimer = null;
-      const final = get().images.filter((i) => i.generation_id === generation_id);
-      const ok = final.filter((i) => i.status === "completed").length;
-      if (ok > 0) toast.success("Generation ready", `${ok}/4 images`);
+      set({ inFlightCount: 0 });
       return;
     }
 

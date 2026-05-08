@@ -227,7 +227,57 @@ export const GROUPS: OptionGroup[] = [
       },
     ],
   },
+  // Image Style is special: each option REPLACES the prompt's tail-end style
+  // suffix (lighting / camera / aesthetic descriptors).  The body of the
+  // prompt — subject, clothing, profession, environment, body, hair, face —
+  // is unaffected.  This means picking a style never breaks the v0.1.4
+  // clothing fix.  See applyImageStyleSuffix() below for the lookup.
+  {
+    kind: "single",
+    group: "imageStyle",
+    label: "Image Style",
+    allowOther: true,
+    otherTemplate: (t) => t.trim(),
+    options: [
+      {
+        id: "professional",
+        label: "Professional Face Profile",
+        // Sentinel — actual phrase resolved by IMAGE_STYLE_SUFFIXES below.
+        phrase: "__style:professional",
+      },
+      { id: "iphone", label: "iPhone Selfie", phrase: "__style:iphone" },
+      { id: "vlog", label: "Vlog", phrase: "__style:vlog" },
+    ],
+  },
 ];
+
+// ---------------------------------------------------------------------------
+// Style-suffix templates (one per Image Style option)
+// ---------------------------------------------------------------------------
+
+const DEFAULT_SUFFIX =
+  "candid unposed everyday photo, natural ambient indoor lighting, " +
+  "natural skin texture and pores, unfiltered and unedited, no retouching, " +
+  "no professional makeup, ordinary documentary moment, slight everyday " +
+  "imperfections, casual smartphone snapshot aesthetic, looks exactly like " +
+  "a real photograph, authentic and grounded, vlog-style realism";
+
+const IMAGE_STYLE_SUFFIXES: Record<string, string> = {
+  professional:
+    "professional studio headshot photograph, soft even studio lighting, " +
+    "sharp focus on the eyes, neutral clean background, polished and refined, " +
+    "shallow depth of field from a high-quality DSLR camera, natural skin " +
+    "texture preserved, looks like a real corporate headshot",
+
+  iphone:
+    "iPhone selfie photograph held at arm's length, casual handheld smartphone " +
+    "framing, slight wide-angle lens distortion typical of front-facing phone " +
+    "cameras, natural everyday indoor lighting, raw and unedited, authentic " +
+    "real selfie aesthetic, point-of-view shot, looks exactly like an actual " +
+    "phone selfie a real person would post",
+
+  vlog: DEFAULT_SUFFIX,
+};
 
 // ---------------------------------------------------------------------------
 // Selection state shape
@@ -243,6 +293,7 @@ export interface CharacterSelections {
   clothes?: string;
   profession?: string;
   environment?: string;
+  imageStyle?: string;
 
   accessories: string[];
 
@@ -253,6 +304,7 @@ export interface CharacterSelections {
   clothesOther?: string;
   professionOther?: string;
   environmentOther?: string;
+  imageStyleOther?: string;
   accessoriesOther?: string;
 
   age?: number;
@@ -356,19 +408,26 @@ export function buildPrompt(s: CharacterSelections): string {
   if (fh) faceBits.push(fh.phrase);
   if (faceBits.length > 0) parts.push(faceBits.join(", "));
 
-  // 8. Style suffix — explicitly anti-studio, anti-retouched, with concrete
-  //    cues that push the model toward documentary smartphone aesthetic.
-  //    "natural skin texture and pores" prevents the over-smoothed beauty-
-  //    filter look the model defaults to without it.
-  const styleSuffix =
-    "candid unposed everyday photo, natural ambient indoor lighting, " +
-    "natural skin texture and pores, unfiltered and unedited, no retouching, " +
-    "no professional makeup, ordinary documentary moment, slight everyday " +
-    "imperfections, casual smartphone snapshot aesthetic, looks exactly like " +
-    "a real photograph, authentic and grounded, vlog-style realism";
+  // 8. Style suffix — driven by Image Style if set, else the default
+  //    documentary/smartphone suffix from v0.1.4.  This is the ONLY part of
+  //    the prompt the Image Style affects, so the v0.1.4 clothing safeguards
+  //    above stay intact regardless of style choice.
+  const styleSuffix = resolveStyleSuffix(s.imageStyle, s.imageStyleOther);
 
   if (parts.length === 0) return styleSuffix;
   return `${parts.join(", ")}, ${styleSuffix}`;
+}
+
+function resolveStyleSuffix(
+  imageStyle: string | undefined,
+  imageStyleOther: string | undefined,
+): string {
+  if (!imageStyle) return DEFAULT_SUFFIX;
+  if (imageStyle === "other") {
+    const text = imageStyleOther?.trim();
+    return text && text.length > 0 ? text : DEFAULT_SUFFIX;
+  }
+  return IMAGE_STYLE_SUFFIXES[imageStyle] ?? DEFAULT_SUFFIX;
 }
 
 /** Whether the user has picked enough to make a meaningful generation. */

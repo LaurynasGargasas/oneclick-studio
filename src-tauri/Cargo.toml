@@ -1,6 +1,6 @@
 [package]
 name = "oneclick-studio"
-version = "0.1.4"
+version = "0.1.5"
 description = "OneClick Studio — local-first AI video generation desktop app"
 authors = ["OneClick Studio"]
 edition = "2021"
