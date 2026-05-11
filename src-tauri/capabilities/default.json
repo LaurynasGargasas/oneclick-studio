@@ -9,12 +9,18 @@
     "opener:default",
     "dialog:default",
     "dialog:allow-open",
+    "dialog:allow-save",
     "fs:default",
+    "fs:allow-write-text-file",
     {
       "identifier": "fs:scope",
       "allow": [
         "$APPDATA/**",
-        "$APPLOCALDATA/**"
+        "$APPLOCALDATA/**",
+        "$HOME/**",
+        "$DOWNLOAD/**",
+        "$DESKTOP/**",
+        "$DOCUMENT/**"
       ]
     },
     "os:default",

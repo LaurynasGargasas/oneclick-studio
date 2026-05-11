@@ -35,6 +35,30 @@ pub fn run() {
             sql: include_str!("../migrations/005_character_generation_id.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 6,
+            description: "landing_pages",
+            sql: include_str!("../migrations/006_landing_pages.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 7,
+            description: "landings_unscoped",
+            sql: include_str!("../migrations/007_landings_unscoped.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 8,
+            description: "landings_starred",
+            sql: include_str!("../migrations/008_landings_starred.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 9,
+            description: "landing_presets",
+            sql: include_str!("../migrations/009_landing_presets.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

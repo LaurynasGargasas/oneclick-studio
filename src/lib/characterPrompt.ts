@@ -152,6 +152,64 @@ export const GROUPS: OptionGroup[] = [
       { id: "hat", label: "Hat", phrase: "wearing a hat" },
     ],
   },
+  // Props — items the subject is holding / using.  Multi-select so a chef can
+  // hold a pan AND a wooden spoon.  Phrasing always starts with "holding" so
+  // the model puts the prop in-hand rather than placing it loose on a counter.
+  {
+    kind: "multi",
+    group: "props",
+    label: "Props",
+    allowOther: true,
+    options: [
+      // Pans
+      { id: "cast-iron-skillet", label: "Cast Iron Skillet",
+        phrase: "holding a well-seasoned black cast iron skillet" },
+      { id: "stainless-pan", label: "Stainless Steel Pan",
+        phrase: "holding a brushed stainless steel frying pan" },
+      { id: "nonstick-pan", label: "Non-Stick Pan",
+        phrase: "holding a black non-stick frying pan" },
+      { id: "ceramic-pan", label: "Ceramic-Coated Pan",
+        phrase: "holding a matte white ceramic-coated pan" },
+      // Utensils
+      { id: "chef-knife", label: "Chef's Knife",
+        phrase: "holding a chef's knife" },
+      { id: "tongs", label: "Tongs",
+        phrase: "holding stainless steel kitchen tongs" },
+      { id: "whisk", label: "Whisk",
+        phrase: "holding a wire balloon whisk" },
+    ],
+  },
+  // Pose — how the subject is captured.  Single-select.  Wrapped so it reads
+  // as a body-language descriptor right after the action/environment.
+  {
+    kind: "single",
+    group: "pose",
+    label: "Pose",
+    allowOther: true,
+    otherTemplate: (t) => t.trim(),
+    options: [
+      { id: "showcase-product", label: "Showcase to Camera",
+        phrase: "holding the product up to the camera with both hands, presenting it directly to the viewer" },
+      { id: "cooking-action", label: "Cooking Action",
+        phrase: "actively cooking in the pan, captured mid-stir motion" },
+      { id: "pour-action", label: "Pouring Action",
+        phrase: "pouring food into the pan, mid-motion" },
+      { id: "close-hands", label: "Close-Up Hands",
+        phrase: "close-up shot focused on the hands gripping the pan" },
+      { id: "side-cooking", label: "Side Profile Cooking",
+        phrase: "captured in side profile while cooking attentively" },
+      { id: "look-camera", label: "Looking at Camera",
+        phrase: "looking directly into the camera with a friendly expression while cooking" },
+      { id: "pointing", label: "Pointing at Product",
+        phrase: "pointing at the product with a confident smile" },
+      { id: "testimonial", label: "Testimonial Pose",
+        phrase: "centered facing the camera in a testimonial-style pose, mid-gesture as if explaining" },
+      { id: "reaction", label: "Reaction Shot",
+        phrase: "showing genuine surprise and delight while looking at the product" },
+      { id: "thumbs-up", label: "Thumbs Up",
+        phrase: "giving a thumbs-up with one hand while holding the product" },
+    ],
+  },
   {
     kind: "single",
     group: "facialHair",
@@ -294,8 +352,10 @@ export interface CharacterSelections {
   profession?: string;
   environment?: string;
   imageStyle?: string;
+  pose?: string;
 
   accessories: string[];
+  props: string[];
 
   ethnicityOther?: string;
   bodyTypeOther?: string;
@@ -305,13 +365,16 @@ export interface CharacterSelections {
   professionOther?: string;
   environmentOther?: string;
   imageStyleOther?: string;
+  poseOther?: string;
   accessoriesOther?: string;
+  propsOther?: string;
 
   age?: number;
 }
 
 export const EMPTY_SELECTIONS: CharacterSelections = {
   accessories: [],
+  props: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -370,15 +433,31 @@ export function buildPrompt(s: CharacterSelections): string {
     parts.push("fully clothed in everyday clothing");
   }
 
-  // 3. Profession context (action / role)
+  // 3. Props (held items) — placed right after clothing so the model attends
+  //    to them with similar weight.  Multi-select: comma-joined.
+  const propsBits: string[] = [];
+  for (const p of s.props) {
+    const opt = findOption("props", p);
+    if (opt) propsBits.push(opt.phrase);
+  }
+  if (s.propsOther && s.propsOther.trim()) {
+    propsBits.push(`also holding ${s.propsOther.trim()}`);
+  }
+  if (propsBits.length > 0) parts.push(propsBits.join(", "));
+
+  // 4. Profession context (action / role)
   const prof = resolveSingle("profession", s.profession, s.professionOther);
   if (prof) parts.push(prof);
 
-  // 4. Environment / setting
+  // 5. Pose / camera framing — body language descriptor.
+  const pose = resolveSingle("pose", s.pose, s.poseOther);
+  if (pose) parts.push(pose);
+
+  // 6. Environment / setting
   const env = resolveSingle("environment", s.environment, s.environmentOther);
   if (env) parts.push(env);
 
-  // 5. Body — placed AFTER clothing so it reads as physique under the outfit
+  // 7. Body — placed AFTER clothing so it reads as physique under the outfit
   //    rather than a standalone subject (which can imply nudity).
   const body = resolveSingle("bodyType", s.bodyType, s.bodyTypeOther);
   if (body) parts.push(body);
