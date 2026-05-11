@@ -46,7 +46,8 @@ type SingleField =
   | "clothes"
   | "profession"
   | "environment"
-  | "imageStyle";
+  | "imageStyle"
+  | "pose";
 
 const GROUP_TO_FIELD: Record<string, SingleField> = {
   gender: "gender",
@@ -59,6 +60,14 @@ const GROUP_TO_FIELD: Record<string, SingleField> = {
   profession: "profession",
   environment: "environment",
   imageStyle: "imageStyle",
+  pose: "pose",
+};
+
+type MultiField = "accessories" | "props";
+
+const GROUP_TO_MULTI_FIELD: Record<string, MultiField> = {
+  accessories: "accessories",
+  props: "props",
 };
 
 type OtherField =
@@ -70,7 +79,9 @@ type OtherField =
   | "professionOther"
   | "environmentOther"
   | "imageStyleOther"
-  | "accessoriesOther";
+  | "poseOther"
+  | "accessoriesOther"
+  | "propsOther";
 
 const GROUP_TO_OTHER_FIELD: Record<string, OtherField> = {
   ethnicity: "ethnicityOther",
@@ -81,7 +92,9 @@ const GROUP_TO_OTHER_FIELD: Record<string, OtherField> = {
   profession: "professionOther",
   environment: "environmentOther",
   imageStyle: "imageStyleOther",
+  pose: "poseOther",
   accessories: "accessoriesOther",
+  props: "propsOther",
 };
 
 export function CharacterCreator() {
@@ -114,8 +127,8 @@ export function CharacterCreator() {
   function updateSingle(field: SingleField, value: string | undefined) {
     setSelections((s) => ({ ...s, [field]: value }));
   }
-  function updateMulti(value: string[]) {
-    setSelections((s) => ({ ...s, accessories: value }));
+  function updateMulti(field: MultiField, value: string[]) {
+    setSelections((s) => ({ ...s, [field]: value }));
   }
   function updateOther(field: OtherField, value: string) {
     setSelections((s) => ({ ...s, [field]: value }));
@@ -307,20 +320,65 @@ export function CharacterCreator() {
             {SINGLE_GROUPS.filter((g) =>
               ["hairStyle", "facialHair"].includes(g.group),
             ).map(renderSingle)}
-            {MULTI_GROUPS.map((g) => (
-              <OptionChips
-                key={g.group}
-                kind="multi"
-                label={g.label}
-                options={g.options}
-                value={selections.accessories}
-                onChange={updateMulti}
-                allowOther={g.allowOther}
-                otherValue={selections.accessoriesOther}
-                onOtherChange={(v) => updateOther("accessoriesOther", v)}
-                otherPlaceholder="e.g. earrings, necklace…"
-              />
-            ))}
+            {MULTI_GROUPS.filter((g) => g.group === "accessories").map((g) => {
+              const field = GROUP_TO_MULTI_FIELD[g.group];
+              const otherField = g.allowOther
+                ? GROUP_TO_OTHER_FIELD[g.group]
+                : undefined;
+              return (
+                <OptionChips
+                  key={g.group}
+                  kind="multi"
+                  label={g.label}
+                  options={g.options}
+                  value={selections[field] as string[]}
+                  onChange={(v) => updateMulti(field, v)}
+                  allowOther={g.allowOther}
+                  otherValue={
+                    otherField
+                      ? (selections[otherField] as string | undefined)
+                      : undefined
+                  }
+                  onOtherChange={
+                    otherField ? (v) => updateOther(otherField, v) : undefined
+                  }
+                  otherPlaceholder="e.g. earrings, necklace…"
+                />
+              );
+            })}
+          </div>
+        </Panel>
+
+        <Panel className="p-5">
+          <h2 className="hud-label text-fg mb-4">Props & Pose</h2>
+          <div className="space-y-5">
+            {MULTI_GROUPS.filter((g) => g.group === "props").map((g) => {
+              const field = GROUP_TO_MULTI_FIELD[g.group];
+              const otherField = g.allowOther
+                ? GROUP_TO_OTHER_FIELD[g.group]
+                : undefined;
+              return (
+                <OptionChips
+                  key={g.group}
+                  kind="multi"
+                  label={g.label}
+                  options={g.options}
+                  value={selections[field] as string[]}
+                  onChange={(v) => updateMulti(field, v)}
+                  allowOther={g.allowOther}
+                  otherValue={
+                    otherField
+                      ? (selections[otherField] as string | undefined)
+                      : undefined
+                  }
+                  onOtherChange={
+                    otherField ? (v) => updateOther(otherField, v) : undefined
+                  }
+                  otherPlaceholder="e.g. coffee grinder, espresso machine…"
+                />
+              );
+            })}
+            {SINGLE_GROUPS.filter((g) => g.group === "pose").map(renderSingle)}
           </div>
         </Panel>
 

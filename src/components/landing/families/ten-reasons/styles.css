@@ -1,0 +1,1524 @@
+/* ===================================================================
+   ten-reasons family — article-body CSS
+   Source: taimatitanium.com listicle theme
+           - 0-listicle-viral-titanium.html (10 Reasons Why 600,000+...)
+           - 4-best-board.html              (10 Reasons Best Board)
+   All selectors scoped to [data-lp-family="ten-reasons"].
+   Per-Shopify-instance IDs (e.g. #reason-item-template--xxx__yyy)
+   were stripped; root-only ID selectors became wrapper classes:
+     #announcement-timer-bar-...   -> .atb
+     #hero-article-teaser-...      -> .hat-wrap
+     #microplastics-...            -> .nm-callout--microplastics
+     #woodwarn-...                 -> .nm-callout--woodwarn
+     #titanium-intro-...           -> .nm-callout--titanium-intro
+     #reason-item-...              -> .nm-reason-item
+     #ri-sticky-...                -> .ri-sticky
+     #quick-answers-...            -> .qa
+     #rfw-...                      -> .rfw
+     #promo-card-...               -> .pc
+     #simple-footer-...            -> .sf
+   Keyframe names generalized: pc-blink-template--... -> pc-blink, etc.
+   =================================================================== */
+
+
+/* === atb-* — announcement timer bar (urgency / countdown) === */
+
+[data-lp-family="ten-reasons"] .atb {
+  --atb-bg: #932933;
+  --atb-text: #ffffff;
+  --atb-timer-bg: #c8beab;
+  --atb-timer-text: #121212;
+  --atb-btn-bg: #c8beab;
+  --atb-btn-text: #121212;
+  --atb-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  width: 100%;
+  background: var(--atb-bg);
+  color: var(--atb-text);
+  box-shadow: var(--atb-shadow);
+  transition: box-shadow .18s ease, background-color .18s ease, opacity .14s ease;
+  will-change: opacity;
+  backface-visibility: hidden;
+}
+/* Fixed class (applied ASAP on any scroll) */
+[data-lp-family="ten-reasons"] .atb.atb-fixed { position: fixed; left: 0; right: 0; top: 0; opacity: .98; }
+[data-lp-family="ten-reasons"] .atb.atb-fixed.atb-fixed-on { opacity: 1; }
+
+/* Spacer to prevent content jump */
+[data-lp-family="ten-reasons"] .atb + .atb-spacer { display: none; height: 0; }
+[data-lp-family="ten-reasons"] .atb + .atb-spacer.atb-spacer--shown { display: block; }
+
+[data-lp-family="ten-reasons"] .atb .atb-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+}
+[data-lp-family="ten-reasons"] .atb .atb-topline { font-weight: 700; letter-spacing: .02em; }
+[data-lp-family="ten-reasons"] .atb .atb-subline { font-size: 13px; opacity: .9; margin-top: 2px; }
+[data-lp-family="ten-reasons"] .atb .atb-timer {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 8px; background: transparent;
+}
+[data-lp-family="ten-reasons"] .atb .atb-seg {
+  display: grid; place-items: center; background: var(--atb-timer-bg); color: var(--atb-timer-text);
+  padding: 6px 8px; border-radius: 6px; min-width: 44px;
+}
+[data-lp-family="ten-reasons"] .atb .atb-num { font-variant-numeric: tabular-nums; font-weight: 800; line-height: 1; font-size: 18px; }
+[data-lp-family="ten-reasons"] .atb .atb-lbl { font-size: 10px; opacity: .8; margin-top: 2px; }
+[data-lp-family="ten-reasons"] .atb .atb-dot { font-weight: 800; padding: 0 2px; }
+[data-lp-family="ten-reasons"] .atb .atb-cta {
+  background: var(--atb-btn-bg); color: var(--atb-btn-text);
+  text-decoration: none; font-weight: 700; padding: 10px 16px;
+  border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+  box-shadow: 0 2px 0 rgba(0,0,0,.06);
+  transition: transform .08s ease, box-shadow .08s ease, opacity .2s ease;
+  margin-left: 68px;
+}
+[data-lp-family="ten-reasons"] .atb .atb-cta span { display: flex; }
+[data-lp-family="ten-reasons"] .atb .atb-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+[data-lp-family="ten-reasons"] .atb .atb-cta[aria-disabled="true"] { opacity: .6; pointer-events: none; }
+
+@media (max-width: 740px) {
+  [data-lp-family="ten-reasons"] .atb .atb-inner {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+  [data-lp-family="ten-reasons"] .atb .atb-left { display: grid; gap: 0; text-align: start; }
+  [data-lp-family="ten-reasons"] .atb .atb-subline { margin-top: 0; line-height: 100%; }
+  [data-lp-family="ten-reasons"] .atb .atb-timer { justify-content: center; }
+  [data-lp-family="ten-reasons"] .atb .atb-cta { justify-content: center; display: none; }
+  [data-lp-family="ten-reasons"] .atb .atb-seg { padding: 2px 0 0 0; min-width: 30px; }
+  [data-lp-family="ten-reasons"] .atb .atb-num { font-weight: 700; font-size: 16px; }
+  [data-lp-family="ten-reasons"] .atb .atb-lbl { margin-top: 0; }
+}
+
+
+/* === hat-* — hero / byline === */
+
+[data-lp-family="ten-reasons"] .hat-wrap {
+  width: 100%;
+  border-bottom: 1px solid #aeaeae;
+  padding: 40px 0 80px;
+  position: relative;
+  background: transparent;
+  margin-bottom: 33px; /* space for author chip offset below */
+}
+
+/* Background layers (100% width cover) */
+[data-lp-family="ten-reasons"] .hat-wrap .hat-bg {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  z-index: 0;
+}
+/* Desktop layer visible on desktop */
+[data-lp-family="ten-reasons"] .hat-wrap .hat-bg--desktop { display: block; }
+/* Mobile layer hidden by default */
+[data-lp-family="ten-reasons"] .hat-wrap .hat-bg--mobile { display: none; background-position: center center; }
+
+/* Content container (constrained) */
+[data-lp-family="ten-reasons"] .hat-wrap .hat-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+[data-lp-family="ten-reasons"] .hat-wrap .hat-left {
+  max-width: 800px;
+}
+
+/* Badges row */
+[data-lp-family="ten-reasons"] .hat-wrap .hat-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+[data-lp-family="ten-reasons"] .hat-wrap .hat-badge {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  padding-right: 24px;
+  margin-right: 24px;
+}
+[data-lp-family="ten-reasons"] .hat-wrap .hat-badge:not(:last-child):after {
+  content: "";
+  position: absolute;
+  right: 0; top: 50%;
+  width: 1px; height: 16px;
+  background: rgba(255,255,255,.6);
+  transform: translateY(-50%);
+}
+[data-lp-family="ten-reasons"] .hat-wrap .hat-badge__icon {
+  width: 18px;
+  height: 22px;
+  object-fit: contain;
+  margin-right: 8px;
+  flex: 0 0 auto;
+  filter: invert(1);
+}
+/* Badge text (desktop spec) */
+[data-lp-family="ten-reasons"] .hat-wrap .hat-badge__text {
+  font-size: 14px;
+  line-height: 20px;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* Title (desktop spec) */
+[data-lp-family="ten-reasons"] .hat-wrap .hat-title {
+  font-size: 38px;
+  line-height: 46px;
+  color: #fff;
+  font-weight: 800;
+  margin: 10px 0 0 0;
+  max-width: 582px;
+  font-family: "Neue Montreal";
+}
+
+/* ===== Author chip at bottom ===== */
+[data-lp-family="ten-reasons"] .hat-wrap .hat-author-bar {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: -33px; /* extends below the section */
+  z-index: 2;
+}
+[data-lp-family="ten-reasons"] .hat-wrap .hat-author-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+[data-lp-family="ten-reasons"] .hat-wrap .hat-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 6px 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+  width: auto;
+}
+[data-lp-family="ten-reasons"] .hat-wrap .hat-author__avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  object-fit: cover;
+}
+[data-lp-family="ten-reasons"] .hat-wrap .hat-author__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "Neue Montreal";
+}
+[data-lp-family="ten-reasons"] .hat-wrap .hat-author__name span {
+  font-weight: 400;
+}
+[data-lp-family="ten-reasons"] .hat-wrap .hat-author__date {
+  font-size: 12px;
+  color: #555;
+  font-family: "Neue Montreal";
+}
+[data-lp-family="ten-reasons"] .hat-yesterday {
+  font-weight: 700;
+}
+
+@media (max-width: 740px) {
+  [data-lp-family="ten-reasons"] .hat-wrap {
+    padding: 25px 0 250px;
+  }
+  /* Toggle background layers */
+  [data-lp-family="ten-reasons"] .hat-wrap .hat-bg--desktop { display: none; }
+  [data-lp-family="ten-reasons"] .hat-wrap .hat-bg--mobile { display: block; }
+
+  /* Badge text (mobile spec) */
+  [data-lp-family="ten-reasons"] .hat-wrap .hat-badge__text {
+    font-size: 12px;
+    line-height: 16px;
+  }
+  /* Badge spacing (mobile spec) */
+  [data-lp-family="ten-reasons"] .hat-wrap .hat-badge {
+    margin-right: 15px;
+    padding-right: 15px;
+  }
+
+  /* Title (mobile spec) */
+  [data-lp-family="ten-reasons"] .hat-wrap .hat-title {
+    font-size: 30px;
+    line-height: 34px;
+  }
+
+  /* Author chip stays aligned with mobile content width */
+  [data-lp-family="ten-reasons"] .hat-wrap .hat-author-wrap {
+    padding: 0 16px;
+  }
+}
+
+
+/* === nm-* — microplastics callout (red-X list) === */
+
+[data-lp-family="ten-reasons"] .nm-callout--microplastics {
+  font-family: "Neue Montreal", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, Helvetica, Arial, sans-serif;
+  width: 100%;
+}
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-wrap {
+  max-width: 1170px;
+  margin: 73px auto 0;
+  padding: 0 16px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 36px;
+  position: relative;
+}
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Global plain text rules */
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-text,
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-list .nm-li-text {
+  font-size: 18px;
+  line-height: 28px;
+  color: rgb(0,0,0);
+  margin-top: 0;
+  letter-spacing: 0.3px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-text p { margin-top: 15px; margin-bottom: 0; }
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-list .nm-li-text { margin-top: 0; }
+
+/* Hide the bottom text on desktop to avoid duplication */
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-bottomtext { display: none; }
+
+/* List with red-cross icons */
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-list {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0 0 0;
+  display: grid;
+  gap: 10px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-list li {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: start;
+  column-gap: 10px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-x {
+  width: 20px; height: 20px; margin-top: 4px; display: inline-flex;
+}
+
+/* Image */
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-img-wrap {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 36px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-img {
+  max-width: 500px;
+  height: auto;
+  display: block;
+  border-radius: 18px;
+}
+
+/* Optional arrow */
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-arrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-20%);
+  top: 48%;
+  width: 193px;
+  height: 57px;
+  pointer-events: none;
+}
+[data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-arrow img { width: 193px; height: 57px; display: block; }
+
+@media only screen and (max-width: 767px) {
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-wrap {
+    margin: 43px auto 0;
+  }
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-cols {
+    grid-template-columns: 1fr;
+    gap: 0px;
+  }
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-left { display: contents; }
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-toptext    { order: 1; }
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-right      { order: 2; justify-content: flex-start; }
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-bottomtext { order: 3; display: block; }
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-list       { order: 4; }
+
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-img { width: 100%; }
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-arrow { display: none; }
+
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-text,
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-list .nm-li-text {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-text p { margin-top: 15px; margin-bottom: 0; }
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-li-text {
+    margin-top: 0;
+  }
+  [data-lp-family="ten-reasons"] .nm-callout--microplastics .nm-img-wrap {
+    margin-top: 25px;
+    margin-bottom: 5px;
+  }
+}
+
+
+/* === nm-* — wood-board warning callout (with quote) === */
+
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn {
+  font-family: "Neue Montreal", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, Helvetica, Arial, sans-serif;
+  width: 100%;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-wrap {
+  max-width: 1170px;
+  margin: 40px auto 0;
+  padding: 0 16px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 36px;
+  position: relative;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-text {
+  font-size: 18px;
+  line-height: 28px;
+  color: rgb(0,0,0);
+  margin-top: 0;
+  letter-spacing: 0.3px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-text p { margin-top: 15px; margin-bottom: 0; }
+
+/* === Quote band === */
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-quote { margin: 18px 0 22px; }
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-quote-top,
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-quote-bottom {
+  position: relative;
+  height: 2px;
+  background: #000;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-quote-open {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateY(-60%);
+  width: 32px; height: 27px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-quote-close {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  transform: translateY(60%) rotate(180deg);
+  width: 32px; height: 27px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-quote-body {
+  padding: 18px 0;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-quote-text {
+  font-size: 18px;
+  line-height: 28px;
+  color: #555;
+  font-style: italic;
+  letter-spacing: 0.3px;
+  margin-top: 10px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-quote-author {
+  font-size: 18px;
+  line-height: 28px;
+  color: #000;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-img-wrap {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 36px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-img {
+  max-width: 500px;
+  height: auto;
+  display: block;
+  border-radius: 18px;
+}
+
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-arrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-20%);
+  top: 48%;
+  width: 193px;
+  height: 57px;
+  pointer-events: none;
+}
+[data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-arrow img { width: 193px; height: 57px; display: block; }
+
+@media only screen and (max-width: 767px) {
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-wrap { margin: 10px auto 0; }
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-cols {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-left { display: contents; }
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-toptext    { order: 1; }
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-right      { order: 2; justify-content: flex-start; }
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-quote      { order: 3; }
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-bottomtext { order: 4; }
+
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-img { width: 100%; }
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-arrow { display: none; }
+
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-text { font-size: 16px; line-height: 24px; }
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-quote-text { font-size: 16px; line-height: 24px; }
+  [data-lp-family="ten-reasons"] .nm-callout--woodwarn .nm-img-wrap { margin-top: 25px; margin-bottom: 5px; }
+}
+
+
+/* === nm-* — titanium intro callout (green-check list) === */
+
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro {
+  font-family: "Neue Montreal", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, Helvetica, Arial, sans-serif;
+  width: 100%;
+}
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-wrap {
+  max-width: 1170px;
+  margin: 40px auto 0;
+  padding: 0 16px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 36px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-text,
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-list .nm-li-text {
+  font-size: 18px;
+  line-height: 28px;
+  color: rgb(0,0,0);
+  margin-top: 0;
+  letter-spacing: 0.3px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-text p { margin-top: 15px; margin-bottom: 0; }
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-list .nm-li-text { margin-top: 0; }
+
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-list {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0 0 0;
+  display: grid;
+  gap: 12px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-list li {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  align-items: start;
+  column-gap: 10px;
+}
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-check { width: 22px; height: 22px; margin-top: 2px; display: inline-flex; }
+
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-img-wrap {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+}
+[data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-img {
+  max-width: 500px;
+  height: auto;
+  display: block;
+  border-radius: 18px;
+}
+
+@media only screen and (max-width: 767px) {
+  [data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-wrap { margin: 10px auto 0; }
+  [data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-cols {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  [data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-right { justify-content: flex-start; }
+  [data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-text,
+  [data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-list .nm-li-text {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  [data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-img { width: 100%; }
+  [data-lp-family="ten-reasons"] .nm-callout--titanium-intro .nm-img-wrap {
+    margin: 25px 0 5px;
+  }
+}
+
+
+/* === nm-* — numbered reason items (+ FAQ accordion) === */
+
+[data-lp-family="ten-reasons"] .nm-reason-item {
+  font-family: "Neue Montreal", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, Helvetica, Arial, sans-serif;
+  width: 100%;
+}
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-wrap {
+  max-width: 1170px;
+  margin: 50px auto 40px;
+  padding: 0 16px;
+}
+
+/* ===== Global typography ===== */
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-text {
+  font-size: 18px;
+  line-height: 28px;
+  color: #000;
+  margin-top: 25px;
+  letter-spacing: 0.3px;
+}
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-text p { margin: 15px 0 0 0; }
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-title {
+  font-size: 36px;
+  line-height: 44px;
+  color: rgb(0, 0, 0);
+  font-weight: 700;
+  margin-top: 10px;
+}
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-reason {
+  font-size: 26px;
+  line-height: 28px;
+  color: #00733d;
+  font-weight: 700;
+  margin-top: 0;
+}
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-section-title { margin-bottom: 50px; }
+
+/* ===== Layout ===== */
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-media {
+  width: 100%;
+}
+
+/* ===== Media (desktop) ===== */
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap {
+  border-radius: 20px;
+  overflow: hidden;
+  height: 500px;
+  width: 100%;
+  background: #0000;
+}
+
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-img {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 18px;
+}
+
+/* Video base */
+[data-lp-family="ten-reasons"] .nm-reason-item video.nm-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  -webkit-playsinline: true;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* ===== FAQ ===== */
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq { margin-top: 20px; border-top: 1px solid #000; border-bottom: 1px solid #000; }
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq-item { border-bottom: 1px solid #000; }
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq-item:last-child { border-bottom: none; }
+
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq-q {
+  position: relative;
+  padding: 20px 0 20px 20px;
+  font-size: 20px;
+  line-height: 26px;
+  color: #000;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+[data-lp-family="ten-reasons"] .nm-reason-item details > summary::-webkit-details-marker { display: none; }
+
+/* LEFT CARET */
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq-q::before {
+  position: absolute;
+  content: "";
+  left: 0;
+  top: 27px;
+  border-top: 7px solid transparent;
+  border-left: 10px solid #000;
+  border-bottom: 7px solid transparent;
+}
+
+/* plus / minus */
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq-toggle { position: relative; width: 16px; height: 16px; flex: 0 0 16px; }
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq-toggle::before,
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq-toggle::after {
+  content: ""; position: absolute; background: #000; border-radius: 1px;
+}
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq-toggle::before { width: 16px; height: 2px; top: 7px; left: 0; }
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq-item:not([open]) .nm-faq-toggle::after { width: 2px; height: 16px; top: 0; left: 7px; }
+
+/* Smoothly animated answer panel */
+[data-lp-family="ten-reasons"] .nm-reason-item .nm-faq-a {
+  padding: 0 30px 20px 30px;
+  font-size: 16px; line-height: 24px; color: #000; font-weight: 400; margin-bottom: 20px; letter-spacing: 0;
+
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: height 450ms ease, opacity 450ms ease;
+}
+
+@media only screen and (max-width: 767px) {
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-wrap { margin: 40px 0 10px; }
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-title { font-size: 24px; line-height: 32px; letter-spacing: 0.3px; }
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-text { font-size: 16px; line-height: 24px; margin-top: 20px; }
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-reason { font-size: 22px; line-height: 24px; }
+
+  /* Stack */
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-grid { grid-template-columns: 1fr; gap: 0; }
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-content { display: contents; }
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-head { order: 1; }
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-media { order: 2; }
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-body { order: 3; }
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-faq { order: 4; }
+
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-media {
+    width: 100%;
+    display: block;
+  }
+
+  /* DEFAULT (IMAGES): DO NOT FORCE 1:1 */
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap {
+    width: 100%;
+    height: auto;
+    aspect-ratio: auto;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  /* Images: natural ratio */
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap img.nm-img {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    border-radius: 0;
+    display: block !important;
+  }
+
+  /* ONLY VIDEOS: FORCE 1:1 */
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap--square {
+    aspect-ratio: 1 / 1;
+  }
+
+  /* Video fills the square */
+  [data-lp-family="ten-reasons"] .nm-reason-item video.nm-video {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  /* Wrapper-centering kill */
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap * {
+    box-sizing: border-box;
+  }
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap > * {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Force height 100% only when wrapper is square (video) */
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap--square > * {
+    height: 100% !important;
+  }
+
+  /* Common wrappers that sometimes center content */
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap deferred-media,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .deferred-media,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .shopify-video-wrapper,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .video-wrapper,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .media,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .media__wrapper,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .media__content {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    margin: 0 !important;
+  }
+
+  /* Normalize positioned wrappers */
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap deferred-media,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .deferred-media,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .shopify-video-wrapper,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .video-wrapper,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .media,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .media__wrapper,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap .media__content {
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+  }
+
+  /* Ensure actual media behaves correctly */
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap img,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap video,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap iframe {
+    width: 100% !important;
+    display: block !important;
+    transform: none !important;
+    left: 0 !important;
+  }
+
+  /* Only videos forced to square height */
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap--square video,
+  [data-lp-family="ten-reasons"] .nm-reason-item .nm-img-wrap--square iframe {
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+}
+
+
+/* === ri-* — sticky urgency CTA bar (mobile) === */
+
+[data-lp-family="ten-reasons"] .ri-sticky {
+  --ri-sticky-bg: #ffffff;
+  --ri-sticky-text: #000000;
+  --ri-btn-bg: #00ab41;
+  --ri-btn-text: #ffffff;
+}
+
+@media (max-width: 767px) {
+  [data-lp-family="ten-reasons"] .ri-sticky {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: var(--ri-sticky-bg);
+    color: var(--ri-sticky-text);
+    border-top: 1px solid rgba(0,0,0,.08);
+    box-shadow: 0 -6px 20px rgba(0,0,0,.12);
+    padding: 10px 12px 12px;
+    z-index: 60;
+    display: grid;
+    gap: 8px;
+  }
+  [data-lp-family="ten-reasons"] .ri-sticky[hidden] { display: none !important; }
+
+  [data-lp-family="ten-reasons"] .ri-sticky .ri-sticky-note {
+    font-size: 14px; line-height: 18px; color: var(--ri-sticky-text);
+    text-align: center;
+  }
+
+  [data-lp-family="ten-reasons"] .ri-sticky .ri-sticky-risk {
+    display: flex; align-items: center; gap: 8px; justify-content: center;
+    font-size: 14px; line-height: 18px; color: #000;
+  }
+  [data-lp-family="ten-reasons"] .ri-sticky .ri-risk-text p { margin: 2px 0; }
+  [data-lp-family="ten-reasons"] .ri-sticky .ri-icon { width: 14px; height: 14px; object-fit: contain; }
+  [data-lp-family="ten-reasons"] .ri-sticky .ri-risk-text strong { color: #ff0000; }
+
+  [data-lp-family="ten-reasons"] .ri-sticky .ri-risk-bar { display: inline-flex; gap: 3px; align-items: center; margin-left: 2px; }
+  [data-lp-family="ten-reasons"] .ri-sticky .ri-risk-dot { width: 10px; height: 10px; background: #e1e1e1; border-radius: 2px; display: inline-block; }
+  [data-lp-family="ten-reasons"] .ri-sticky .ri-risk-dot--red { background: #ff3b30; animation: ri-blink 1.1s linear infinite; }
+
+  [data-lp-family="ten-reasons"] .ri-sticky .ri-sticky-btn {
+    display: flex;
+    font-size: 22px;
+    letter-spacing: 1px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    background: var(--ri-btn-bg);
+    color: var(--ri-btn-text);
+    padding: 12px 18px;
+    border-radius: 10px;
+    width: 100%;
+    box-shadow: 0 2px 0 rgba(0,0,0,.06);
+  }
+  [data-lp-family="ten-reasons"] .ri-sticky .ri-arrow { color: var(--ri-btn-text); }
+}
+
+@keyframes ri-blink {
+  0%, 50% { opacity: 1; }
+  60%     { opacity: .35; }
+  100%    { opacity: 1; }
+}
+
+
+/* === qa-* — quick answers (FAQ list) === */
+
+[data-lp-family="ten-reasons"] .qa {
+  font-family: "Neue Montreal", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, Helvetica, Arial, sans-serif;
+  width: 100%;
+}
+[data-lp-family="ten-reasons"] .qa .qa-wrap {
+  max-width: 1170px;
+  margin: 50px auto 40px;
+  padding: 0 16px;
+}
+
+/* ===== Title ===== */
+[data-lp-family="ten-reasons"] .qa .qa-title {
+  font-size: 30px;
+  line-height: 38px;
+  color: #000000;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+/* ===== List / Rows ===== */
+[data-lp-family="ten-reasons"] .qa .qa-list {
+  margin-top: 16px;
+  padding: 0 70px;
+}
+
+[data-lp-family="ten-reasons"] .qa .qa-row {
+  position: relative;
+  border-bottom: 1px solid #b9b9b9;
+  padding: 13px 0 14px 20px;
+}
+[data-lp-family="ten-reasons"] .qa .qa-row::before {
+  content: "";
+  position: absolute;
+  left: 6px; top: 21px;
+  width: 6px; height: 6px;
+  background: #000;
+  border-radius: 50%;
+}
+
+[data-lp-family="ten-reasons"] .qa .qa-q {
+  font-size: 18px;
+  line-height: 28px;
+  color: #000;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin: 0;
+}
+
+[data-lp-family="ten-reasons"] .qa .qa-a {
+  font-size: 18px;
+  line-height: 28px;
+  color: #000;
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+}
+[data-lp-family="ten-reasons"] .qa .qa-a p { margin: 0; }
+
+@media only screen and (max-width: 767px) {
+  [data-lp-family="ten-reasons"] .qa .qa-wrap { margin: 40px 0 20px; }
+
+  [data-lp-family="ten-reasons"] .qa .qa-title {
+    font-size: 24px;
+    line-height: 32px;
+    letter-spacing: 0.3px;
+  }
+
+  [data-lp-family="ten-reasons"] .qa .qa-q {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  [data-lp-family="ten-reasons"] .qa .qa-a {
+    font-size: 16px;
+    line-height: 24px;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+  }
+  [data-lp-family="ten-reasons"] .qa .qa-row::before {
+    top: 18px;
+  }
+  [data-lp-family="ten-reasons"] .qa .qa-list {
+    padding: 0;
+  }
+}
+
+
+/* === rfw-* — risk-free / 600k families band === */
+
+[data-lp-family="ten-reasons"] .rfw {
+  font-family: "Neue Montreal", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, Helvetica, Arial, sans-serif;
+  width: 100%;
+}
+[data-lp-family="ten-reasons"] .rfw .rfw-wrap {
+  max-width: 1170px;
+  margin: 60px auto 10px;
+  padding: 0;
+}
+
+/* ===== Layout (Desktop) ===== */
+[data-lp-family="ten-reasons"] .rfw .rfw-grid {
+  display: grid;
+  grid-template-columns: 54% 36.4%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===== Typography ===== */
+[data-lp-family="ten-reasons"] .rfw .rfw-title {
+  font-size: 36px;
+  line-height: 40px;
+  color: #000;
+  font-weight: 700;
+  margin: 0;
+}
+[data-lp-family="ten-reasons"] .rfw .rfw-title p {
+  margin: 0;
+}
+[data-lp-family="ten-reasons"] .rfw .rfw-text {
+  font-size: 18px;
+  line-height: 28px;
+  color: #000;
+  margin-top: 25px;
+  letter-spacing: 0.3px;
+}
+[data-lp-family="ten-reasons"] .rfw .rfw-text p {
+  margin: 25px 0 0 0;
+}
+
+/* ===== Image ===== */
+[data-lp-family="ten-reasons"] .rfw .rfw-imgwrap {
+  border-radius: 20px;
+  overflow: hidden;
+}
+[data-lp-family="ten-reasons"] .rfw .rfw-img {
+  max-width: 500px;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  display: block;
+}
+
+@media only screen and (max-width: 767px) {
+  [data-lp-family="ten-reasons"] .rfw .rfw-wrap {
+    margin: 40px 0 0px;
+    padding: 0 16px;
+  }
+
+  /* order: title → image → body */
+  [data-lp-family="ten-reasons"] .rfw .rfw-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  [data-lp-family="ten-reasons"] .rfw .rfw-copy { display: contents; }
+  [data-lp-family="ten-reasons"] .rfw .rfw-title { order: 1; font-size: 24px; line-height: 32px; letter-spacing: .3px; }
+  [data-lp-family="ten-reasons"] .rfw .rfw-media { order: 2; }
+  [data-lp-family="ten-reasons"] .rfw .rfw-text {
+    order: 3;
+    font-size: 16px;
+    line-height: 24px;
+    margin-top: 0px;
+    letter-spacing: 0.3px;
+  }
+  [data-lp-family="ten-reasons"] .rfw .rfw-img { width: 100%; }
+}
+
+
+/* === pc-* — promo countdown card (footer CTA) === */
+
+[data-lp-family="ten-reasons"] .pc {
+  /* Layout */
+  --pc-max-width: 1030px;
+
+  /* Ribbon */
+  --pc-ribbon-bg: #ff0000;
+  --pc-ribbon-fg: #ffffff;
+
+  /* Card */
+  --pc-card-border: #ff0000;
+  --pc-card-bg: #ffffff;
+
+  /* Image wrap */
+  --pc-imgwrap-bg: #f5f5f5;
+
+  /* Headline & copy */
+  --pc-headline-color: #ff0000;
+  --pc-subcopy-color: #000000;
+
+  /* Timer */
+  --pc-timer-label: #ff0000;
+  --pc-timer-rule: #cecece;
+  --pc-digit-border: #dcdcdc;
+  --pc-digit-bg: #ffffff;
+  --pc-digit-fg: #000000;
+  --pc-unit-color: #777777;
+  --pc-sep-color: #000000;
+
+  /* CTA */
+  --pc-cta-bg: #00ab41;
+  --pc-cta-fg: #ffffff;
+  --pc-cta-arrow: #ffffff;
+
+  /* Lines under CTA */
+  --pc-line-color: #4e4e4e;
+  --pc-free-color: #000000;
+
+  /* Risk */
+  --pc-risk-text: #000000;
+  --pc-risk-strong: #ff0000;
+  --pc-risk-dot: #e1e1e1;
+  --pc-risk-dot-red: #ff3b30;
+
+  /* Guarantee */
+  --pc-guarantee-color: #000000;
+}
+
+[data-lp-family="ten-reasons"] .pc {
+  font-family: "Neue Montreal", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, Helvetica, Arial, sans-serif;
+  width: 100%;
+}
+[data-lp-family="ten-reasons"] .pc .pc-wrap {
+  max-width: var(--pc-max-width);
+  margin: 80px auto 60px;
+}
+
+/* Ribbon */
+[data-lp-family="ten-reasons"] .pc .pc-ribbon {
+  display: flex; justify-content: center;
+  margin: 0 auto -15px;
+}
+[data-lp-family="ten-reasons"] .pc .pc-ribbon-text {
+  background: var(--pc-ribbon-bg);
+  color: var(--pc-ribbon-fg);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 20px;
+  padding: 5px 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Card */
+[data-lp-family="ten-reasons"] .pc .pc-card {
+  border: 2px dashed var(--pc-card-border);
+  border-radius: 15px;
+  padding: 40px;
+  background: var(--pc-card-bg);
+  display: grid;
+  grid-template-columns: 43.2% 53%;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Media */
+[data-lp-family="ten-reasons"] .pc .pc-imgwrap {
+  border-radius: 16px; overflow: hidden;
+  background: var(--pc-imgwrap-bg);
+}
+[data-lp-family="ten-reasons"] .pc .pc-img {
+  max-width: 500px; width: 100%; height: auto; display: block; border-radius: 14px;
+}
+
+/* Content */
+[data-lp-family="ten-reasons"] .pc .pc-headline {
+  font-size: 36px;
+  line-height: 40px;
+  color: var(--pc-headline-color);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin: 0;
+  text-align: center;
+  max-width: 400px;
+  text-transform: uppercase;
+}
+[data-lp-family="ten-reasons"] .pc .pc-subcopy {
+  font-size: 18px; line-height: 28px; color: var(--pc-subcopy-color);
+  margin-top: 12px; letter-spacing: .3px; text-align: center;
+}
+
+/* ===== TIMER ===== */
+[data-lp-family="ten-reasons"] .pc .pc-timer { margin-top: 10px; text-align: center; }
+[data-lp-family="ten-reasons"] .pc .pc-timer-label {
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--pc-timer-label);
+  font-weight: 600;
+  position: relative;
+  margin-bottom: 10px;
+}
+[data-lp-family="ten-reasons"] .pc .pc-timer-label span { padding: 0 10px; }
+[data-lp-family="ten-reasons"] .pc .pc-timer-label:before,
+[data-lp-family="ten-reasons"] .pc .pc-timer-label:after {
+  display: inline-block; vertical-align: middle; content: '';
+  right: 0; top: 50%; width: 80px; height: 1px; background: var(--pc-timer-rule); margin: -1px 0 0;
+}
+
+[data-lp-family="ten-reasons"] .pc .pc-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+}
+[data-lp-family="ten-reasons"] .pc .pc-dial {
+  display: grid; justify-items: center; gap: 6px;
+}
+[data-lp-family="ten-reasons"] .pc .pc-digits { display: inline-flex; gap: 6px; }
+[data-lp-family="ten-reasons"] .pc .pc-digit {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border: 1px solid var(--pc-digit-border);
+  border-radius: 8px;
+  background: var(--pc-digit-bg);
+  box-shadow: 0 1px 0 rgba(0,0,0,.05);
+  font-weight: 800; font-size: 22px; line-height: 22px; color: var(--pc-digit-fg);
+}
+[data-lp-family="ten-reasons"] .pc .pc-unit { font-size: 12px; line-height: 14px; color: var(--pc-unit-color); }
+[data-lp-family="ten-reasons"] .pc .pc-sep {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 34px;
+  color: var(--pc-sep-color);
+  margin: 0 2px;
+  place-self: self-start;
+  transform: none;
+}
+
+/* CTA */
+[data-lp-family="ten-reasons"] .pc .pc-cta {
+  margin-top: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--pc-cta-bg);
+  font-size: 24px;
+  text-transform: capitalize;
+  color: var(--pc-cta-fg);
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 12px 18px;
+  width: 100%;
+  text-decoration: none;
+  max-width: 435px;
+  transition: transform .06s ease, box-shadow .06s ease, opacity .2s;
+}
+[data-lp-family="ten-reasons"] .pc .pc-cta:hover { transform: translateY(-1px); }
+[data-lp-family="ten-reasons"] .pc .pc-cta:active { transform: translateY(0); box-shadow: 0 1px 0 #0e7a36; }
+[data-lp-family="ten-reasons"] .pc .pc-cta-svg { display: inline-block; }
+
+/* Lines under CTA */
+[data-lp-family="ten-reasons"] .pc .pc-line {
+  display: flex; align-items: center; gap: 8px; justify-content: center;
+  font-size: 14px; line-height: 18px; color: var(--pc-line-color); margin-top: 8px;
+}
+[data-lp-family="ten-reasons"] .pc .pc-icon { width: 16px; height: 16px; object-fit: contain; }
+[data-lp-family="ten-reasons"] .pc .pc-free { color: var(--pc-free-color); font-weight: 400; }
+
+[data-lp-family="ten-reasons"] .pc .pc-risk-text {
+  font-size: 17px;
+  line-height: 21px;
+  color: var(--pc-risk-text);
+  font-weight: 500;
+  margin-right: 6px;
+}
+[data-lp-family="ten-reasons"] .pc .pc-risk-text strong {
+  color: var(--pc-risk-strong);
+  font-weight: 700;
+}
+[data-lp-family="ten-reasons"] .pc .pc-risk-text p { margin: 0; }
+
+/* Risk bar with blinking red square */
+[data-lp-family="ten-reasons"] .pc .pc-risk-bar {
+  display: inline-flex; gap: 3px; align-items: center;
+}
+[data-lp-family="ten-reasons"] .pc .pc-risk-dot {
+  width: 10px; height: 10px; background: var(--pc-risk-dot); border-radius: 2px; display: inline-block;
+}
+[data-lp-family="ten-reasons"] .pc .pc-risk-dot--red {
+  background: var(--pc-risk-dot-red);
+  animation: pc-blink 1.1s linear infinite;
+}
+
+@keyframes pc-blink {
+  0%, 50% { opacity: 1; }
+  60%     { opacity: .35; }
+  100%    { opacity: 1; }
+}
+
+/* Guarantee */
+[data-lp-family="ten-reasons"] .pc .pc-guarantee {
+  font-size: 18px;
+  line-height: 26px;
+  color: var(--pc-guarantee-color);
+  font-weight: 700;
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* Layout specifics */
+[data-lp-family="ten-reasons"] .pc .pc-card .pc-media { display: flex; justify-content: center; }
+[data-lp-family="ten-reasons"] .pc .pc-content { display: flex; flex-direction: column; align-items: center; }
+
+@media (max-width: 767px) {
+  [data-lp-family="ten-reasons"] .pc .pc-wrap { padding: 0 16px; }
+  [data-lp-family="ten-reasons"] .pc .pc-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 25px 15px 20px;
+  }
+  [data-lp-family="ten-reasons"] .pc .pc-headline {
+    font-size: 24px; line-height: 32px; letter-spacing: .3px; text-align: center; margin-top: 4px;
+  }
+  [data-lp-family="ten-reasons"] .pc .pc-subcopy {
+    font-size: 16px; line-height: 24px; letter-spacing: .3px; margin-top: 6px;
+  }
+  [data-lp-family="ten-reasons"] .pc .pc-img { width: 100%; }
+  [data-lp-family="ten-reasons"] .pc .pc-ribbon {
+    width: fit-content;
+    margin: 0 auto -13px;
+  }
+  [data-lp-family="ten-reasons"] .pc .pc-ribbon-text {
+    font-size: 16px;
+    line-height: 16px;
+    width: 100%;
+    padding: 6px 7px 5px;
+  }
+  [data-lp-family="ten-reasons"] .pc .pc-wrap { margin: 45px auto 35px; }
+
+  /* keep timer proportional on mobile */
+  [data-lp-family="ten-reasons"] .pc .pc-digit { width: 32px; height: 32px; font-size: 20px; }
+  [data-lp-family="ten-reasons"] .pc .pc-unit { font-size: 11px; }
+  [data-lp-family="ten-reasons"] .pc .pc-sep { height: 32px; font-size: 26px; line-height: 32px; }
+}
+
+
+/* === sf-* — simple article footer === */
+
+[data-lp-family="ten-reasons"] .sf {
+  width: 100%;
+  background: #ffffff;
+  font-family: "Neue Montreal", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, Helvetica, Arial, sans-serif;
+}
+[data-lp-family="ten-reasons"] .sf .sf-wrap {
+  max-width: 1170px;
+  margin: 0 auto;
+  padding: 18px 16px 28px;
+  border-top: 1px solid #ededed;
+  text-align: center;
+}
+[data-lp-family="ten-reasons"] .sf .sf-copy {
+  margin: 0;
+  font-size: 17px;
+  line-height: 25px;
+  color: #6b6b6b;
+  letter-spacing: .2px;
+}
+
+@media (max-width: 767px) {
+  [data-lp-family="ten-reasons"] .sf .sf-wrap { padding: 16px 12px 24px; }
+  [data-lp-family="ten-reasons"] .sf .sf-copy { font-size: 12px; line-height: 18px; }
+}
+
+/* === Standalone author chip ===========================================
+   Variants render the byline as its own section, not nested under
+   `.hat-wrap`.  The original `.hat-wrap .hat-author-bar` selectors
+   above don't match in that case so the avatar img would fill the
+   page.  These rules style the standalone case; they're lower
+   specificity than the nested rules so the original hero layout still
+   wins when both contexts apply.
+   ====================================================================== */
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+  background: transparent;
+}
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone .hat-author-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone .hat-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 6px 12px 6px 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone .hat-author__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f0f0f0;
+}
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone .hat-author__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone .hat-author__meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone .hat-author__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone .hat-author__name span {
+  font-weight: 400;
+}
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone .hat-author__verifier {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone .hat-author__verifier img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+[data-lp-family="ten-reasons"] .hat-author-bar--standalone .hat-author__date {
+  font-size: 12px;
+  color: #555;
+  margin-top: 2px;
+}
+
+/* === Editor fallback fixes ============================================
+   The extracted CSS uses `font-family: "Neue Montreal"` (Shopify-only,
+   proprietary) without a fallback chain, so without Neue Montreal the
+   browser drops to the user-agent serif default.  Alias Neue Montreal
+   to the locally-loaded Poppins.  Also gives the hero a min-height so
+   the background image renders at a reasonable aspect ratio.
+   ====================================================================== */
+
+@font-face {
+  font-family: "Neue Montreal";
+  src: local("Poppins"), local("Poppins-Regular"), local("Poppins Regular");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Neue Montreal";
+  src: local("Poppins SemiBold"), local("Poppins-SemiBold"), local("Poppins");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Neue Montreal";
+  src: local("Poppins Bold"), local("Poppins-Bold"), local("Poppins");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Neue Montreal";
+  src: local("Poppins ExtraBold"), local("Poppins-ExtraBold"), local("Poppins");
+  font-weight: 800;
+  font-display: swap;
+}
+
+/* Belt-and-braces: any element whose font-family resolves to nothing
+   loadable still gets a clean sans-serif. */
+[data-lp-family="ten-reasons"],
+[data-lp-family="ten-reasons"] * {
+  font-family: "Neue Montreal", "Poppins", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Hero needs to be tall enough that the background image isn't cropped
+   to a thin sliver.  Original Shopify height was ~540px desktop. */
+[data-lp-family="ten-reasons"] .hat-wrap {
+  min-height: 540px;
+}
+@media (max-width: 749px) {
+  [data-lp-family="ten-reasons"] .hat-wrap {
+    min-height: 420px;
+  }
+}
+
+/* === Editor chrome — small +/× buttons inside variants are visible
+   only on hover so they don't pollute the preview when reading the
+   page top-to-bottom. */
+[data-lp-family="ten-reasons"] .lp-editor-chrome {
+  opacity: 0;
+  transition: opacity 120ms ease;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 0 4px;
+  font-size: 0.85em;
+}
+[data-lp-family="ten-reasons"] .lp-editor-chrome--add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+[data-lp-family="ten-reasons"] *:hover > .lp-editor-chrome,
+[data-lp-family="ten-reasons"] .hat-badges:hover .lp-editor-chrome,
+[data-lp-family="ten-reasons"] .hat-badge:hover .lp-editor-chrome {
+  opacity: 1;
+}

@@ -1,0 +1,4083 @@
+<style>
+  a{
+    color:#214ED2!important;
+  }
+
+  .article-sticky-offer {
+    width: 100%;
+    background: #ffffff;
+    padding-top: var(--aso-section-padding-top-desktop, 0);
+    padding-bottom: var(--aso-section-padding-bottom-desktop, 0);
+  }
+
+  .article-sticky-offer__inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 877px 370px;
+    column-gap: 53px;
+    align-items: start;
+    background: #ffffff;
+  }
+
+  .article-sticky-offer__left {
+    min-width: 0;
+    width: 877px;
+  }
+
+  .aso-block {
+    margin-bottom: var(--aso-block-space-desktop, 24px);
+  }
+
+  .article-sticky-offer__left > .aso-block:last-child {
+    margin-bottom: 0;
+  }
+
+  .article-sticky-offer__right {
+    min-width: 0;
+    width: 370px;
+    position: sticky;
+    top: 20px;
+    align-self: start;
+  }
+
+  .article-sticky-offer__card {
+    width: 100%;
+    background: #FEF8F7;
+    border: 2px solid #E99B8A;
+    border-radius: 20px;
+    padding: 24px 16px;
+    box-sizing: border-box;
+  }
+
+  .article-sticky-offer__top-label-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    margin-bottom: 11px;
+  }
+
+  .article-sticky-offer__top-line {
+    flex: 1 1 auto;
+    max-width: 80px;
+    height: 1px;
+    background: #d4d1d1;
+  }
+
+  .article-sticky-offer__top-label {
+    margin: 0;
+    font-family: Poppins;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 18px;
+    line-height: 34px;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    color:#1F1F1F;
+  }
+
+  .article-sticky-offer__heading {
+    margin-bottom: 22px;
+  }
+
+  .article-sticky-offer__heading-line {
+    margin: 0;
+    color: #1f1f1f;
+    text-align: center;
+    font-style: normal;
+  }
+
+  .article-sticky-offer__heading-line--1 {
+    font-family: Open Sans;
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 28px;
+    line-height: 34px;
+    letter-spacing: 0px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .article-sticky-offer__heading-line--2 {
+    font-family: Open Sans;
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 28px;
+    line-height: 34px;
+    letter-spacing: 0px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .article-sticky-offer__logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .article-sticky-offer__logo img {
+    display: block;
+    max-width: 170px;
+    width: 100%;
+    height: auto;
+  }
+
+  .article-sticky-offer__product-image {
+    margin-bottom: 26px;
+  }
+
+  .article-sticky-offer__product-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .article-sticky-offer__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 58px;
+    padding: 17px 20px;
+    border-radius: 5px;
+    background: #53B652;
+    box-shadow: 2px 2px 20px 6px #00000033 inset;
+    color: #ffffff!important;
+    text-decoration: none;
+    text-align: center;
+    box-sizing: border-box;
+    font-family: Poppins;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 20px;
+    line-height: 19.58px;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+
+  .aso-breadcrumbs {
+    width: 100%;
+  }
+
+  .aso-breadcrumbs__inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .aso-breadcrumbs__item {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 22px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    text-decoration: none;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .aso-breadcrumbs__item--dark,
+  .aso-breadcrumbs__item--mid {
+    color: #818181;
+  }
+
+  .aso-breadcrumbs__item--light {
+    color: #3e3e3e;
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .aso-breadcrumbs__arrow {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aso-breadcrumbs__arrow img,
+  .aso-breadcrumbs__arrow svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
+  .aso-update-notice {
+    width: 100%;
+  }
+
+  .aso-update-notice__inner {
+    padding: 23px 21px;
+    border: 1px solid #ccc9ac;
+    background: #fefbd8;
+    border-radius: 14px;
+    box-sizing: border-box;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 32px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #1f1f1f;
+  }
+
+  .aso-update-notice__label {
+    color: #ff0000;
+    font-weight: 700;
+  }
+
+  .aso-update-notice__text,
+  .aso-update-notice__text p {
+    display: inline;
+    margin: 0;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 32px;
+    letter-spacing: 0;
+    color: #1f1f1f;
+  }
+
+  .aso-update-notice__text strong {
+    font-weight: 700;
+  }
+
+  .aso-title-block__title {
+    margin: 0;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 56px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #000000;
+  }
+
+  .aso-subheading-block__title {
+    margin: 0;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 44px;
+    letter-spacing: 0;
+    color: #000000;
+  }
+
+  .aso-text-block__inner {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 32px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #3e3e3e;
+  }
+
+  .aso-text-block__label {
+    color: #ff0000;
+    font-weight: 600;
+  }
+
+  .aso-text-block__text,
+  .aso-text-block__text p {
+    display: inline;
+    margin: 0;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 32px;
+    letter-spacing: 0;
+    color: #3e3e3e;
+  }
+
+  .aso-new-text__content,
+  .aso-new-text__content p,
+  .aso-danger-item__text,
+  .aso-danger-item__text p,
+  .aso-icon-text-item__text,
+  .aso-icon-text-item__text p,
+  .aso-review-card__text,
+  .aso-review-card__text p {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: var(--aso-desktop-20px-text-size, 20px);
+    line-height: 28px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #3e3e3e;
+  }
+
+  .aso-new-text__content p {
+    margin: 0 0 24px;
+  }
+
+  .aso-new-text__content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .aso-rating-block__inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .aso-rating-block__stars {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex: 0 0 auto;
+  }
+
+  .aso-rating-block__star {
+    width: 21.56px;
+    height: 21.56px;
+    flex: 0 0 21.56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aso-rating-block__star img,
+  .aso-rating-block__star svg {
+    display: block;
+    width: 21.56px;
+    height: 21.56px;
+    object-fit: contain;
+  }
+
+  .aso-rating-block__divider {
+    width: 1px;
+    height: 28px;
+    background: #c7c7c7;
+    flex: 0 0 1px;
+  }
+
+  .aso-rating-block__text {
+    font-family: "Neue Montreal", sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 22px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #3e3e3e;
+  }
+
+  .aso-feature-image__main img,
+  .aso-feature-image__main picture,
+  .aso-feature-image__main source {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .aso-feature-image__meta {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 12px 0 10px;
+    border-bottom: 1px solid #e4e4e4;
+  }
+
+  .aso-feature-image__meta-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .aso-feature-image__doctor-image {
+    width: 50px;
+    height: 50px;
+    flex: 0 0 50px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .aso-feature-image__doctor-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .aso-feature-image__doctor-copy {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .aso-feature-image__doctor-name {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 22px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #1f1f1f;
+    margin: 0 0 2px;
+  }
+
+  .aso-feature-image__doctor-title {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 28px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #818181;
+    margin: 0;
+  }
+
+  .aso-feature-image__date {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    align-self: flex-end;
+    white-space: nowrap;
+  }
+
+  .aso-feature-image__date-icon {
+    display: inline-flex;
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aso-feature-image__date-icon svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+
+  .aso-feature-image__date-text {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 28px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #818181;
+  }
+
+  .aso-danger-item__inner {
+    display: grid;
+    grid-template-columns: 154px minmax(0, 1fr);
+    column-gap: 20px;
+    align-items: start;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #c7c7c7;
+  }
+
+  .aso-danger-item__image img {
+    display: block;
+    width: 154px;
+    height: auto;
+  }
+  aso-danger-item__image-mobile{
+    display:none;
+  }
+  .aso-danger-item__content {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    column-gap: 10px;
+    align-items: start;
+  }
+
+  .aso-danger-item__header {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    column-gap: 10px;
+    align-items: start;
+  }
+
+  .aso-danger-item__icon {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: flex-start;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .aso-danger-item__icon img,
+  .aso-danger-item__icon svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
+  .aso-danger-item__title {
+    margin: 0;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 56px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #000000;
+  }
+
+  .aso-danger-item__text {
+    grid-column: 2;
+    margin-top: 14px;
+    min-width: 0;
+  }
+
+  .aso-danger-item__text p {
+    margin: 0 0 24px;
+  }
+
+  .aso-danger-item__text p:last-child {
+    margin-bottom: 0;
+  }
+
+  .aso-icon-text-item__mobile-image {
+    display: none;
+  }
+
+  .aso-icon-text-item__inner {
+    display: grid;
+    grid-template-columns: var(--aso-icon-width-desktop, 28px) minmax(0, 1fr);
+    column-gap: 28px;
+    align-items: start;
+  }
+
+  .aso-icon-text-item--has-middle-image .aso-icon-text-item__inner {
+    grid-template-columns: var(--aso-icon-width-desktop, 28px) 154px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+
+  .aso-icon-text-item__inner--no-title {
+    align-items: center;
+  }
+
+  .aso-icon-text-item__icon {
+    width: var(--aso-icon-width-desktop, 28px);
+    height: var(--aso-icon-width-desktop, 28px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 var(--aso-icon-width-desktop, 28px);
+  }
+
+  .aso-icon-text-item__icon img,
+  .aso-icon-text-item__icon svg {
+    display: block;
+    width: var(--aso-icon-width-desktop, 28px);
+    height: var(--aso-icon-width-desktop, 28px);
+    object-fit: contain;
+  }
+
+  .aso-icon-text-item__middle-image {
+    width: 154px;
+    display: block;
+  }
+
+  .aso-icon-text-item__middle-image img {
+    display: block;
+    width: 154px;
+    height: auto;
+  }
+
+  .aso-icon-text-item__content {
+    min-width: 0;
+  }
+
+  .aso-icon-text-item__title {
+    margin: 0;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 34px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #000000;
+  }
+
+  .aso-icon-text-item__text {
+    margin-top: 10px;
+  }
+
+  .aso-icon-text-item__inner--no-title .aso-icon-text-item__text {
+    margin-top: 0;
+  }
+
+  .aso-icon-text-item__text p {
+    margin: 0 0 24px;
+  }
+
+  .aso-icon-text-item__text p:last-child {
+    margin-bottom: 0;
+  }
+
+  .aso-button-block {
+    width: 100%;
+  }
+
+  .aso-button-block__button {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--Green, #53B652);
+    box-shadow: 2px 2px 20px 6px #00000033 inset;
+    font-family: Poppins, sans-serif;
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 28px;
+    line-height: 19.58px;
+    letter-spacing: 0px;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #fff !important;
+    padding: 24px 0;
+    text-decoration: none;
+    border-radius: 0;
+  }
+
+  .aso-video-block__media {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #000000;
+  }
+
+  .aso-video-block__media video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .aso-review-card__inner {
+    border: 1px solid #dddddd;
+    box-shadow: 2px 2px 8px 2px rgba(86, 84, 84, 0.1);
+    background: rgba(245, 245, 245, 0.37);
+    padding: 24px 16px;
+    border-radius: 12px;
+    box-sizing: border-box;
+  }
+
+  .aso-review-card__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .aso-review-card__person {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .aso-review-card__avatar {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .aso-review-card__avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .aso-review-card__person-copy {
+    min-width: 0;
+  }
+
+  .aso-review-card__name {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #000000;
+    margin: 0 0 8px;
+  }
+
+  .aso-review-card__location {
+    font-family: "Neue Montreal", sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #3e3e3e;
+  }
+
+  .aso-review-card__verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+
+  .aso-review-card__verified-icon {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aso-review-card__verified-icon img,
+  .aso-review-card__verified-icon svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
+  .aso-review-card__verified-text {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 26.37px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #3f92ff;
+  }
+
+  .aso-review-card__middle {
+    margin-top: 18px;
+    margin-bottom: 13px;
+  }
+
+  .aso-review-card__stars {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24.92px;
+    letter-spacing: 2px;
+    vertical-align: middle;
+    color: #fecb00;
+  }
+
+  .aso-review-card__text p {
+    margin: 0 0 24px;
+  }
+
+  .aso-review-card__text p:last-child {
+    margin-bottom: 0;
+  }
+
+  .aso-promo-card {
+    --aso-pc-scale: 0.8514563107;
+  }
+
+  .aso-pc-wrap {
+    max-width: calc(var(--aso-pc-base-max-width, 1030px) * var(--aso-pc-scale));
+    margin: 0 auto;
+    font-family: "Neue Montreal", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .aso-pc-ribbon {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto calc(-15px * var(--aso-pc-scale));
+  }
+
+  .aso-pc-ribbon-text {
+    background: var(--aso-pc-ribbon-bg);
+    color: var(--aso-pc-ribbon-fg);
+    font-weight: 700;
+    font-size: calc(20px * var(--aso-pc-scale));
+    line-height: calc(20px * var(--aso-pc-scale));
+    padding: calc(5px * var(--aso-pc-scale)) calc(15px * var(--aso-pc-scale));
+    display: inline-flex;
+    align-items: center;
+    gap: calc(6px * var(--aso-pc-scale));
+  }
+
+  .aso-pc-card {
+    border: calc(2px * var(--aso-pc-scale)) dashed var(--aso-pc-card-border);
+    border-radius: calc(15px * var(--aso-pc-scale));
+    padding: calc(40px * var(--aso-pc-scale));
+    background: var(--aso-pc-card-bg);
+    display: grid;
+    grid-template-columns: 43.2% 53%;
+    justify-content: space-between;
+    gap: calc(24px * var(--aso-pc-scale));
+    align-items: start;
+  }
+
+  .aso-pc-media {
+    display: flex;
+    justify-content: center;
+  }
+
+  .aso-pc-imgwrap {
+    border-radius: calc(16px * var(--aso-pc-scale));
+    overflow: hidden;
+    background: var(--aso-pc-imgwrap-bg);
+  }
+
+  .aso-pc-img {
+    width: 100%;
+    max-width: calc(500px * var(--aso-pc-scale));
+    height: auto;
+    display: block;
+    border-radius: calc(14px * var(--aso-pc-scale));
+  }
+
+  .aso-pc-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .aso-pc-headline {
+    margin: 0;
+    max-width: calc(400px * var(--aso-pc-scale));
+    font-size: calc(36px * var(--aso-pc-scale));
+    line-height: calc(40px * var(--aso-pc-scale));
+    color: var(--aso-pc-headline-color);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: calc(0.3px * var(--aso-pc-scale));
+    text-align: center;
+  }
+
+  .aso-pc-subcopy {
+    font-size: calc(18px * var(--aso-pc-scale));
+    line-height: calc(28px * var(--aso-pc-scale));
+    color: var(--aso-pc-subcopy-color);
+    margin-top: calc(12px * var(--aso-pc-scale));
+    letter-spacing: calc(0.3px * var(--aso-pc-scale));
+    text-align: center;
+  }
+
+  .aso-pc-subcopy p {
+    margin: 0;
+  }
+
+  .aso-pc-timer {
+    margin-top: calc(10px * var(--aso-pc-scale));
+    text-align: center;
+  }
+
+  .aso-pc-timer-label {
+    font-size: calc(16px * var(--aso-pc-scale));
+    line-height: calc(22px * var(--aso-pc-scale));
+    color: var(--aso-pc-timer-label);
+    font-weight: 600;
+    position: relative;
+    margin-bottom: calc(10px * var(--aso-pc-scale));
+  }
+
+  .aso-pc-timer-label span {
+    padding: 0 calc(10px * var(--aso-pc-scale));
+  }
+
+  .aso-pc-timer-label::before,
+  .aso-pc-timer-label::after {
+    display: inline-block;
+    vertical-align: middle;
+    content: "";
+    width: calc(80px * var(--aso-pc-scale));
+    height: 1px;
+    background: var(--aso-pc-timer-rule);
+    margin-top: -1px;
+  }
+
+  .aso-pc-clock {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(10px * var(--aso-pc-scale));
+  }
+
+  .aso-pc-dial {
+    display: grid;
+    justify-items: center;
+    gap: calc(6px * var(--aso-pc-scale));
+  }
+
+  .aso-pc-digits {
+    display: inline-flex;
+    gap: calc(6px * var(--aso-pc-scale));
+  }
+
+  .aso-pc-digit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(34px * var(--aso-pc-scale));
+    height: calc(34px * var(--aso-pc-scale));
+    border: 1px solid var(--aso-pc-digit-border);
+    border-radius: calc(8px * var(--aso-pc-scale));
+    background: var(--aso-pc-digit-bg);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+    font-weight: 800;
+    font-size: calc(22px * var(--aso-pc-scale));
+    line-height: calc(22px * var(--aso-pc-scale));
+    color: var(--aso-pc-digit-fg);
+  }
+
+  .aso-pc-unit {
+    font-size: calc(12px * var(--aso-pc-scale));
+    line-height: calc(14px * var(--aso-pc-scale));
+    color: var(--aso-pc-unit-color);
+  }
+
+  .aso-pc-sep {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(34px * var(--aso-pc-scale));
+    font-weight: 700;
+    font-size: calc(28px * var(--aso-pc-scale));
+    line-height: calc(34px * var(--aso-pc-scale));
+    color: var(--aso-pc-sep-color);
+    margin: 0 calc(2px * var(--aso-pc-scale));
+    place-self: self-start;
+  }
+
+  .aso-pc-cta {
+    margin-top: calc(25px * var(--aso-pc-scale));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(8px * var(--aso-pc-scale));
+    background: var(--aso-pc-cta-bg);
+    font-size: calc(24px * var(--aso-pc-scale));
+    text-transform: capitalize;
+    color: var(--aso-pc-cta-fg)!important;
+    font-weight: 700;
+    border-radius: calc(8px * var(--aso-pc-scale));
+    padding: calc(12px * var(--aso-pc-scale)) calc(18px * var(--aso-pc-scale));
+    width: 100%;
+    max-width: calc(435px * var(--aso-pc-scale));
+    text-decoration: none;
+    transition: transform .06s ease, opacity .2s;
+  }
+
+  .aso-pc-cta:hover {
+    transform: translateY(-1px);
+  }
+
+  .aso-pc-cta-svg {
+    display: inline-block;
+    width: calc(32px * var(--aso-pc-scale));
+    height: calc(32px * var(--aso-pc-scale));
+  }
+
+  .aso-pc-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(8px * var(--aso-pc-scale));
+    font-size: calc(14px * var(--aso-pc-scale));
+    line-height: calc(18px * var(--aso-pc-scale));
+    color: var(--aso-pc-line-color);
+    margin-top: calc(8px * var(--aso-pc-scale));
+    text-align: center;
+  }
+
+  .aso-pc-icon {
+    width: calc(16px * var(--aso-pc-scale));
+    height: calc(16px * var(--aso-pc-scale));
+    object-fit: contain;
+  }
+
+  .aso-pc-free {
+    color: var(--aso-pc-free-color);
+    font-weight: 400;
+  }
+
+  .aso-pc-risk-text {
+    font-size: calc(17px * var(--aso-pc-scale));
+    line-height: calc(21px * var(--aso-pc-scale));
+    color: var(--aso-pc-risk-text);
+    font-weight: 500;
+    margin-right: calc(6px * var(--aso-pc-scale));
+  }
+
+  .aso-pc-risk-text strong {
+    color: var(--aso-pc-risk-strong);
+    font-weight: 700;
+  }
+
+  .aso-pc-risk-text p,
+  .aso-pc-guarantee p {
+    margin: 0;
+  }
+
+  .aso-pc-risk-bar {
+    display: inline-flex;
+    gap: calc(3px * var(--aso-pc-scale));
+    align-items: center;
+  }
+
+  .aso-pc-risk-dot {
+    width: calc(10px * var(--aso-pc-scale));
+    height: calc(10px * var(--aso-pc-scale));
+    background: var(--aso-pc-risk-dot);
+    border-radius: calc(2px * var(--aso-pc-scale));
+    display: inline-block;
+  }
+
+  .aso-pc-risk-dot--red {
+    background: var(--aso-pc-risk-dot-red);
+    animation: aso-pc-blink 1.1s linear infinite;
+  }
+  .aso-danger-item__image-mobile{
+    display:none;
+  }
+
+  @keyframes aso-pc-blink {
+    0%, 50% { opacity: 1; }
+    60% { opacity: .35; }
+    100% { opacity: 1; }
+  }
+
+  .aso-pc-guarantee {
+    font-size: calc(18px * var(--aso-pc-scale));
+    line-height: calc(26px * var(--aso-pc-scale));
+    color: var(--aso-pc-guarantee-color);
+    font-weight: 700;
+    text-align: center;
+    margin-top: calc(12px * var(--aso-pc-scale));
+  }
+
+  @media screen and (max-width: 1339px) {
+    .article-sticky-offer__inner {
+      grid-template-columns: minmax(0, 1fr) 370px;
+      column-gap: 53px;
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
+    }
+
+    .article-sticky-offer__left,
+    .article-sticky-offer__right {
+      width: auto;
+    }
+  }
+
+  @media screen and (max-width: 989px) {
+    .article-sticky-offer {
+      padding-top: calc(var(--aso-section-padding-top-mobile, 0) + 33px);
+      padding-right: 12px;
+      padding-bottom: calc(var(--aso-section-padding-bottom-mobile, 0) + 33px);
+      padding-left: 12px;
+      background: #ffffff;
+    }
+
+    .article-sticky-offer__inner {
+      max-width: none;
+      display: block;
+      padding: 0;
+    }
+
+    .article-sticky-offer__left {
+      width: 100%;
+    }
+
+    .aso-block {
+      margin-bottom: var(--aso-block-space-mobile, 18px);
+    }
+
+    .article-sticky-offer__left > .aso-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .article-sticky-offer__right {
+      display: none;
+    }
+
+    .aso-breadcrumbs__inner {
+      gap: 8px;
+    }
+
+    .aso-breadcrumbs__item {
+      font-size: 12px;
+      line-height: 22px;
+    }
+
+    .aso-breadcrumbs__arrow {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+    }
+
+    .aso-update-notice__inner {
+      padding: 12px;
+      font-size: 16px;
+      line-height: 26px;
+    }
+
+    .aso-update-notice__text,
+    .aso-update-notice__text p {
+      font-size: 16px;
+      line-height: 26px;
+    }
+
+    .aso-title-block__title {
+      font-size: 34px;
+      line-height: 44px;
+    }
+
+    .aso-subheading-block__title {
+      font-size: 28px;
+      line-height: 38px;
+      vertical-align: middle;
+    }
+
+    .aso-text-block__inner {
+      font-size: 16px;
+      line-height: 26px;
+    }
+
+    .aso-text-block__text,
+    .aso-text-block__text p {
+      font-size: 16px;
+      line-height: 26px;
+    }
+
+    .aso-new-text__content,
+    .aso-new-text__content p,
+    .aso-danger-item__text,
+    .aso-danger-item__text p,
+    .aso-icon-text-item__text,
+    .aso-icon-text-item__text p,
+    .aso-review-card__text,
+    .aso-review-card__text p {
+      font-size: 16px;
+      line-height: 26px;
+    }
+
+    .aso-new-text__content p,
+    .aso-danger-item__text p,
+    .aso-icon-text-item__text p,
+    .aso-review-card__text p {
+      margin-bottom: 18px;
+    }
+
+    .aso-rating-block__text {
+      font-size: 18px;
+      line-height: 22px;
+    }
+
+    .aso-feature-image__meta {
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0 8px;
+    }
+
+    .aso-feature-image__meta-left {
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .aso-feature-image__doctor-image {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 44px;
+    }
+
+    .aso-feature-image__doctor-name {
+      font-size: 14px;
+      line-height: 22px;
+    }
+
+    .aso-feature-image__doctor-title {
+      font-size: 12px;
+      line-height: 23px;
+    }
+
+    .aso-feature-image__date {
+      align-self: flex-start;
+      gap: 6px;
+      margin-top: 1px;
+    }
+
+    .aso-feature-image__date-text {
+      font-family: "Poppins", sans-serif;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 22px;
+    }
+
+    .aso-danger-item__inner {
+      display: block;
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .aso-danger-item__image {
+      display: none;
+    }
+    .aso-danger-item__image-mobile{
+      display: flex;
+      padding: 16px 0;
+      justify-content: center;
+    }
+    .aso-danger-item__content {
+      display: block;
+    }
+
+    .aso-danger-item__header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      justify-content:center;
+    }
+
+    .aso-danger-item__icon {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+      margin-top: 1px;
+    }
+
+    .aso-danger-item__title {
+      font-size: 20px;
+      line-height: 26px;
+    }
+
+    .aso-danger-item__text {
+      grid-column: auto;
+      margin-top: 16px;
+    }
+
+    .aso-icon-text-item__mobile-image {
+      display: block;
+      width: 154px;
+      margin: 0 auto 12px;
+    }
+
+    .aso-icon-text-item__mobile-image img {
+      display: block;
+      width: 154px;
+      height: auto;
+    }
+
+    .aso-icon-text-item__middle-image {
+      display: none;
+    }
+
+    .aso-icon-text-item__inner {
+      display: block;
+    }
+
+    .aso-icon-text-item__icon {
+      width: var(--aso-icon-width-mobile, 24px);
+      height: var(--aso-icon-width-mobile, 24px);
+      flex: 0 0 var(--aso-icon-width-mobile, 24px);
+      display: inline-flex;
+      vertical-align: top;
+      margin-right: 12px;
+    }
+
+    .aso-icon-text-item__icon img,
+    .aso-icon-text-item__icon svg {
+      width: var(--aso-icon-width-mobile, 24px);
+      height: var(--aso-icon-width-mobile, 24px);
+    }
+
+    .aso-icon-text-item__content {
+      display: block;
+    }
+
+    .aso-icon-text-item__title {
+      display: inline;
+      font-size: 20px;
+      line-height: 26px;
+      vertical-align: middle;
+    }
+
+    .aso-icon-text-item__text {
+      margin-top: 12px;
+    }
+
+    .aso-icon-text-item__inner--no-title .aso-icon-text-item__text {
+      margin-top: 0;
+    }
+
+    .aso-button-block__button {
+      font-size: 17px;
+      padding: 10px;
+      line-height: 25px;
+    }
+
+    .aso-review-card__inner {
+      padding: 24px 16px;
+    }
+
+    .aso-review-card__top {
+      display: block;
+    }
+
+    .aso-review-card__person {
+      gap: 14px;
+    }
+
+    .aso-review-card__verified {
+      margin-top: 18px;
+    }
+
+    .aso-review-card__middle {
+      margin-top: 18px;
+      margin-bottom: 13px;
+    }
+
+    .aso-pc-wrap {
+      max-width: none;
+      margin: 0;
+    }
+
+    .aso-pc-card {
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 25px 15px 20px;
+    }
+
+    .aso-pc-headline {
+      max-width: none;
+      font-size: 24px;
+      line-height: 32px;
+      letter-spacing: 0.3px;
+      margin-top: 4px;
+    }
+
+    .aso-pc-subcopy {
+      font-size: 16px;
+      line-height: 24px;
+      letter-spacing: 0.3px;
+      margin-top: 6px;
+    }
+
+    .aso-pc-img {
+      max-width: none;
+      width: 100%;
+    }
+
+    .aso-pc-ribbon {
+      width: fit-content;
+      margin: 0 auto -13px;
+    }
+
+    .aso-pc-ribbon-text {
+      font-size: 16px;
+      line-height: 16px;
+      width: 100%;
+      padding: 6px 7px 5px;
+    }
+
+    .aso-pc-digit {
+      width: 32px;
+      height: 32px;
+      font-size: 20px;
+    }
+
+    .aso-pc-unit {
+      font-size: 11px;
+    }
+
+    .aso-pc-sep {
+      height: 32px;
+      font-size: 26px;
+      line-height: 32px;
+    }
+  }
+
+  .aso-comments-block__header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 23px 16px;
+    background: #1f1f1f;
+  }
+
+  .aso-comments-block__header-icon {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aso-comments-block__header-icon img,
+  .aso-comments-block__header-icon svg {
+    display: block;
+    width: 26px;
+    height: 26px;
+  }
+
+  .aso-comments-block__header-text {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: var(--aso-desktop-20px-text-size, 20px);
+    line-height: 28px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #ffffff;
+  }
+
+  .aso-comments-block__list {
+    background: #ffffff;
+  }
+
+  .aso-comments-block__item {
+    padding: 14px 0 18px;
+    border-bottom: 1px solid #ebebeb;
+  }
+
+  .aso-comments-block__comment {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .aso-comments-block__avatar {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .aso-comments-block__avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .aso-comments-block__body {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .aso-comments-block__name {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #000000;
+    margin: 0 0 10px;
+  }
+
+  .aso-comments-block__text {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.45;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #818181;
+  }
+
+  .aso-comments-block__meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .aso-comments-block__like-icon {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aso-comments-block__like-icon img,
+  .aso-comments-block__like-icon svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+
+  .aso-comments-block__likes,
+  .aso-comments-block__reply,
+  .aso-comments-block__dot {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1;
+    color: #818181;
+  }
+
+  .aso-comments-block__nested {
+    margin-top: 14px;
+    margin-left: 56px;
+    padding: 14px 12px;
+    border: 1px solid #ebebeb;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  @media screen and (max-width: 989px) {
+    .aso-comments-block__header {
+      padding: 23px 16px;
+    }
+
+    .aso-comments-block__header-text {
+      font-size: 16px;
+      line-height: 28px;
+    }
+
+    .aso-comments-block__header-icon {
+      width: 26px;
+      height: 26px;
+      flex: 0 0 26px;
+    }
+
+    .aso-comments-block__header-icon img,
+    .aso-comments-block__header-icon svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .aso-comments-block__item {
+      padding: 16px 0 18px;
+    }
+
+    .aso-comments-block__name {
+      font-size: 18px;
+    }
+
+    .aso-comments-block__text {
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .aso-comments-block__nested {
+      margin-left: 0;
+      margin-top: 12px;
+    }
+  }
+</style>
+
+<div id="shopify-section-template--26054065848585__article_main_9eM7RM" class="shopify-section">
+
+<section
+  class="article-sticky-offer"
+  style="
+    --aso-section-padding-top-desktop: 66px;
+    --aso-section-padding-bottom-desktop: 28px;
+    --aso-section-padding-top-mobile: 0px;
+    --aso-section-padding-bottom-mobile: 0px;
+    --aso-desktop-20px-text-size: 24px;
+  "
+>
+  <div class="article-sticky-offer__inner">
+    <div class="article-sticky-offer__left">
+
+
+
+
+
+            <div
+              class="aso-block aso-breadcrumbs"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+              <div class="aso-breadcrumbs__inner">
+
+
+                    <span class="aso-breadcrumbs__item aso-breadcrumbs__item--dark">
+                      Home
+                    </span>
+
+
+
+
+                  <span class="aso-breadcrumbs__arrow" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/chevron-right.svg?v=1773491102&amp;width=24" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/chevron-right.svg?v=1773491102&amp;width=24 24w" width="24" height="24" loading="lazy">
+                  </span>
+
+
+
+
+                    <span class="aso-breadcrumbs__item aso-breadcrumbs__item--mid">
+                      Breaking News
+                    </span>
+
+
+
+
+                  <span class="aso-breadcrumbs__arrow" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/chevron-right.svg?v=1773491102&amp;width=24" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/chevron-right.svg?v=1773491102&amp;width=24 24w" width="24" height="24" loading="lazy">
+                  </span>
+
+
+
+                  <span class="aso-breadcrumbs__item aso-breadcrumbs__item--light">
+                    Scientists Are Calling It A Silent Public Health Crisis – And It's In Your Kitchen
+                  </span>
+
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-title-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h1 class="aso-title-block__title">Scientists Are Calling It A Silent Public Health Crisis – And It's In Your Kitchen</h1>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-text-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+              <div class="aso-text-block__inner">
+
+                  <span class="aso-text-block__label">WARNING:</span>
+
+
+                  <div class="aso-text-block__text rte">
+                    <p>If you cook with non-stick, ceramic or steel pans daily, and you've never questioned what those coatings and metals are actually made of, this may be the most important article you read this year...</p>
+                  </div>
+
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-rating-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+              <div class="aso-rating-block__inner">
+                <div class="aso-rating-block__stars" aria-hidden="true">
+
+                    <span class="aso-rating-block__star">
+                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=44" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=22 22w, //kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=44 44w" width="44" height="44" loading="lazy">
+                    </span>
+
+
+                    <span class="aso-rating-block__star">
+                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=44" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=22 22w, //kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=44 44w" width="44" height="44" loading="lazy">
+                    </span>
+
+
+                    <span class="aso-rating-block__star">
+                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=44" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=22 22w, //kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=44 44w" width="44" height="44" loading="lazy">
+                    </span>
+
+
+                    <span class="aso-rating-block__star">
+                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=44" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=22 22w, //kitchensafetyinstitute.org/cdn/shop/files/line-md_star-filled.svg?v=1773498912&amp;width=44 44w" width="44" height="44" loading="lazy">
+                    </span>
+
+
+                    <span class="aso-rating-block__star">
+                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_148.svg?v=1773498939&amp;width=44" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_148.svg?v=1773498939&amp;width=22 22w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_148.svg?v=1773498939&amp;width=44 44w" width="44" height="44" loading="lazy">
+                    </span>
+
+                </div>
+
+                <span class="aso-rating-block__divider" aria-hidden="true"></span>
+
+
+                  <div class="aso-rating-block__text">
+                    4,854 · Ratings
+                  </div>
+
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/final_advertorial_-0_min.jpg?v=1774292378&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/final_advertorial_-0_min.jpg?v=1774292378&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/final_advertorial_-0_min.jpg?v=1774292378&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/final_advertorial_-0_min.jpg?v=1774292378&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/final_advertorial_-0_min.jpg?v=1774292378&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/final_advertorial_-0_min.jpg?v=1774292378&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/final_advertorial_-0_min.jpg?v=1774292378&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/final_advertorial_-0_min.jpg?v=1774292378&amp;width=1800 1800w" width="1800" height="1424" loading="lazy">
+
+                </div>
+
+
+
+                <div class="aso-feature-image__meta">
+                  <div class="aso-feature-image__meta-left">
+
+                      <div class="aso-feature-image__doctor-image">
+                        <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background_1.png?v=1773528804&amp;width=100" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background_1.png?v=1773528804&amp;width=44 44w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.png?v=1773528804&amp;width=50 50w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.png?v=1773528804&amp;width=88 88w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.png?v=1773528804&amp;width=100 100w" width="100" height="100" loading="lazy">
+                      </div>
+
+                    <div class="aso-feature-image__doctor-copy">
+
+                        <div class="aso-feature-image__doctor-name">DR. ELENA CARTER, MPH</div>
+
+
+                        <div class="aso-feature-image__doctor-title">Environmental Health Specialist & Research Advisor</div>
+
+                    </div>
+                  </div>
+
+
+                    <div class="aso-feature-image__date">
+                      <span class="aso-feature-image__date-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                          <path d="M1.16797 5.25001C1.16797 4.14984 1.16797 3.60034 1.5098 3.25851C1.85164 2.91667 2.40114 2.91667 3.5013 2.91667H10.5013C11.6015 2.91667 12.151 2.91667 12.4928 3.25851C12.8346 3.60034 12.8346 4.14984 12.8346 5.25001C12.8346 5.52476 12.8346 5.66242 12.7495 5.74817C12.6637 5.83334 12.5255 5.83334 12.2513 5.83334H1.7513C1.47655 5.83334 1.33889 5.83334 1.25314 5.74817C1.16797 5.66242 1.16797 5.52417 1.16797 5.25001ZM1.16797 10.5C1.16797 11.6002 1.16797 12.1497 1.5098 12.4915C1.85164 12.8333 2.40114 12.8333 3.5013 12.8333H10.5013C11.6015 12.8333 12.151 12.8333 12.4928 12.4915C12.8346 12.1497 12.8346 11.6002 12.8346 10.5V7.58334C12.8346 7.30859 12.8346 7.17092 12.7495 7.08517C12.6637 7.00001 12.5255 7.00001 12.2513 7.00001H1.7513C1.47655 7.00001 1.33889 7.00001 1.25314 7.08517C1.16797 7.17092 1.16797 7.30917 1.16797 7.58334V10.5Z" fill="#818181"/>
+                          <path d="M4.08594 1.75V3.5M9.91927 1.75V3.5" stroke="#818181" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                      </span>
+                      <span class="aso-feature-image__date-text">March 5th, 2026</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>Non-stick pans are everywhere.</p><p>They’re light, they heat fast, and the cleanup takes seconds.</p><p>And, of course, they’re cheap.</p><p>It’s no surprise that nearly <strong>80% of American households</strong> rely on them daily.</p><p>But here’s what most people don’t realize:</p><p>With every meal, your food may be picking up invisible chemical residue.</p><p>So dangerous that it has been linked to:</p><p>⚠️ Thyroid disease</p><p>⚠️ Liver & kidney dysfunction</p><p>⚠️ Infertility</p><p>⚠️ Autoimmune diseases</p><p>⚠️ Prostate cancer</p><p>Millions of families cook with PFA-coated pans every day without knowing these chemicals are ending up directly on their plates – and in their bodies. Here's how it happens.</p>
+                </div>
+
+            </div>
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">Meet PFAs: The Forever Chemical, Non-Stick Coatings Silently Making Thousands Of Americans Sick Every Day</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_-_MIN.png?v=1773680644&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_-_MIN.png?v=1773680644&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_-_MIN.png?v=1773680644&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_-_MIN.png?v=1773680644&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_-_MIN.png?v=1773680644&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_-_MIN.png?v=1773680644&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_-_MIN.png?v=1773680644&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_-_MIN.png?v=1773680644&amp;width=1800 1800w" width="1800" height="1186" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p><strong>PFAs are synthetic fluorinated chemicals</strong> used in traditional non-stick coatings because grease simply doesn't stick to them.</p><p>That's exactly what makes your eggs slide off the pan so effortlessly every morning.</p><p>But over time, everyday use <strong>breaks it down</strong>, metal utensils, harsh dishwasher chemicals, repeated heating and cooling cycles, and daily scrubbing all add up without most people even realizing it.</p><p>Once the structure is compromised, small particles and chemical residue can begin to release.</p><p>And you don't need to see visible flakes peeling off to be exposed. <strong>The breakdown happens at a microscopic level: invisible, odorless, and completely undetectable.</strong></p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/chemicals_-_MIN.jpg?v=1773844102&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/chemicals_-_MIN.jpg?v=1773844102&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/chemicals_-_MIN.jpg?v=1773844102&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/chemicals_-_MIN.jpg?v=1773844102&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/chemicals_-_MIN.jpg?v=1773844102&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/chemicals_-_MIN.jpg?v=1773844102&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/chemicals_-_MIN.jpg?v=1773844102&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/chemicals_-_MIN.jpg?v=1773844102&amp;width=1800 1800w" width="1800" height="1186" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>Trace amounts of PFAs end up in your food, kitchen dust, and even the air around your stove.</p><p>Which means <strong>you literally eat or breathe in the chemicals without even knowing it. </strong></p><p>So do your spouse, your kids, and even your pets. </p><p>And once PFAs particles leave the coating and enter your kitchen environment, they behave exactly as they were designed to – they resist breakdown and <strong>stay in your kitchen for decades.</strong></p><p>That long-term buildup is exactly what's <strong>raising serious alarm bells</strong> among scientists worldwide.</p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">The Long Term Damage Is Far More Alarming Than Most Realize</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/problems_-MIN.jpg?v=1774292500&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/problems_-MIN.jpg?v=1774292500&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/problems_-MIN.jpg?v=1774292500&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/problems_-MIN.jpg?v=1774292500&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/problems_-MIN.jpg?v=1774292500&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/problems_-MIN.jpg?v=1774292500&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/problems_-MIN.jpg?v=1774292500&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/problems_-MIN.jpg?v=1774292500&amp;width=1800 1800w" width="1800" height="1200" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>These PFA particles don’t just pass through you.</p><p><strong>They accumulate.</strong></p><p>And the first sign that something is wrong <strong>often goes completely unnoticed.</strong></p><p>Have you ever felt <strong>sudden flu-like symptoms out of nowhere</strong> – fever, chills, headaches, a tightness in your chest – only for them to disappear just as mysteriously?</p><p><strong>That's Teflon Flu. </strong></p><p>It happens when a non-stick pan is heated empty or pushed past its temperature limit, causing the coating to break down and <strong>release toxic fumes</strong> – invisible, odorless, and easy to dismiss as just another bad day.</p><p>But this flu is just the beginning. </p><p>Over time, <strong>small exposures can add up. </strong></p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/blood_-_min.jpg?v=1773844248&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/blood_-_min.jpg?v=1773844248&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/blood_-_min.jpg?v=1773844248&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/blood_-_min.jpg?v=1773844248&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/blood_-_min.jpg?v=1773844248&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/blood_-_min.jpg?v=1773844248&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/blood_-_min.jpg?v=1773844248&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/blood_-_min.jpg?v=1773844248&amp;width=1800 1800w" width="1800" height="1186" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>Researchers have detected <strong>PFAs in 4 out of 5 blood samples</strong> across the <strong>U.S. population</strong>, showing just how widespread exposure has become.</p><p>And once inside the body, they can interfere with normal biological functions. </p><p>They’ve been associated with <strong>hormonal imbalance, thyroid dysfunction, elevated cholesterol levels, and immune suppression.</strong></p><p>Certain PFA compounds have been linked to <strong>fertility challenges</strong> and even <strong>fetal developmental risks during pregnancy.</strong></p><p>And perhaps most troubling, long-term exposure has been connected to <strong>kidney and testicular cancers.</strong></p><p>So the real question arises: if the risks are known, why are these coatings still in millions of kitchens?</p>
+                </div>
+
+            </div>
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">Profit vs. Health: The Hidden Truth Behind Non-Stick Coated Pan Companies</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/toxic_3.jpg?v=1773853761&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/toxic_3.jpg?v=1773853761&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/toxic_3.jpg?v=1773853761&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/toxic_3.jpg?v=1773853761&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/toxic_3.jpg?v=1773853761&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/toxic_3.jpg?v=1773853761&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/toxic_3.jpg?v=1773853761&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/toxic_3.jpg?v=1773853761&amp;width=1800 1800w" width="1800" height="1437" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>Various investigations over the years have revealed that <strong>major cookware manufacturers were aware of potential health concerns decades ago.</strong></p><p><strong>They knew these chemicals accumulated in the body.</strong></p><p>They saw early warning signs.</p><p>Yet production continued. And expanded.</p><p>Because once the coating wears down and the pan’s performance drops, you buy a new one. </p><p><strong>That repeat purchase cycle fuels billions in revenue.</strong> The shorter the lifespan, the faster the profit. </p><p>Meanwhile, buyers think they’re saving money with a <strong>$50</strong> pan.</p><p>What they don’t see is how the lower upfront cost brings <strong>serious health risks.</strong></p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/results_-min.jpg?v=1773845101&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/results_-min.jpg?v=1773845101&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/results_-min.jpg?v=1773845101&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/results_-min.jpg?v=1773845101&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/results_-min.jpg?v=1773845101&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/results_-min.jpg?v=1773845101&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/results_-min.jpg?v=1773845101&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/results_-min.jpg?v=1773845101&amp;width=1800 1800w" width="1800" height="1186" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">How "Non-Stick" Cookware Companies Fooled an Entire Industry By Swapping One Poison for Another</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/ban_better_1.jpg?v=1773849924&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/ban_better_1.jpg?v=1773849924&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/ban_better_1.jpg?v=1773849924&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/ban_better_1.jpg?v=1773849924&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/ban_better_1.jpg?v=1773849924&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/ban_better_1.jpg?v=1773849924&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/ban_better_1.jpg?v=1773849924&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/ban_better_1.jpg?v=1773849924&amp;width=1800 1800w" width="1800" height="1186" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>In response to mounting evidence, several U.S. states have begun restricting PFAs in consumer products, including cookware. </p><p><strong>And as restrictions tighten, manufacturers adapt.</strong></p><p>Instead of removing toxic chemicals altogether, many cookware companies have simply switched to other chemicals like GenX, PFBs, and PFBA.</p><p>They are little-known relatives of PFAs that <strong>carry the same health risks</strong> but fly under the radar because <strong>they aren't yet regulated.</strong></p><p>So these companies slap "PFA-free," "next generation," and "improved" on the label, and technically they aren't lying. </p><p>But here's what they won't tell you: <strong>a non-stick coating without these fluorinated chemicals simply does not exist,</strong> because you cannot have one without the other. </p><p>So no matter what the label says,<strong> the problem stays exactly the same.</strong></p><p>Naturally, more and more people are ditching non-stick cookware altogether and turning to ceramic, cast iron, or stainless steel instead.</p><p>They believe that as long as PFAs are not included, the pan is risk-free. Unfortunately, even these options are not safe enough:</p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">Every Alternative Has a Dirty Secret</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_3_-_MIN.png?v=1773680908&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_3_-_MIN.png?v=1773680908&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_3_-_MIN.png?v=1773680908&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_3_-_MIN.png?v=1773680908&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_3_-_MIN.png?v=1773680908&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_3_-_MIN.png?v=1773680908&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_3_-_MIN.png?v=1773680908&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_3_-_MIN.png?v=1773680908&amp;width=1800 1800w" width="1800" height="1186" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-danger-item"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+              <div class="aso-danger-item__inner">
+
+                  <div class="aso-danger-item__image">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67.png?v=1773537821&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67.png?v=1773537821&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_67.png?v=1773537821&amp;width=308 308w" width="308" height="276" loading="lazy">
+                  </div>
+
+                <div class="aso-danger-item__content">
+                  <div class="aso-danger-item__header">
+
+                      <span class="aso-danger-item__icon" aria-hidden="true">
+                        <img src="//kitchensafetyinstitute.org/cdn/shop/files/oui_cross.svg?v=1773537851&amp;width=24" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/oui_cross.svg?v=1773537851&amp;width=24 24w" width="24" height="24" loading="lazy">
+                      </span>
+
+
+                      <h3 class="aso-danger-item__title">Ceramic-Coated Pans</h3>
+
+                  </div>
+
+                    <div class="aso-danger-item__image aso-danger-item__image-mobile">
+                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67.png?v=1773537821&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67.png?v=1773537821&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_67.png?v=1773537821&amp;width=308 308w" width="308" height="276" loading="lazy">
+                    </div>
+
+
+                    <div class="aso-danger-item__text rte"><p>Due to <strong>poor durability,</strong> the coating cracks, chips, or simply wears off within 1-2 years, <strong>exposing toxic compounds</strong> underneath that can leach <strong>directly into your food.</strong></p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-danger-item"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+              <div class="aso-danger-item__inner">
+
+                  <div class="aso-danger-item__image">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67_1.png?v=1773537953&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67_1.png?v=1773537953&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_67_1.png?v=1773537953&amp;width=308 308w" width="308" height="276" loading="lazy">
+                  </div>
+
+                <div class="aso-danger-item__content">
+                  <div class="aso-danger-item__header">
+
+                      <span class="aso-danger-item__icon" aria-hidden="true">
+                        <img src="//kitchensafetyinstitute.org/cdn/shop/files/oui_cross.svg?v=1773537851&amp;width=24" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/oui_cross.svg?v=1773537851&amp;width=24 24w" width="24" height="24" loading="lazy">
+                      </span>
+
+
+                      <h3 class="aso-danger-item__title">Stainless Steel Pans</h3>
+
+                  </div>
+
+                    <div class="aso-danger-item__image aso-danger-item__image-mobile">
+                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67_1.png?v=1773537953&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67_1.png?v=1773537953&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_67_1.png?v=1773537953&amp;width=308 308w" width="308" height="276" loading="lazy">
+                    </div>
+
+
+                    <div class="aso-danger-item__text rte"><p>Leaches heavy metals like <strong>nickel and chromium into acidic foods</strong>, linked to hormone disruption, allergies, and Alzheimer’s.<br/>The sticky surface forces more oil just to cook, quietly <strong>adding extra calories to every meal.</strong></p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-danger-item"
+              style="--aso-block-space-desktop: 40px; --aso-block-space-mobile: 50px;"
+
+            >
+              <div class="aso-danger-item__inner">
+
+                  <div class="aso-danger-item__image">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67_2.png?v=1773538144&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67_2.png?v=1773538144&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_67_2.png?v=1773538144&amp;width=308 308w" width="308" height="276" loading="lazy">
+                  </div>
+
+                <div class="aso-danger-item__content">
+                  <div class="aso-danger-item__header">
+
+                      <span class="aso-danger-item__icon" aria-hidden="true">
+                        <img src="//kitchensafetyinstitute.org/cdn/shop/files/oui_cross.svg?v=1773537851&amp;width=24" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/oui_cross.svg?v=1773537851&amp;width=24 24w" width="24" height="24" loading="lazy">
+                      </span>
+
+
+                      <h3 class="aso-danger-item__title">Cast Iron Pans</h3>
+
+                  </div>
+
+                    <div class="aso-danger-item__image aso-danger-item__image-mobile">
+                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67_2.png?v=1773538144&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_67_2.png?v=1773538144&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_67_2.png?v=1773538144&amp;width=308 308w" width="308" height="276" loading="lazy">
+                    </div>
+
+
+                    <div class="aso-danger-item__text rte"><p>If not seasoned and maintained regularly, <strong>have a high risk of rust</strong> and <strong>can leach excessive iron into food,</strong> leading to iron overload and organ damage in sensitive individuals.</p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">Is There A Way To Cook Toxin-Free Meals? </h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>As it turns out, there is. </p><p>And the answer has been hiding in plain sight – inside operating rooms, surgical tools, and medical implants used by doctors worldwide.</p><p>That material is <strong>titanium.</strong></p><p><strong>The human body doesn't reject, absorb, or react with it.</strong></p><p>That's why surgeons trust it inside the human body, and it's exactly why it belongs in your kitchen. </p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_4_-_MIN.png?v=1773680997&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_4_-_MIN.png?v=1773680997&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_4_-_MIN.png?v=1773680997&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_4_-_MIN.png?v=1773680997&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_4_-_MIN.png?v=1773680997&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_4_-_MIN.png?v=1773680997&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_4_-_MIN.png?v=1773680997&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_4_-_MIN.png?v=1773680997&amp;width=1800 1800w" width="1800" height="1186" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>And the advantages of pure titanium go even further:</p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 28px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+
+              <div class="aso-icon-text-item__inner aso-icon-text-item__inner--no-title">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+
+                <div class="aso-icon-text-item__content">
+
+
+                    <div class="aso-icon-text-item__text rte"><p><strong>Zero microplastics, heavy metals, or hormone-disrupting chemicals,</strong> just <strong>pure titanium</strong>. There is simply nothing to shed, no matter how long you cook with it.</p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 28px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+
+              <div class="aso-icon-text-item__inner aso-icon-text-item__inner--no-title">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+
+                <div class="aso-icon-text-item__content">
+
+
+                    <div class="aso-icon-text-item__text rte"><p><strong>Naturally non-reactive and non-corrosive, </strong>so your food stays clean and untouched by metal residue, no matter what you cook.</p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 28px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+
+              <div class="aso-icon-text-item__inner aso-icon-text-item__inner--no-title">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+
+                <div class="aso-icon-text-item__content">
+
+
+                    <div class="aso-icon-text-item__text rte"><p><strong>Resists bacterial growth on contact, </strong>keeping your cooking surface practically sterile without extra effort.</p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 28px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+
+              <div class="aso-icon-text-item__inner aso-icon-text-item__inner--no-title">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+
+                <div class="aso-icon-text-item__content">
+
+
+                    <div class="aso-icon-text-item__text rte"><p><strong>Won't break down, peel, or flake over time, </strong>staying structurally intact meal after meal, year after year.</p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px; --aso-icon-width-desktop: 28px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+
+              <div class="aso-icon-text-item__inner aso-icon-text-item__inner--no-title">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/Background.svg?v=1773539820&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+
+                <div class="aso-icon-text-item__content">
+
+
+                    <div class="aso-icon-text-item__text rte"><p><strong>Handles acidic foods, like sauces, citrus, or tomatoes,</strong> without reacting, leaching, or leaving any trace behind.</p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">But not all titanium cookware is created equal.</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>Most brands on the market <strong>aren't selling you pure titanium at all. </strong></p><p>They're selling titanium-sprayed coatings over steel, or mixed alloys that still carry the same toxic risks you were trying to escape. </p><p><strong>The true, pure titanium cookware is incredibly rare – and right now, only one brand is actually delivering it.</strong></p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <picture>
+                      <source
+                        media="(max-width: 989px)"
+                        srcset="//kitchensafetyinstitute.org/cdn/shop/files/table_2.png?v=1773831911&width=1200"
+                      >
+                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_221_1.png?v=1773831956&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_221_1.png?v=1773831956&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_221_1.png?v=1773831956&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_221_1.png?v=1773831956&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_221_1.png?v=1773831956&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_221_1.png?v=1773831956&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_221_1.png?v=1773831956&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_221_1.png?v=1773831956&amp;width=1800 1800w" width="1800" height="1309" loading="lazy">
+                    </picture>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">With TAIMA®, You Can Finally Cook Without the Trade-Offs</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p><a href="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0" title="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0"><strong>TAIMA® </strong></a>didn't just enter the cookware market. It redefined what a pan could be.</p><p>The brand was built on a single mission: to free every kitchen in the world from toxic cookware for good. </p><p>No PFAs coatings or compromises. Just pure, clean cooking backed by <strong>Japanese premium quality and precision engineering.</strong></p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/japan_smiling_1.jpg?v=1773846024&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/japan_smiling_1.jpg?v=1773846024&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/japan_smiling_1.jpg?v=1773846024&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/japan_smiling_1.jpg?v=1773846024&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/japan_smiling_1.jpg?v=1773846024&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/japan_smiling_1.jpg?v=1773846024&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/japan_smiling_1.jpg?v=1773846024&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/japan_smiling_1.jpg?v=1773846024&amp;width=1800 1800w" width="1800" height="1186" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>The result is the <a href="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0" title="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0"><strong>TAIMA® Certified Pure Titanium Classic Pan</strong> </a>– and it's unlike anything else on the market.</p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-video-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-video-block__media">
+                  <video playsinline="true" autoplay="autoplay" loop="loop" muted="muted" preload="auto" poster="//kitchensafetyinstitute.org/cdn/shop/files/preview_images/df6ec53c1f1a4de7a4308b74dcefb650.thumbnail.0000000000_1200x.jpg?v=1771323381"><source src="//kitchensafetyinstitute.org/cdn/shop/videos/c/vp/df6ec53c1f1a4de7a4308b74dcefb650/df6ec53c1f1a4de7a4308b74dcefb650.HD-1080p-2.5Mbps-74356518.mp4?v=0" type="video/mp4"><img src="//kitchensafetyinstitute.org/cdn/shop/files/preview_images/df6ec53c1f1a4de7a4308b74dcefb650.thumbnail.0000000000_1200x.jpg?v=1771323381"></video>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>Here's what sets it apart:</p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item aso-icon-text-item--has-middle-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 34px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+                <div class="aso-icon-text-item__mobile-image">
+                  <img src="//kitchensafetyinstitute.org/cdn/shop/files/certification_1.jpg?v=1773846412&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/certification_1.jpg?v=1773846412&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/certification_1.jpg?v=1773846412&amp;width=308 308w" width="308" height="308" loading="lazy">
+                </div>
+
+
+              <div class="aso-icon-text-item__inner">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+                  <div class="aso-icon-text-item__middle-image">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/certification_1.jpg?v=1773846412&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/certification_1.jpg?v=1773846412&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/certification_1.jpg?v=1773846412&amp;width=308 308w" width="308" height="308" loading="lazy">
+                  </div>
+
+
+                <div class="aso-icon-text-item__content">
+
+                    <h3 class="aso-icon-text-item__title">99.86% Grade 1 Pure Titanium</h3>
+
+
+                    <div class="aso-icon-text-item__text rte"><p>This isn't titanium-coated or titanium-infused. It's <strong>certified pure</strong> – the same medical-grade standard used in surgical implants. That means <strong>zero</strong> <strong>toxic coatings, zero chemical risk, and zero compromise on safety.</strong></p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item aso-icon-text-item--has-middle-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 34px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+                <div class="aso-icon-text-item__mobile-image">
+                  <img src="//kitchensafetyinstitute.org/cdn/shop/files/pattern_1.jpg?v=1773846411&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/pattern_1.jpg?v=1773846411&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/pattern_1.jpg?v=1773846411&amp;width=308 308w" width="308" height="308" loading="lazy">
+                </div>
+
+
+              <div class="aso-icon-text-item__inner">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+                  <div class="aso-icon-text-item__middle-image">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/pattern_1.jpg?v=1773846411&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/pattern_1.jpg?v=1773846411&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/pattern_1.jpg?v=1773846411&amp;width=308 308w" width="308" height="308" loading="lazy">
+                  </div>
+
+
+                <div class="aso-icon-text-item__content">
+
+                    <h3 class="aso-icon-text-item__title">SlipScale™ Surface Pattern</h3>
+
+
+                    <div class="aso-icon-text-item__text rte"><p>TAIMA®'s <strong>patented SlipScale™ surface </strong>is a naturally non-stick micro-pattern pressed directly into the titanium itself. <strong>No chemical coating needed.</strong> Food releases cleanly, cleanup takes seconds, and<strong> the surface stays intact for life.</strong></p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item aso-icon-text-item--has-middle-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 34px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+                <div class="aso-icon-text-item__mobile-image">
+                  <img src="//kitchensafetyinstitute.org/cdn/shop/files/5ply_1.jpg?v=1773846411&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/5ply_1.jpg?v=1773846411&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/5ply_1.jpg?v=1773846411&amp;width=308 308w" width="308" height="308" loading="lazy">
+                </div>
+
+
+              <div class="aso-icon-text-item__inner">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+                  <div class="aso-icon-text-item__middle-image">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/5ply_1.jpg?v=1773846411&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/5ply_1.jpg?v=1773846411&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/5ply_1.jpg?v=1773846411&amp;width=308 308w" width="308" height="308" loading="lazy">
+                  </div>
+
+
+                <div class="aso-icon-text-item__content">
+
+                    <h3 class="aso-icon-text-item__title">5-Ply Construction for Chef-Level Performance</h3>
+
+
+                    <div class="aso-icon-text-item__text rte"><p>Five <strong>precision-engineered layers </strong>work together to <strong>distribute heat evenly</strong> across the entire surface. No hot spots. No uneven cooking. Just consistent, reliable results every single time.</p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item aso-icon-text-item--has-middle-image"
+              style="--aso-block-space-desktop: 40px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 34px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+                <div class="aso-icon-text-item__mobile-image">
+                  <img src="//kitchensafetyinstitute.org/cdn/shop/files/fire_1.jpg?v=1773846411&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/fire_1.jpg?v=1773846411&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/fire_1.jpg?v=1773846411&amp;width=308 308w" width="308" height="308" loading="lazy">
+                </div>
+
+
+              <div class="aso-icon-text-item__inner">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/mdi_arrow-down-bold.svg?v=1773545072&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+                  <div class="aso-icon-text-item__middle-image">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/fire_1.jpg?v=1773846411&amp;width=308" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/fire_1.jpg?v=1773846411&amp;width=154 154w, //kitchensafetyinstitute.org/cdn/shop/files/fire_1.jpg?v=1773846411&amp;width=308 308w" width="308" height="308" loading="lazy">
+                  </div>
+
+
+                <div class="aso-icon-text-item__content">
+
+                    <h3 class="aso-icon-text-item__title">Handles Extreme Heat Without Degrading</h3>
+
+
+                    <div class="aso-icon-text-item__text rte"><p>Titanium is<strong> the same material used in jet engines and rockets</strong> precisely because it loves extreme heat, and that same strength is built into every TAIMA® pan. Whether you're searing, sautéing, or finishing in the oven, the pan performs <strong>without releasing a single harmful chemical.</strong></p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>TAIMA® isn't just a better pan. It's the last pan you'll ever need to buy.</p>
+                </div>
+
+            </div>
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">600,000+ People Switched to TAIMA®’s Titanium Pan Last Year</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/customers_-min.jpg?v=1773850439&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/customers_-min.jpg?v=1773850439&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/customers_-min.jpg?v=1773850439&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/customers_-min.jpg?v=1773850439&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/customers_-min.jpg?v=1773850439&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/customers_-min.jpg?v=1773850439&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/customers_-min.jpg?v=1773850439&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/customers_-min.jpg?v=1773850439&amp;width=1800 1800w" width="1800" height="1080" loading="lazy">
+
+                </div>
+
+
+                <div class="aso-feature-image__meta">
+                  <div class="aso-feature-image__meta-left">
+
+                    <div class="aso-feature-image__doctor-copy">
+
+
+                    </div>
+                  </div>
+
+
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>When families start thinking about what touches their food daily, safe cookware becomes a priority.</p><p>And TAIMA® is delivering it. Check out yourself: </p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-review-card"
+              style="--aso-block-space-desktop: 14px; --aso-block-space-mobile: 18px;"
+
+            >
+              <div class="aso-review-card__inner">
+                <div class="aso-review-card__top">
+                  <div class="aso-review-card__person">
+
+                      <div class="aso-review-card__avatar">
+                        <img src="//kitchensafetyinstitute.org/cdn/shop/files/5_db38efc7-cb9f-4148-a1d9-afed32303cc2.jpg?v=1773843095&amp;width=104" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/5_db38efc7-cb9f-4148-a1d9-afed32303cc2.jpg?v=1773843095&amp;width=52 52w, //kitchensafetyinstitute.org/cdn/shop/files/5_db38efc7-cb9f-4148-a1d9-afed32303cc2.jpg?v=1773843095&amp;width=104 104w" width="104" height="104" loading="lazy">
+                      </div>
+
+                    <div class="aso-review-card__person-copy">
+
+                        <div class="aso-review-card__name">Sandra M.</div>
+
+
+                        <div class="aso-review-card__location">Portland, OR</div>
+
+                    </div>
+                  </div>
+
+
+                    <div class="aso-review-card__verified">
+
+                        <span class="aso-review-card__verified-icon" aria-hidden="true">
+                          <img src="//kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=48" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=48 48w" width="48" height="48" loading="lazy">
+                        </span>
+
+                      <span class="aso-review-card__verified-text">Verified Purchase</span>
+                    </div>
+
+                </div>
+
+                <div class="aso-review-card__middle">
+
+                    <div class="aso-review-card__stars">★★★★★</div>
+
+                </div>
+
+
+                  <div class="aso-review-card__text rte"><p>“A friend told me about how dangerous these teflon pans can be and I immediately threw mine in the trash. Now I’m extremely careful about what touches my food!! Knowing TAIMA has zero coatings and zero chemicals gives me genuine peace of mind every single meal.”</p></div>
+
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-review-card"
+              style="--aso-block-space-desktop: 14px; --aso-block-space-mobile: 18px;"
+
+            >
+              <div class="aso-review-card__inner">
+                <div class="aso-review-card__top">
+                  <div class="aso-review-card__person">
+
+                      <div class="aso-review-card__avatar">
+                        <img src="//kitchensafetyinstitute.org/cdn/shop/files/12_d93ca448-531b-44a8-b7aa-96807fabd367.jpg?v=1773843095&amp;width=104" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/12_d93ca448-531b-44a8-b7aa-96807fabd367.jpg?v=1773843095&amp;width=52 52w, //kitchensafetyinstitute.org/cdn/shop/files/12_d93ca448-531b-44a8-b7aa-96807fabd367.jpg?v=1773843095&amp;width=104 104w" width="104" height="104" loading="lazy">
+                      </div>
+
+                    <div class="aso-review-card__person-copy">
+
+                        <div class="aso-review-card__name">Derek T.</div>
+
+
+                        <div class="aso-review-card__location">Austin, TX</div>
+
+                    </div>
+                  </div>
+
+
+                    <div class="aso-review-card__verified">
+
+                        <span class="aso-review-card__verified-icon" aria-hidden="true">
+                          <img src="//kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=48" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=48 48w" width="48" height="48" loading="lazy">
+                        </span>
+
+                      <span class="aso-review-card__verified-text">Verified Purchase</span>
+                    </div>
+
+                </div>
+
+                <div class="aso-review-card__middle">
+
+                    <div class="aso-review-card__stars">★★★★★</div>
+
+                </div>
+
+
+                  <div class="aso-review-card__text rte"><p>“I went through two ceramic pans in one year and cast iron that kept rusting no matter what I did. Switched to Taima and haven't looked back. it's light, clean and actually lasts.”</p></div>
+
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-review-card"
+              style="--aso-block-space-desktop: 14px; --aso-block-space-mobile: 18px;"
+
+            >
+              <div class="aso-review-card__inner">
+                <div class="aso-review-card__top">
+                  <div class="aso-review-card__person">
+
+                      <div class="aso-review-card__avatar">
+                        <img src="//kitchensafetyinstitute.org/cdn/shop/files/4.jpg?v=1773843095&amp;width=104" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/4.jpg?v=1773843095&amp;width=52 52w, //kitchensafetyinstitute.org/cdn/shop/files/4.jpg?v=1773843095&amp;width=104 104w" width="104" height="104" loading="lazy">
+                      </div>
+
+                    <div class="aso-review-card__person-copy">
+
+                        <div class="aso-review-card__name">Brenda K.</div>
+
+
+                        <div class="aso-review-card__location">Columbus, OH</div>
+
+                    </div>
+                  </div>
+
+
+                    <div class="aso-review-card__verified">
+
+                        <span class="aso-review-card__verified-icon" aria-hidden="true">
+                          <img src="//kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=48" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=48 48w" width="48" height="48" loading="lazy">
+                        </span>
+
+                      <span class="aso-review-card__verified-text">Verified Purchase</span>
+                    </div>
+
+                </div>
+
+                <div class="aso-review-card__middle">
+
+                    <div class="aso-review-card__stars">★★★★★</div>
+
+                </div>
+
+
+                  <div class="aso-review-card__text rte"><p>“Stainless steel was destroying my meals, like everything burned on one side and stuck to the bottom. TAIMA heats so evenly it almost feels like cheating haha.”</p></div>
+
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-review-card"
+              style="--aso-block-space-desktop: 14px; --aso-block-space-mobile: 18px;"
+
+            >
+              <div class="aso-review-card__inner">
+                <div class="aso-review-card__top">
+                  <div class="aso-review-card__person">
+
+                      <div class="aso-review-card__avatar">
+                        <img src="//kitchensafetyinstitute.org/cdn/shop/files/7.jpg?v=1773843094&amp;width=104" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/7.jpg?v=1773843094&amp;width=52 52w, //kitchensafetyinstitute.org/cdn/shop/files/7.jpg?v=1773843094&amp;width=104 104w" width="104" height="104" loading="lazy">
+                      </div>
+
+                    <div class="aso-review-card__person-copy">
+
+                        <div class="aso-review-card__name">Marco R.</div>
+
+
+                        <div class="aso-review-card__location">New York, NY</div>
+
+                    </div>
+                  </div>
+
+
+                    <div class="aso-review-card__verified">
+
+                        <span class="aso-review-card__verified-icon" aria-hidden="true">
+                          <img src="//kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=48" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=48 48w" width="48" height="48" loading="lazy">
+                        </span>
+
+                      <span class="aso-review-card__verified-text">Verified Purchase</span>
+                    </div>
+
+                </div>
+
+                <div class="aso-review-card__middle">
+
+                    <div class="aso-review-card__stars">★★★★★</div>
+
+                </div>
+
+
+                  <div class="aso-review-card__text rte"><p>“I've been a professional chef for 13 years and I'm extremely picky about cookware. TAIMA's heat distribution is exceptional, it cooks food beautifully, nothing sticks, and the food genuinely tastes better.”</p></div>
+
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-review-card"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+              <div class="aso-review-card__inner">
+                <div class="aso-review-card__top">
+                  <div class="aso-review-card__person">
+
+                      <div class="aso-review-card__avatar">
+                        <img src="//kitchensafetyinstitute.org/cdn/shop/files/6.jpg?v=1773843094&amp;width=104" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/6.jpg?v=1773843094&amp;width=52 52w, //kitchensafetyinstitute.org/cdn/shop/files/6.jpg?v=1773843094&amp;width=104 104w" width="104" height="104" loading="lazy">
+                      </div>
+
+                    <div class="aso-review-card__person-copy">
+
+                        <div class="aso-review-card__name">Christine L.</div>
+
+
+                        <div class="aso-review-card__location">Sacramento, CA</div>
+
+                    </div>
+                  </div>
+
+
+                    <div class="aso-review-card__verified">
+
+                        <span class="aso-review-card__verified-icon" aria-hidden="true">
+                          <img src="//kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=48" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/SVG_5.svg?v=1773546828&amp;width=48 48w" width="48" height="48" loading="lazy">
+                        </span>
+
+                      <span class="aso-review-card__verified-text">Verified Purchase</span>
+                    </div>
+
+                </div>
+
+                <div class="aso-review-card__middle">
+
+                    <div class="aso-review-card__stars">★★★★★</div>
+
+                </div>
+
+
+                  <div class="aso-review-card__text rte"><p>“After losing my father to cancer I started avoiding any toxins and chemicals, especially in my kitchen. Taima was a turning point. no coatings or chemicals, just pure titanium. I finally feel like I'm protecting my family.”</p></div>
+
+              </div>
+            </div>
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">The Investment Your Body Will Thank You For</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>Titanium cookware isn't the cheapest option on the shelf – and there's a good reason for that. </p><p>The raw material itself costs more, and the manufacturing process demands a level of precision that most cookware brands simply don't invest in.</p><p>But here's what that investment actually delivers:</p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 34px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+
+              <div class="aso-icon-text-item__inner aso-icon-text-item__inner--no-title">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+
+                <div class="aso-icon-text-item__content">
+
+
+                    <div class="aso-icon-text-item__text rte"><p><strong>A pan that lasts a lifetime – no warping, peeling, or replacing every year</strong></p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 34px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+
+              <div class="aso-icon-text-item__inner aso-icon-text-item__inner--no-title">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+
+                <div class="aso-icon-text-item__content">
+
+
+                    <div class="aso-icon-text-item__text rte"><p><strong>Zero risk of toxic coatings breaking down into your food </strong></p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 34px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+
+              <div class="aso-icon-text-item__inner aso-icon-text-item__inner--no-title">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+
+                <div class="aso-icon-text-item__content">
+
+
+                    <div class="aso-icon-text-item__text rte"><p><strong>Even, reliable heat for consistently better meals</strong></p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-icon-text-item"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px; --aso-icon-width-desktop: 34px; --aso-icon-width-mobile: 24px;"
+
+            >
+
+
+              <div class="aso-icon-text-item__inner aso-icon-text-item__inner--no-title">
+
+                  <div class="aso-icon-text-item__icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=24 24w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=28 28w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=34 34w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=48 48w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=68 68w, //kitchensafetyinstitute.org/cdn/shop/files/Background_1.svg?v=1773547311&amp;width=80 80w" width="80" height="80" loading="lazy">
+                  </div>
+
+
+
+                <div class="aso-icon-text-item__content">
+
+
+                    <div class="aso-icon-text-item__text rte"><p><strong>A cooking surface that locks in nutrients instead of contaminating them</strong></p></div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-video-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-video-block__media">
+                  <video playsinline="true" autoplay="autoplay" loop="loop" muted="muted" preload="auto" poster="//kitchensafetyinstitute.org/cdn/shop/files/preview_images/a36b5d3d652342b9bba73b659b5aad52.thumbnail.0000000000_1200x.jpg?v=1773129246"><source src="//kitchensafetyinstitute.org/cdn/shop/videos/c/vp/a36b5d3d652342b9bba73b659b5aad52/a36b5d3d652342b9bba73b659b5aad52.HD-720p-3.0Mbps-77544545.mp4?v=0" type="video/mp4"><img src="//kitchensafetyinstitute.org/cdn/shop/files/preview_images/a36b5d3d652342b9bba73b659b5aad52.thumbnail.0000000000_1200x.jpg?v=1773129246"></video>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>Think about <strong>what you've spent replacing cheap non-stick pans over the years. </strong></p><p>The scratched coatings. The replacements. The health trade-offs you didn't even know you were making.</p><p>TAIMA® changes that equation completely <strong>with a special Spring Detox Sale.</strong></p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">Special Offer for Our Readers</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/200save-_min.jpg?v=1773851290&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/200save-_min.jpg?v=1773851290&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/200save-_min.jpg?v=1773851290&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/200save-_min.jpg?v=1773851290&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/200save-_min.jpg?v=1773851290&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/200save-_min.jpg?v=1773851290&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/200save-_min.jpg?v=1773851290&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/200save-_min.jpg?v=1773851290&amp;width=1800 1800w" width="1800" height="1080" loading="lazy">
+
+                </div>
+
+
+                <div class="aso-feature-image__meta">
+                  <div class="aso-feature-image__meta-left">
+
+                    <div class="aso-feature-image__doctor-copy">
+
+
+                    </div>
+                  </div>
+
+
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>Spring is when most of us start thinking seriously about our health – better food, more movement, cleaner living. </p><p>But few people understand that <strong>the real detox starts in the kitchen, and clearing out toxic cookware is one of the most impactful health decisions you can make. </strong></p><p>Right now, TAIMA® is making that switch easier than ever with <strong>up to $200 off the Certified Pure Titanium Classic Pan</strong> – a product built to last a lifetime, sourced from premium materials, and manufactured with surgical-grade precision.</p><p>Every order still comes fully backed by TAIMA®'s <strong>lifetime warranty,</strong> because a pan built to last should be guaranteed to last. </p><p>And with a <strong>30-day return policy,</strong> you can try it completely risk-free and feel the difference for yourself.</p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-button-block"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <a
+                  href="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0"
+                  class="aso-button-block__button"
+                >
+                  Get $200 Off TAIMA® Titanium Pan NOW
+                </a>
+
+            </div>
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">It Might Sell Out By Tomorrow… Or Maybe Even Today</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/stock_low_-_minm.jpg?v=1773848610&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/stock_low_-_minm.jpg?v=1773848610&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/stock_low_-_minm.jpg?v=1773848610&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/stock_low_-_minm.jpg?v=1773848610&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/stock_low_-_minm.jpg?v=1773848610&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/stock_low_-_minm.jpg?v=1773848610&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/stock_low_-_minm.jpg?v=1773848610&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/stock_low_-_minm.jpg?v=1773848610&amp;width=1800 1800w" width="1800" height="1186" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>Due to the overwhelming response to their <strong>$200 off spring discount</strong>, TAIMA® is running critically <strong>low on stock</strong> – once it's gone, it's gone. </p><p>If you're serious about making the switch, don't wait.</p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_10.png?v=1773830585&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_10.png?v=1773830585&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_10.png?v=1773830585&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_10.png?v=1773830585&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_10.png?v=1773830585&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_10.png?v=1773830585&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_10.png?v=1773830585&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/TAIMA_Titanium_Pan_lifestyle_shot_10.png?v=1773830585&amp;width=1800 1800w" width="1800" height="1186" loading="lazy">
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>But keep in mind, that TAIMA® Pure Titanium Pans are<a href="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0" title="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0"> only available through their official website. </a></p><p>Anything you find on Amazon, third-party retailers, or other online stores is unauthorised, uncertified, and cannot be guaranteed for titanium quality or purity.</p><p>Only the official store guarantees you're getting the real thing –<strong> tested, certified, and built to the standard.</strong></p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">Exclusive Limited-Time Discount: Get TAIMA® Titanium Pan at $200 Off</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-button-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <a
+                  href="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0"
+                  class="aso-button-block__button"
+                >
+                  Get $200 Off
+                </a>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-feature-image"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <div class="aso-feature-image__main">
+
+                    <picture>
+                      <source
+                        media="(max-width: 989px)"
+                        srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_195_1.png?v=1773830861&width=1200"
+                      >
+                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_195.png?v=1773830843&amp;width=1800" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_195.png?v=1773830843&amp;width=400 400w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_195.png?v=1773830843&amp;width=600 600w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_195.png?v=1773830843&amp;width=800 800w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_195.png?v=1773830843&amp;width=1000 1000w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_195.png?v=1773830843&amp;width=1200 1200w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_195.png?v=1773830843&amp;width=1600 1600w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_195.png?v=1773830843&amp;width=1800 1800w" width="1800" height="393" loading="lazy">
+                    </picture>
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-subheading-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+
+                <h2 class="aso-subheading-block__title">Try TAIMA® For 30 Days, Completely 100% Risk-Free</h2>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-new-text"
+              style="--aso-block-space-desktop: 60px; --aso-block-space-mobile: 50px;"
+
+            >
+
+                <div class="aso-new-text__content rte">
+                  <p>You get a <strong>full month</strong> to cook with it, feel the difference, and <strong>decide for yourself. </strong></p><p>If for any reason you're not completely satisfied - send it back. <strong>No questions asked.</strong></p><p>And every TAIMA® pan comes backed by a <strong>lifetime warranty,</strong> because a pan built to last a lifetime should be <strong>guaranteed to last </strong>one.</p><p>Only available through the <a href="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0" title="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0">official TAIMA® store</a> via the link below.</p><p>Anything found on Amazon or third-party retailers cannot be guaranteed for titanium purity or quality.</p><p><strong>Truly a RISK-FREE opportunity!</strong></p>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+              class="aso-block aso-promo-card"
+              style="
+                --aso-block-space-desktop: 24px;
+                --aso-block-space-mobile: 18px;
+                --aso-pc-base-max-width: 1030px;
+                --aso-pc-ribbon-bg: #ff0000;
+                --aso-pc-ribbon-fg: #ffffff;
+                --aso-pc-card-border: #ff0000;
+                --aso-pc-card-bg: #ffffff;
+                --aso-pc-imgwrap-bg: #f5f5f5;
+                --aso-pc-headline-color: #ff0000;
+                --aso-pc-subcopy-color: #000000;
+                --aso-pc-timer-label: #ff0000;
+                --aso-pc-timer-rule: #cecece;
+                --aso-pc-digit-border: #dcdcdc;
+                --aso-pc-digit-bg: #ffffff;
+                --aso-pc-digit-fg: #000000;
+                --aso-pc-unit-color: #777777;
+                --aso-pc-sep-color: #000000;
+                --aso-pc-cta-bg: #00ab41;
+                --aso-pc-cta-fg: #ffffff;
+                --aso-pc-cta-arrow: #ffffff;
+                --aso-pc-line-color: #4e4e4e;
+                --aso-pc-free-color: #000000;
+                --aso-pc-risk-text: #000000;
+                --aso-pc-risk-strong: #ff0000;
+                --aso-pc-risk-dot: #e1e1e1;
+                --aso-pc-risk-dot-red: #ff3b30;
+                --aso-pc-guarantee-color: #000000;
+              "
+
+            >
+              <div class="aso-pc-wrap">
+
+                  <div class="aso-pc-ribbon">
+                    <span class="aso-pc-ribbon-text">Special Offer for Our Readers</span>
+                  </div>
+
+
+                <div class="aso-pc-card">
+
+                    <div class="aso-pc-media">
+                      <div class="aso-pc-imgwrap">
+                        <img
+                          class="aso-pc-img"
+                          src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_194.png?v=1773549406&width=1200"
+                          alt=""
+                          loading="lazy"
+                        >
+                      </div>
+                    </div>
+
+
+                  <div class="aso-pc-content">
+
+                      <h2 class="aso-pc-headline">Last Chance to Save $200 + Free Gift!</h2>
+
+
+                      <div class="aso-pc-subcopy rte"><p>This limited-time Deal is in high demand and stock keeps selling out.</p></div>
+
+
+                    <div class="aso-pc-timer" data-countdown data-start-hours="3" aria-live="polite">
+
+                        <div class="aso-pc-timer-label"><span>Limited Time Offer</span></div>
+
+                      <div class="aso-pc-clock" role="timer">
+                        <div class="aso-pc-dial">
+                          <div class="aso-pc-digits">
+                            <span class="aso-pc-digit" data-hrs-t>0</span>
+                            <span class="aso-pc-digit" data-hrs-o>3</span>
+                          </div>
+                          <span class="aso-pc-unit">Hours</span>
+                        </div>
+                        <span class="aso-pc-sep">:</span>
+                        <div class="aso-pc-dial">
+                          <div class="aso-pc-digits">
+                            <span class="aso-pc-digit" data-min-t>0</span>
+                            <span class="aso-pc-digit" data-min-o>0</span>
+                          </div>
+                          <span class="aso-pc-unit">Minutes</span>
+                        </div>
+                        <span class="aso-pc-sep">:</span>
+                        <div class="aso-pc-dial">
+                          <div class="aso-pc-digits">
+                            <span class="aso-pc-digit" data-sec-t>0</span>
+                            <span class="aso-pc-digit" data-sec-o>0</span>
+                          </div>
+                          <span class="aso-pc-unit">Seconds</span>
+                        </div>
+                      </div>
+                    </div>
+
+
+                      <a
+                        href="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0"
+                        class="aso-pc-cta"
+                      >
+                        <span>Check Availability</span>
+                        <svg class="aso-pc-cta-svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+                          <path d="M18.9547 9.71256L25.6213 16.3792M25.6213 16.3792L18.9547 23.0459M25.6213 16.3792L7.90942 16.3792" stroke="var(--aso-pc-cta-arrow)" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"></path>
+                        </svg>
+                      </a>
+
+
+                      <div class="aso-pc-line aso-pc-free">
+
+                        <span>🚚 FREE Shipping</span>
+                      </div>
+
+
+                      <div class="aso-pc-line aso-pc-risk">
+
+                        <span class="aso-pc-risk-text"><p>⏱ Sell-Out Risk: HIGH </p></span>
+                        <span class="aso-pc-risk-bar" aria-hidden="true">
+                          <span class="aso-pc-risk-dot aso-pc-risk-dot--red"></span>
+                          <span class="aso-pc-risk-dot"></span>
+                          <span class="aso-pc-risk-dot"></span>
+                          <span class="aso-pc-risk-dot"></span>
+                          <span class="aso-pc-risk-dot"></span>
+                          <span class="aso-pc-risk-dot"></span>
+                        </span>
+                      </div>
+
+
+                      <div class="aso-pc-guarantee rte"><p>Try it today with a 30-Day Money Back Guarantee</p></div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+            <div
+              class="aso-block aso-comments-block"
+              style="--aso-block-space-desktop: 24px; --aso-block-space-mobile: 18px;"
+
+            >
+              <div class="aso-comments-block__header">
+
+                  <span class="aso-comments-block__header-icon" aria-hidden="true">
+                    <img src="//kitchensafetyinstitute.org/cdn/shop/files/Facebook_F_logo_SVG.svg?v=1773550889&amp;width=52" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Facebook_F_logo_SVG.svg?v=1773550889&amp;width=26 26w, //kitchensafetyinstitute.org/cdn/shop/files/Facebook_F_logo_SVG.svg?v=1773550889&amp;width=52 52w" width="52" height="52" loading="lazy">
+                  </span>
+
+
+                  <div class="aso-comments-block__header-text">
+                    Comments · 4,889 people have commented on this article
+                  </div>
+
+              </div>
+
+              <div class="aso-comments-block__list">
+
+                    <div class="aso-comments-block__item">
+                      <div class="aso-comments-block__comment">
+
+                          <div class="aso-comments-block__avatar">
+                            <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background_2.png?v=1773550942&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background_2.png?v=1773550942&amp;width=40 40w, //kitchensafetyinstitute.org/cdn/shop/files/Background_2.png?v=1773550942&amp;width=80 80w" width="80" height="80" loading="lazy">
+                          </div>
+
+
+                        <div class="aso-comments-block__body">
+
+                            <div class="aso-comments-block__name">Karen Brynlie</div>
+
+
+                            <div class="aso-comments-block__text">Can anybody vouch for this? Seriously considering ordering...</div>
+
+
+                            <div class="aso-comments-block__meta">
+
+                                <span class="aso-comments-block__like-icon" aria-hidden="true">
+                                  <img src="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=14 14w, //kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28 28w" width="28" height="28" loading="lazy">
+                                </span>
+
+                              <span class="aso-comments-block__likes">4</span>
+
+                                <span class="aso-comments-block__dot">·</span>
+                                <span class="aso-comments-block__reply">Reply</span>
+
+                            </div>
+
+                        </div>
+                      </div>
+
+
+                    </div>
+
+
+                    <div class="aso-comments-block__item aso-comments-block__item--has-nested">
+                      <div class="aso-comments-block__comment">
+
+                          <div class="aso-comments-block__avatar">
+                            <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background_3.png?v=1773551020&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background_3.png?v=1773551020&amp;width=40 40w, //kitchensafetyinstitute.org/cdn/shop/files/Background_3.png?v=1773551020&amp;width=80 80w" width="80" height="80" loading="lazy">
+                          </div>
+
+
+                        <div class="aso-comments-block__body">
+
+                            <div class="aso-comments-block__name">Warren Duffer</div>
+
+
+                            <div class="aso-comments-block__text">Is it really worth the price? I’ve gone through so many non-stick pans already.</div>
+
+
+                            <div class="aso-comments-block__meta">
+
+                                <span class="aso-comments-block__like-icon" aria-hidden="true">
+                                  <img src="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=14 14w, //kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28 28w" width="28" height="28" loading="lazy">
+                                </span>
+
+                              <span class="aso-comments-block__likes">4</span>
+
+                                <span class="aso-comments-block__dot">·</span>
+                                <span class="aso-comments-block__reply">Reply</span>
+
+                            </div>
+
+                        </div>
+                      </div>
+
+
+                        <div class="aso-comments-block__nested">
+                          <div class="aso-comments-block__comment aso-comments-block__comment--nested">
+
+                              <div class="aso-comments-block__avatar">
+                                <img src="//kitchensafetyinstitute.org/cdn/shop/files/Background_4.png?v=1773551058&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Background_4.png?v=1773551058&amp;width=40 40w, //kitchensafetyinstitute.org/cdn/shop/files/Background_4.png?v=1773551058&amp;width=80 80w" width="80" height="80" loading="lazy">
+                              </div>
+
+
+                            <div class="aso-comments-block__body">
+
+                                <div class="aso-comments-block__name">Jennifer Kerry</div>
+
+
+                                <div class="aso-comments-block__text">I paid full price and now it's $200 off?? Not fair... but honestly the pan is worth full price too. Can't complain.</div>
+
+
+                                <div class="aso-comments-block__meta">
+
+                                    <span class="aso-comments-block__like-icon" aria-hidden="true">
+                                      <img src="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=14 14w, //kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28 28w" width="28" height="28" loading="lazy">
+                                    </span>
+
+                                  <span class="aso-comments-block__likes">4</span>
+
+                                    <span class="aso-comments-block__dot">·</span>
+                                    <span class="aso-comments-block__reply">Reply</span>
+
+                                </div>
+
+                            </div>
+                          </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="aso-comments-block__item">
+                      <div class="aso-comments-block__comment">
+
+                          <div class="aso-comments-block__avatar">
+                            <img src="//kitchensafetyinstitute.org/cdn/shop/files/15.jpg?v=1773843094&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/15.jpg?v=1773843094&amp;width=40 40w, //kitchensafetyinstitute.org/cdn/shop/files/15.jpg?v=1773843094&amp;width=80 80w" width="80" height="80" loading="lazy">
+                          </div>
+
+
+                        <div class="aso-comments-block__body">
+
+                            <div class="aso-comments-block__name">Linda Kowalski</div>
+
+
+                            <div class="aso-comments-block__text">I already have one and it's genuinely the best pan I've ever owned. Zero exaggeration. Get it.</div>
+
+
+                            <div class="aso-comments-block__meta">
+
+                                <span class="aso-comments-block__like-icon" aria-hidden="true">
+                                  <img src="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=14 14w, //kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28 28w" width="28" height="28" loading="lazy">
+                                </span>
+
+                              <span class="aso-comments-block__likes">89</span>
+
+                                <span class="aso-comments-block__dot">·</span>
+                                <span class="aso-comments-block__reply">Reply</span>
+
+                            </div>
+
+                        </div>
+                      </div>
+
+
+                    </div>
+
+
+                    <div class="aso-comments-block__item">
+                      <div class="aso-comments-block__comment">
+
+                          <div class="aso-comments-block__avatar">
+                            <img src="//kitchensafetyinstitute.org/cdn/shop/files/8.jpg?v=1773843094&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/8.jpg?v=1773843094&amp;width=40 40w, //kitchensafetyinstitute.org/cdn/shop/files/8.jpg?v=1773843094&amp;width=80 80w" width="80" height="80" loading="lazy">
+                          </div>
+
+
+                        <div class="aso-comments-block__body">
+
+                            <div class="aso-comments-block__name">Donna Wilson</div>
+
+
+                            <div class="aso-comments-block__text">Been using mine for 6 months now. Never going back to regular pans.</div>
+
+
+                            <div class="aso-comments-block__meta">
+
+                                <span class="aso-comments-block__like-icon" aria-hidden="true">
+                                  <img src="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=14 14w, //kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28 28w" width="28" height="28" loading="lazy">
+                                </span>
+
+                              <span class="aso-comments-block__likes">61</span>
+
+                                <span class="aso-comments-block__dot">·</span>
+                                <span class="aso-comments-block__reply">Reply</span>
+
+                            </div>
+
+                        </div>
+                      </div>
+
+
+                    </div>
+
+
+                    <div class="aso-comments-block__item">
+                      <div class="aso-comments-block__comment">
+
+                          <div class="aso-comments-block__avatar">
+                            <img src="//kitchensafetyinstitute.org/cdn/shop/files/13.jpg?v=1773843094&amp;width=80" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/13.jpg?v=1773843094&amp;width=40 40w, //kitchensafetyinstitute.org/cdn/shop/files/13.jpg?v=1773843094&amp;width=80 80w" width="80" height="80" loading="lazy">
+                          </div>
+
+
+                        <div class="aso-comments-block__body">
+
+                            <div class="aso-comments-block__name">Mike Tishdale</div>
+
+
+                            <div class="aso-comments-block__text">The quality is unreal. Wish I bought the set instead of just the one pan.</div>
+
+
+                            <div class="aso-comments-block__meta">
+
+                                <span class="aso-comments-block__like-icon" aria-hidden="true">
+                                  <img src="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28" alt="" srcset="//kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=14 14w, //kitchensafetyinstitute.org/cdn/shop/files/solar_like-bold.svg?v=1773550924&amp;width=28 28w" width="28" height="28" loading="lazy">
+                                </span>
+
+                              <span class="aso-comments-block__likes">93</span>
+
+                                <span class="aso-comments-block__dot">·</span>
+                                <span class="aso-comments-block__reply">Reply</span>
+
+                            </div>
+
+                        </div>
+                      </div>
+
+
+                    </div>
+
+              </div>
+            </div>
+
+
+    </div>
+
+    <aside class="article-sticky-offer__right">
+      <div class="article-sticky-offer__card">
+
+          <div class="article-sticky-offer__top-label-wrap">
+            <span class="article-sticky-offer__top-line"></span>
+            <p class="article-sticky-offer__top-label">Spring Detox Offer</p>
+            <span class="article-sticky-offer__top-line"></span>
+          </div>
+
+
+        <div class="article-sticky-offer__heading">
+
+            <p class="article-sticky-offer__heading-line article-sticky-offer__heading-line--1">The Safest Toxin-Free Titanium Pan on sale for our readers only!</p>
+
+
+        </div>
+
+
+          <div class="article-sticky-offer__logo">
+            <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_146.png?v=1773487155&amp;width=400" alt="Logo" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_146.png?v=1773487155&amp;width=200 200w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_146.png?v=1773487155&amp;width=300 300w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_146.png?v=1773487155&amp;width=400 400w" width="400" height="161" loading="lazy">
+          </div>
+
+
+          <div class="article-sticky-offer__product-image">
+            <img src="//kitchensafetyinstitute.org/cdn/shop/files/Frame_20.png?v=1773486600&amp;width=740" alt="Product" srcset="//kitchensafetyinstitute.org/cdn/shop/files/Frame_20.png?v=1773486600&amp;width=370 370w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_20.png?v=1773486600&amp;width=540 540w, //kitchensafetyinstitute.org/cdn/shop/files/Frame_20.png?v=1773486600&amp;width=740 740w" width="740" height="654" loading="lazy">
+          </div>
+
+
+          <a href="https://taimatitanium.com/products/taima-titanium-nutri-pan-pro-2-0" class="article-sticky-offer__button">
+            Check Availability →
+          </a>
+
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const timers = document.querySelectorAll("[data-countdown]");
+
+  timers.forEach(timer => {
+    let hours = parseInt(timer.dataset.startHours || 3);
+    let totalSeconds = hours * 3600;
+
+    const hrsT = timer.querySelector("[data-hrs-t]");
+    const hrsO = timer.querySelector("[data-hrs-o]");
+    const minT = timer.querySelector("[data-min-t]");
+    const minO = timer.querySelector("[data-min-o]");
+    const secT = timer.querySelector("[data-sec-t]");
+    const secO = timer.querySelector("[data-sec-o]");
+
+    function updateClock() {
+      if (totalSeconds <= 0) {
+        totalSeconds = hours * 3600;
+      }
+
+      let h = Math.floor(totalSeconds / 3600);
+      let m = Math.floor((totalSeconds % 3600) / 60);
+      let s = totalSeconds % 60;
+
+      let hStr = String(h).padStart(2, "0");
+      let mStr = String(m).padStart(2, "0");
+      let sStr = String(s).padStart(2, "0");
+
+      hrsT.textContent = hStr[0];
+      hrsO.textContent = hStr[1];
+      minT.textContent = mStr[0];
+      minO.textContent = mStr[1];
+      secT.textContent = sStr[0];
+      secO.textContent = sStr[1];
+
+      totalSeconds--;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+  });
+});
+</script></div>
+</content>
+</invoke>

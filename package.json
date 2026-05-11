@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "extract-top5": "python3 /tmp/landing-refs/_extract_top5.py"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.5",

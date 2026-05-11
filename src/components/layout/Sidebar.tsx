@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Film, Folder, Boxes, Settings as SettingsIcon, Sparkles, Wand2, UserCog } from "lucide-react";
+import { Film, Folder, Boxes, Settings as SettingsIcon, Sparkles, Wand2, UserCog, FileText } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useSettings } from "@/stores/settingsStore";
 import { useGenerations } from "@/stores/generationsStore";
@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { to: "/", label: "Feed", icon: Film, end: true },
   { to: "/generate", label: "Generate", icon: Wand2, end: false },
   { to: "/character", label: "Characters", icon: UserCog, end: false },
+  { to: "/landings", label: "Landings", icon: FileText, end: false },
   { to: "/projects", label: "Projects", icon: Folder, end: false },
   { to: "/elements", label: "Elements", icon: Boxes, end: false },
   { to: "/settings", label: "Settings", icon: SettingsIcon, end: false },
