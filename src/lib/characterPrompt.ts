@@ -135,6 +135,7 @@ export const GROUPS: OptionGroup[] = [
     options: [
       { id: "slim", label: "Slim", phrase: "slim" },
       { id: "athletic", label: "Athletic", phrase: "athletic" },
+      { id: "muscular", label: "Extremely Muscular", phrase: "extremely muscular" },
       { id: "bulky", label: "Bulky", phrase: "broad heavyset" },
       { id: "fat", label: "Fat", phrase: "heavyset" },
     ],
@@ -194,33 +195,16 @@ export const GROUPS: OptionGroup[] = [
       { id: "hat", label: "Hat", phrase: "wearing a cap" },
     ],
   },
-  // Props — items the subject is holding / using.  Verb-anchored phrasing
-  // ("holding"/"gripping") keeps the prop in-hand vs floating in the
-  // background — known Soul V2 lever for hands+props.  Multi-prop joining
-  // is handled by buildPrompt (avoids the awkward "holding X, holding Y").
+  // Props — free-text only in v0.1.7.  The pre-baked cookware list was
+  // too narrow for the wider character-creator use case; users now type
+  // what the subject is holding via the "Other" field, and buildPrompt
+  // wraps it with "holding " so Soul V2 puts it in-hand vs floating loose.
   {
     kind: "multi",
     group: "props",
     label: "Props",
     allowOther: true,
-    options: [
-      // Pans — material + finish detail helps Soul V2 render the right surface
-      { id: "cast-iron-skillet", label: "Cast Iron Skillet",
-        phrase: "gripping the handle of a well-seasoned cast iron skillet" },
-      { id: "stainless-pan", label: "Stainless Steel Pan",
-        phrase: "gripping a brushed stainless steel frying pan" },
-      { id: "nonstick-pan", label: "Non-Stick Pan",
-        phrase: "gripping a black non-stick frying pan" },
-      { id: "ceramic-pan", label: "Ceramic-Coated Pan",
-        phrase: "gripping a matte white ceramic-coated pan" },
-      // Utensils
-      { id: "chef-knife", label: "Chef's Knife",
-        phrase: "holding a chef's knife" },
-      { id: "tongs", label: "Tongs",
-        phrase: "holding stainless steel kitchen tongs" },
-      { id: "whisk", label: "Whisk",
-        phrase: "holding a wire balloon whisk" },
-    ],
+    options: [],
   },
   // Pose — natural-action verbs over "posing for camera" phrasing.
   {
@@ -230,34 +214,39 @@ export const GROUPS: OptionGroup[] = [
     allowOther: true,
     otherTemplate: (t) => t.trim(),
     options: [
+      // testimonial-first ordering — testimonial is the most useful default
+      // for landing-page hero shots (subject facing camera, explaining).
+      { id: "testimonial", label: "Testimonial Pose",
+        phrase: "facing camera mid-gesture, waist-up" },
       { id: "showcase-product", label: "Showcase to Camera",
         phrase: "presenting the product to the camera, slight three-quarter angle" },
       { id: "cooking-action", label: "Cooking Action",
         phrase: "leaning over counter mid-stir motion" },
-      { id: "pour-action", label: "Pouring Action",
-        phrase: "pouring food into the pan, captured mid-motion" },
-      { id: "close-hands", label: "Close-Up Hands",
-        phrase: "close-up of hands on the pan, shallow depth of field" },
       { id: "side-cooking", label: "Side Profile Cooking",
         phrase: "side profile, focused on the cooking, candid moment" },
       { id: "look-camera", label: "Looking at Camera",
         phrase: "soft eye contact with the camera, mid-laugh" },
       { id: "pointing", label: "Pointing at Product",
         phrase: "gesturing at the product with a relaxed smile" },
-      { id: "testimonial", label: "Testimonial Pose",
-        phrase: "facing the camera mid-gesture as if explaining, waist-up" },
       { id: "reaction", label: "Reaction Shot",
         phrase: "surprised reaction, eyes wide, mid-laugh" },
-      { id: "thumbs-up", label: "Thumbs Up",
-        phrase: "giving a thumbs-up with one hand, soft smile" },
     ],
   },
   {
     kind: "single",
     group: "facialHair",
     label: "Facial Hair",
+    allowOther: true,
+    // Custom facial hair — user supplies the phrase verbatim (e.g.
+    // "with a goatee", "with a handlebar mustache").  Bare text is fine
+    // for Soul V2; the face-details join handles the comma.
+    otherTemplate: (t) => `with ${t.trim()}`,
     options: [
-      { id: "clean", label: "Clean Shaved", phrase: "clean-shaven" },
+      // "None" replaces v0.1.6's "Clean Shaved" label — clearer that this
+      // is the "no facial hair" pick.  Phrase still emits "clean-shaven"
+      // so the prompt explicitly states the absence (Soul V2 needs the
+      // explicit token; just omitting the clause is weaker).
+      { id: "clean", label: "None", phrase: "clean-shaven" },
       { id: "stubble", label: "Stubble", phrase: "with light stubble" },
       { id: "beard", label: "Beard", phrase: "with a full beard" },
       { id: "mustache", label: "Mustache", phrase: "with a thick mustache" },
@@ -333,8 +322,14 @@ export const GROUPS: OptionGroup[] = [
   },
   // Image Style is special: each option resolves to a {lighting, medium,
   // closer} triple at prompt-assembly time (see STYLE_BLOCKS below).
-  // Adding new options here is non-breaking — old characters with
-  // legacy IDs still resolve via the fallback.
+  // v0.1.7 redesign: three specific named-camera presets + Other.  Named
+  // hardware tokens ("iPhone 17 Pro", "Canon EOS R5") land more
+  // consistently on Soul V2 than generic terms ("smartphone",
+  // "professional camera") — Higgsfield is camera-medium-aware natively.
+  //
+  // Legacy IDs (vlog/iphone/editorial/disposable/professional) from
+  // pre-0.1.7 characters fall through to DEFAULT_STYLE_BLOCK at render
+  // time — non-breaking but those characters lose their original style.
   {
     kind: "single",
     group: "imageStyle",
@@ -342,16 +337,15 @@ export const GROUPS: OptionGroup[] = [
     allowOther: true,
     otherTemplate: (t) => t.trim(),
     options: [
-      // Default for UGC hero shots.  Phone-snapshot aesthetic.
-      { id: "vlog", label: "UGC iPhone", phrase: "__style:vlog" },
-      // Selfie-specific framing.
-      { id: "iphone", label: "iPhone Selfie", phrase: "__style:iphone" },
-      // Gritty UGC w/ harsh flash — great for "real person on Reddit"-look.
-      { id: "disposable", label: "Disposable Flash", phrase: "__style:disposable" },
-      // Soft natural light, film-stock color science.
-      { id: "editorial", label: "Lifestyle Editorial", phrase: "__style:editorial" },
-      // Clean studio headshot.
-      { id: "professional", label: "Professional Headshot", phrase: "__style:professional" },
+      // Default — listed first.  Modern phone-camera aesthetic, 4K video
+      // frame look, the cleanest "real person filmed on a phone" baseline.
+      { id: "iphone-pro", label: "iPhone 17 Pro 4K Photo", phrase: "__style:iphone-pro" },
+      // Pro camera with a SPECIFIC named body + lens — Soul V2 reads the
+      // hardware token and adjusts grain/color science accordingly.
+      { id: "pro-camera", label: "Professional Camera (Canon EOS R5)", phrase: "__style:pro-camera" },
+      // Selfie framing — first-person POV, slight wide-angle distortion
+      // characteristic of phone front cameras.
+      { id: "iphone-selfie", label: "iPhone 17 Selfie", phrase: "__style:iphone-selfie" },
     ],
   },
 ];
@@ -375,38 +369,42 @@ interface StyleBlock {
   closer: string;
 }
 
+// v0.1.7: "no subtitles" added — Soul V2 sometimes hallucinates
+// captioning/text overlays on UGC-style outputs (TikTok/Reels muscle
+// memory in the training set).  Explicit negative directive kills it.
 const COMMON_CLOSER =
-  "no retouching, no professional makeup, no signage";
+  "no retouching, no professional makeup, no signage, no subtitles";
 
 const STYLE_BLOCKS: Record<string, StyleBlock> = {
-  vlog: {
-    lighting: "natural ambient indoor lighting",
-    medium: "shot on iPhone, natural film grain",
+  // Default + first option.  Named hardware token ("iPhone 17 Pro")
+  // gives Soul V2 a strong anchor — 4K mode + computational HDR look,
+  // sharp focus on the subject with natural depth-of-field falloff.
+  "iphone-pro": {
+    lighting: "natural ambient lighting, true-to-life dynamic range",
+    medium: "shot on iPhone 17 Pro, 4K photo, sharp focus, natural depth of field",
     closer: COMMON_CLOSER,
   },
-  iphone: {
-    lighting: "even ambient lighting, slight wide-angle distortion",
-    medium: "iPhone front camera, natural film grain",
+  // Pro camera with specific body + lens.  Higgsfield's docs explicitly
+  // call out named cameras/films as "responds intelligently" — Canon
+  // EOS R5 + 50mm f/1.4 + Kodak Portra 400 is a known photoreal
+  // sweet spot.  Trimmed of redundant adjectives ("portrait lens",
+  // "color science", "shallow depth of field" — the f/1.4 token already
+  // signals bokeh) to keep heavy prompts under the 75-word cap.
+  "pro-camera": {
+    lighting: "soft natural light, bright catchlights",
+    medium: "shot on Canon EOS R5, 50mm f/1.4, Kodak Portra 400",
     closer: COMMON_CLOSER,
   },
-  disposable: {
-    lighting: "harsh direct flash, slight overexposure",
-    medium: "shot on a disposable camera, visible grain",
-    closer: COMMON_CLOSER,
-  },
-  editorial: {
-    lighting: "soft window-side morning light, bright catchlights",
-    medium: "Kodak Portra 400, natural grain",
-    closer: COMMON_CLOSER,
-  },
-  professional: {
-    lighting: "soft even studio lighting, bright catchlights in both eyes",
-    medium: "shot on DSLR, 50mm f/1.8, shallow depth of field",
+  // Front-camera selfie — slight wide-angle distortion is the tell that
+  // makes it read as a real phone selfie vs a posed portrait.
+  "iphone-selfie": {
+    lighting: "natural ambient lighting, even facial lighting",
+    medium: "iPhone 17 front camera selfie, slight wide-angle distortion, natural film grain",
     closer: COMMON_CLOSER,
   },
 };
 
-const DEFAULT_STYLE_BLOCK: StyleBlock = STYLE_BLOCKS.vlog;
+const DEFAULT_STYLE_BLOCK: StyleBlock = STYLE_BLOCKS["iphone-pro"];
 
 // ---------------------------------------------------------------------------
 // Selection state shape

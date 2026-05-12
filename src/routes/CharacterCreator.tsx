@@ -333,10 +333,10 @@ export function CharacterCreator() {
                 <Slider
                   value={age}
                   onChange={setAge}
-                  min={1}
-                  max={100}
+                  min={18}
+                  max={99}
                   step={1}
-                  ticks={[10, 25, 50, 75, 100]}
+                  ticks={[20, 35, 50, 65, 85]}
                 />
               )}
             </div>

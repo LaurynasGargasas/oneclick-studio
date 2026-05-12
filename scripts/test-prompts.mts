@@ -36,7 +36,7 @@ interface TestCase {
 
 const cases: TestCase[] = [
   {
-    name: "Hero shot — chef holding cast iron",
+    name: "Hero shot — pro camera, free-text prop",
     sel: {
       ...EMPTY_SELECTIONS,
       gender: "female",
@@ -48,13 +48,13 @@ const cases: TestCase[] = [
       clothes: "chef",
       profession: "chef",
       environment: "homekitchen",
-      props: ["cast-iron-skillet"],
+      propsOther: "a cast iron skillet",
       pose: "cooking-action",
-      imageStyle: "editorial",
+      imageStyle: "pro-camera",
     },
   },
   {
-    name: "iPhone selfie — casual",
+    name: "iPhone selfie",
     sel: {
       ...EMPTY_SELECTIONS,
       gender: "male",
@@ -65,7 +65,19 @@ const cases: TestCase[] = [
       profession: "ugc",
       environment: "home",
       pose: "look-camera",
-      imageStyle: "iphone",
+      imageStyle: "iphone-selfie",
+    },
+  },
+  {
+    name: "iPhone 17 Pro (default style)",
+    sel: {
+      ...EMPTY_SELECTIONS,
+      gender: "female",
+      age: 28,
+      bodyType: "athletic",
+      hairColor: "blonde",
+      hairStyle: "long",
+      imageStyle: "iphone-pro",
     },
   },
   {
@@ -86,47 +98,29 @@ const cases: TestCase[] = [
     },
   },
   {
-    name: "Multi-prop join (avoids holding/holding double-verb)",
-    sel: {
-      ...EMPTY_SELECTIONS,
-      gender: "female",
-      props: ["cast-iron-skillet", "chef-knife", "whisk"],
-    },
-  },
-  {
     name: "Minimum viable — just gender",
     sel: { ...EMPTY_SELECTIONS, gender: "female" },
   },
   {
-    name: "Disposable Flash gritty UGC",
+    name: "Extremely muscular body type",
     sel: {
       ...EMPTY_SELECTIONS,
       gender: "male",
-      age: 40,
-      bodyType: "bulky",
-      hairColor: "black",
-      hairStyle: "short",
-      facialHair: "beard",
+      age: 30,
+      bodyType: "muscular",
+      hairStyle: "buzz",
       clothes: "casual",
-      pose: "thumbs-up",
-      imageStyle: "disposable",
+      imageStyle: "pro-camera",
     },
   },
   {
-    name: "Professional headshot",
+    name: "Facial hair Other (free text)",
     sel: {
       ...EMPTY_SELECTIONS,
-      gender: "female",
-      ethnicity: "mexican",
-      age: 35,
-      hairColor: "black",
-      hairStyle: "professional",
-      accessories: ["glasses"],
-      clothes: "labcoat",
-      profession: "doctor",
-      environment: "prostudio",
-      imageStyle: "professional",
-    },
+      gender: "male",
+      facialHair: "other",
+      facialHairOther: "a neatly trimmed goatee",
+    } as CharacterSelections,
   },
   {
     name: "Heavy: every group filled",
@@ -141,10 +135,11 @@ const cases: TestCase[] = [
       clothes: "chef",
       profession: "chef",
       environment: "prokitchen",
-      pose: "cooking-action",
-      imageStyle: "editorial",
+      pose: "testimonial",
+      imageStyle: "pro-camera",
       accessories: ["freckles"],
-      props: ["cast-iron-skillet"],
+      props: [],
+      propsOther: "a cast iron skillet",
     },
   },
 ];
@@ -163,7 +158,12 @@ const FORBIDDEN: string[] = [
   "flawless",
 ];
 
-const REQUIRED: string[] = ["no visible makeup", "visible pores", "no retouching"];
+const REQUIRED: string[] = [
+  "no visible makeup",
+  "visible pores",
+  "no retouching",
+  "no subtitles",   // v0.1.7 — kills hallucinated caption overlays
+];
 
 for (const c of cases) {
   const prompt = buildPrompt(c.sel);
@@ -203,10 +203,20 @@ for (const c of cases) {
     );
   }
 
-  if ((c.sel.props ?? []).length >= 2) {
+  // Free-text prop check — when propsOther is set, prompt must include
+  // it wrapped with "holding" so Soul V2 puts it in-hand.
+  if (c.sel.propsOther && c.sel.propsOther.trim()) {
     check(
-      `${c.name}: multi-prop uses "also" for second prop`,
-      /\balso\b/.test(prompt),
+      `${c.name}: propsOther emits "holding <text>"`,
+      prompt.toLowerCase().includes(`holding ${c.sel.propsOther.toLowerCase()}`),
+    );
+  }
+
+  // Extremely-muscular body type should land as an inline adjective.
+  if (c.sel.bodyType === "muscular") {
+    check(
+      `${c.name}: muscular body emits "extremely muscular"`,
+      prompt.toLowerCase().includes("extremely muscular"),
     );
   }
 }
