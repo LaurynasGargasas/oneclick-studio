@@ -5,7 +5,7 @@
 export interface Snippet {
   id: string;
   label: string;
-  category: "Text" | "Media" | "Lists" | "CTA" | "Layout";
+  category: "Text" | "Media" | "Lists" | "CTA" | "Layout" | "Social Proof";
   html: string;
 }
 
@@ -184,6 +184,155 @@ export const SNIPPETS: Snippet[] = [
     <p style="margin:0;">Right column body.</p>
   </div>
 </div>`,
+  },
+  {
+    id: "three-col-text",
+    label: "Three Columns",
+    category: "Layout",
+    html: `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:24px 0;">
+  <div>
+    <h4 style="margin:0 0 6px;">Column 1</h4>
+    <p style="margin:0;font-size:0.9em;">Body.</p>
+  </div>
+  <div>
+    <h4 style="margin:0 0 6px;">Column 2</h4>
+    <p style="margin:0;font-size:0.9em;">Body.</p>
+  </div>
+  <div>
+    <h4 style="margin:0 0 6px;">Column 3</h4>
+    <p style="margin:0;font-size:0.9em;">Body.</p>
+  </div>
+</div>`,
+  },
+  {
+    id: "spacer",
+    label: "Spacer (40px)",
+    category: "Layout",
+    html: `<div style="height:40px;"></div>`,
+  },
+
+  // ── Social Proof ──────────────────────────────────────────────────
+  {
+    id: "star-rating",
+    label: "Star Rating",
+    category: "Social Proof",
+    html: `<div style="display:flex;align-items:center;gap:8px;margin:16px 0;">
+  <span style="color:#fbbf24;font-size:1.25em;letter-spacing:2px;">★★★★★</span>
+  <span style="font-weight:bold;">4.9</span>
+  <span style="color:#64748b;font-size:0.9em;">(4,889 verified reviews)</span>
+</div>`,
+  },
+  {
+    id: "testimonial-card",
+    label: "Testimonial Card",
+    category: "Social Proof",
+    html: `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:20px;margin:24px 0;max-width:520px;">
+  <div style="color:#fbbf24;font-size:1.1em;letter-spacing:2px;margin-bottom:8px;">★★★★★</div>
+  <p style="margin:0 0 16px;font-style:italic;color:#334155;line-height:1.6;">"This product completely changed how I cook.  I've recommended it to everyone in my family."</p>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div style="width:36px;height:36px;border-radius:50%;background:#cbd5e1;"></div>
+    <div>
+      <div style="font-weight:bold;font-size:0.9em;">Daniela R.</div>
+      <div style="font-size:0.8em;color:#64748b;">Verified buyer · Chicago, IL</div>
+    </div>
+  </div>
+</div>`,
+  },
+  {
+    id: "testimonial-row",
+    label: "Three Testimonials (row)",
+    category: "Social Proof",
+    html: `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:32px 0;">
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;">
+    <div style="color:#fbbf24;margin-bottom:6px;">★★★★★</div>
+    <p style="margin:0 0 10px;font-size:0.9em;font-style:italic;">"Honestly the best I've used.  Game-changer."</p>
+    <div style="font-size:0.8em;font-weight:bold;">— Renata M.</div>
+  </div>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;">
+    <div style="color:#fbbf24;margin-bottom:6px;">★★★★★</div>
+    <p style="margin:0 0 10px;font-size:0.9em;font-style:italic;">"My kitchen has never been the same since I switched."</p>
+    <div style="font-size:0.8em;font-weight:bold;">— James K.</div>
+  </div>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;">
+    <div style="color:#fbbf24;margin-bottom:6px;">★★★★★</div>
+    <p style="margin:0 0 10px;font-size:0.9em;font-style:italic;">"Worth every penny.  Wish I'd bought it years ago."</p>
+    <div style="font-size:0.8em;font-weight:bold;">— Jane S.</div>
+  </div>
+</div>`,
+  },
+  {
+    id: "social-proof-bar",
+    label: "Customer Count Bar",
+    category: "Social Proof",
+    html: `<div style="text-align:center;padding:24px;background:#f1f5f9;border-radius:8px;margin:24px 0;">
+  <div style="font-size:2em;font-weight:bold;color:#0f172a;">600,000+</div>
+  <div style="color:#64748b;font-size:0.95em;margin-top:4px;">Happy customers and counting</div>
+</div>`,
+  },
+  {
+    id: "press-logos",
+    label: "As Seen In (press strip)",
+    category: "Social Proof",
+    html: `<div style="text-align:center;margin:32px 0;">
+  <div style="font-size:0.7em;letter-spacing:2px;color:#94a3b8;text-transform:uppercase;margin-bottom:12px;">As Seen In</div>
+  <div style="display:flex;justify-content:center;align-items:center;gap:32px;flex-wrap:wrap;color:#64748b;font-weight:bold;letter-spacing:1px;">
+    <span style="font-family:serif;font-size:1.1em;">FORBES</span>
+    <span style="font-style:italic;font-size:1.1em;">Bloomberg</span>
+    <span style="font-size:1.1em;">CNN</span>
+    <span style="font-family:serif;font-size:1.1em;">NYT</span>
+  </div>
+</div>`,
+  },
+
+  // ── Extra CTAs ────────────────────────────────────────────────────
+  {
+    id: "cta-countdown",
+    label: "Countdown CTA",
+    category: "CTA",
+    html: `<div style="background:#dc2626;color:#fff;padding:20px;text-align:center;margin:24px 0;border-radius:6px;">
+  <div style="font-size:0.85em;letter-spacing:2px;text-transform:uppercase;opacity:0.85;">Limited-time offer ends in</div>
+  <div style="font-family:'JetBrains Mono','Courier New',monospace;font-size:2.2em;font-weight:bold;margin:8px 0 12px;letter-spacing:4px;">03:00:00</div>
+  <a href="#" style="display:inline-block;background:#fff;color:#dc2626;padding:12px 28px;border-radius:4px;font-weight:bold;text-transform:uppercase;letter-spacing:0.05em;text-decoration:none;font-size:0.9em;">Claim My Discount</a>
+</div>`,
+  },
+  {
+    id: "cta-secondary",
+    label: "Secondary CTA (outline)",
+    category: "CTA",
+    html: `<div style="text-align:center;margin:24px 0;">
+  <a href="#" style="display:inline-block;border:2px solid #0f172a;color:#0f172a;padding:12px 28px;border-radius:6px;font-weight:bold;text-transform:uppercase;letter-spacing:0.05em;text-decoration:none;font-size:0.9em;">Learn More</a>
+</div>`,
+  },
+
+  // ── Extra Text ────────────────────────────────────────────────────
+  {
+    id: "faq-item",
+    label: "FAQ Item",
+    category: "Text",
+    html: `<details style="border:1px solid #e2e8f0;border-radius:6px;padding:14px 18px;margin:12px 0;">
+  <summary style="cursor:pointer;font-weight:bold;font-size:1.05em;color:#0f172a;">Question goes here?</summary>
+  <p style="margin:12px 0 0;color:#475569;line-height:1.6;">Answer to the question.  Click to expand and edit.</p>
+</details>`,
+  },
+  {
+    id: "comparison-table",
+    label: "Comparison Table",
+    category: "Text",
+    html: `<table style="width:100%;border-collapse:collapse;margin:32px 0;font-size:0.95em;">
+  <thead>
+    <tr style="background:#f1f5f9;">
+      <th style="text-align:left;padding:12px 14px;border-bottom:2px solid #e2e8f0;">Feature</th>
+      <th style="text-align:center;padding:12px 14px;border-bottom:2px solid #e2e8f0;background:#dcfce7;color:#166534;">Us</th>
+      <th style="text-align:center;padding:12px 14px;border-bottom:2px solid #e2e8f0;">Brand B</th>
+      <th style="text-align:center;padding:12px 14px;border-bottom:2px solid #e2e8f0;">Brand C</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;">Non-toxic</td><td style="text-align:center;color:#16a34a;">✓</td><td style="text-align:center;color:#dc2626;">✗</td><td style="text-align:center;color:#dc2626;">✗</td></tr>
+    <tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;">Lifetime warranty</td><td style="text-align:center;color:#16a34a;">✓</td><td style="text-align:center;color:#dc2626;">✗</td><td style="text-align:center;color:#16a34a;">✓</td></tr>
+    <tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;">PFAS-free</td><td style="text-align:center;color:#16a34a;">✓</td><td style="text-align:center;color:#dc2626;">✗</td><td style="text-align:center;color:#dc2626;">✗</td></tr>
+  </tbody>
+</table>`,
   },
 ];
 

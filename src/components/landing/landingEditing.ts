@@ -2,6 +2,53 @@
 // and <video> in a freshly-rendered preset.  Runs after the canvas's
 // innerHTML is set; marks media as contenteditable=false so the
 // surrounding contentEditable doesn't treat them as text.
+//
+// Also exports `executeScripts(root)` which re-runs every inline
+// <script> in the freshly-inserted markup.  Browsers leave such
+// scripts inert when set via innerHTML — without this, the source
+// HTML's FAQ accordions, countdown timers, sticky CTAs, and the
+// ranking-page carousel never wake up.
+
+/**
+ * Rewrite every inline `<style>` inside `root` so width-based @media
+ * queries become @container queries.  The editor canvas is a container
+ * (via `container-type: inline-size`), so this is what makes the
+ * mobile-preview toggle actually trigger responsive breakpoints in the
+ * styles bundled inside each preset's HTML.  On save we invert the
+ * transform — see `serializeCanvas`.
+ */
+export function transformInlineMediaToContainer(root: HTMLElement): void {
+  const styles = root.querySelectorAll("style");
+  for (const s of Array.from(styles)) {
+    if (!s.textContent) continue;
+    const next = s.textContent.replace(
+      /@media\b[^{]*?(\(\s*(?:max|min)-width\s*:\s*[^)]+\))/g,
+      "@container $1",
+    );
+    if (next !== s.textContent) s.textContent = next;
+  }
+}
+
+/**
+ * Re-execute every `<script>` inside `root`.  Replaces each inert
+ * script tag with a freshly-created one (browsers DO execute scripts
+ * created via createElement + inserted into the DOM).
+ */
+export function executeScripts(root: HTMLElement): void {
+  const scripts = Array.from(root.querySelectorAll("script"));
+  for (const old of scripts) {
+    const fresh = document.createElement("script");
+    for (const attr of Array.from(old.attributes)) {
+      try {
+        fresh.setAttribute(attr.name, attr.value);
+      } catch {
+        /* ignore invalid attr names */
+      }
+    }
+    fresh.textContent = old.textContent ?? "";
+    old.replaceWith(fresh);
+  }
+}
 
 const ACCEPT_IMAGE = "image/*,video/*";
 const ACCEPT_VIDEO = "video/*";

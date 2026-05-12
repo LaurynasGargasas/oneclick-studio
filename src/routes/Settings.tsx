@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Save, Activity, CheckCircle, XCircle, Monitor, ExternalLink, Zap, ImageUp, Download, RefreshCw, UserCog } from "lucide-react";
+import { Save, Activity, CheckCircle, XCircle, Monitor, ExternalLink, Zap, ImageUp, Download, RefreshCw, UserCog, Sparkles } from "lucide-react";
 import { check as checkForUpdate, type Update } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { getVersion } from "@tauri-apps/api/app";
@@ -27,6 +27,7 @@ export function Settings() {
   const [imgbbApiKey, setImgbbApiKey] = useState(settings.imgbbApiKey);
   const [higgsfieldApiKey, setHiggsfieldApiKey] = useState(settings.higgsfieldApiKey);
   const [higgsfieldApiSecret, setHiggsfieldApiSecret] = useState(settings.higgsfieldApiSecret);
+  const [anthropicApiKey, setAnthropicApiKey] = useState(settings.anthropicApiKey);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [testState, setTestState] = useState<TestState>("idle");
@@ -124,6 +125,7 @@ export function Settings() {
     setImgbbApiKey(settings.imgbbApiKey);
     setHiggsfieldApiKey(settings.higgsfieldApiKey);
     setHiggsfieldApiSecret(settings.higgsfieldApiSecret);
+    setAnthropicApiKey(settings.anthropicApiKey);
   }, [
     settings.apiEndpoint,
     settings.apiKey,
@@ -131,6 +133,7 @@ export function Settings() {
     settings.imgbbApiKey,
     settings.higgsfieldApiKey,
     settings.higgsfieldApiSecret,
+    settings.anthropicApiKey,
   ]);
 
   async function handleSave() {
@@ -142,6 +145,7 @@ export function Settings() {
       await settings.set("imgbb_api_key", imgbbApiKey);
       await settings.set("higgsfield_api_key", higgsfieldApiKey);
       await settings.set("higgsfield_api_secret", higgsfieldApiSecret);
+      await settings.set("anthropic_api_key", anthropicApiKey);
       setSaved(true);
       setTestState("idle");
       setTimeout(() => setSaved(false), 2000);
@@ -344,6 +348,44 @@ export function Settings() {
         {higgsfieldApiKey && higgsfieldApiSecret && (
           <p className="font-mono text-[0.6rem] text-hud-green mt-3">
             ✓ Higgsfield credentials configured
+          </p>
+        )}
+      </Panel>
+
+      {/* Anthropic (Claude API) — Generate landings with AI */}
+      <Panel className="p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <Sparkles className="w-4 h-4 text-hud-cyan" strokeWidth={1.5} />
+          <h2 className="hud-label text-fg">Anthropic (Generate Landings)</h2>
+        </div>
+
+        <p className="font-mono text-[0.65rem] text-fg-muted mb-4 leading-relaxed">
+          Used by the <span className="text-hud-cyan">Generate with AI</span> button
+          on the Landings page to rewrite preset copy via Claude. Get your key at{" "}
+          <a
+            href="https://console.anthropic.com/settings/keys"
+            target="_blank"
+            rel="noreferrer"
+            className="text-hud-cyan hover:underline"
+          >
+            console.anthropic.com
+          </a>
+          . The key is stored locally and sent directly to Anthropic — no middleman.
+        </p>
+
+        <HudInput
+          label="Anthropic API Key"
+          type="password"
+          mono
+          value={anthropicApiKey}
+          onChange={(e) => setAnthropicApiKey(e.target.value)}
+          placeholder="sk-ant-…"
+          hint="Starts with sk-ant-. Save to apply."
+        />
+
+        {anthropicApiKey && (
+          <p className="font-mono text-[0.6rem] text-hud-green mt-3">
+            ✓ Anthropic key configured
           </p>
         )}
       </Panel>

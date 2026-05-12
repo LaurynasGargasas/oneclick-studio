@@ -155,7 +155,6 @@ async function resolveImageUrl(
   if (apiCreds?.imgbb_api_key) {
     const cached = imgbbCache.get(filePath);
     if (cached) {
-      console.log("imgbb cache hit for", filePath);
       return cached;
     }
     try {
@@ -167,7 +166,6 @@ async function resolveImageUrl(
         });
         if (url) {
           imgbbCache.set(filePath, url);
-          console.log("imgbb upload successful:", url);
           return url;
         }
       }

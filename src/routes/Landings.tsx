@@ -3,11 +3,12 @@
 
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, FileText, Star, Copy, Trash2, Check, X } from "lucide-react";
+import { Plus, FileText, Star, Copy, Trash2, Check, X, Sparkles } from "lucide-react";
 import { Button, Panel } from "@/components/hud";
 import { useLandings, type LandingPage } from "@/stores/landingsStore";
 import { isTauri } from "@/lib/tauri";
 import { PresetPicker } from "@/components/landing/PresetPicker";
+import { GenerateWithAIModal } from "@/components/landing/GenerateWithAIModal";
 import { docFromPreset, getPreset, type Preset } from "@/components/landing/presets";
 import { toast } from "@/stores/toastStore";
 import { cn } from "@/lib/cn";
@@ -22,6 +23,7 @@ export function Landings() {
   const remove = useLandings((s) => s.remove);
   const navigate = useNavigate();
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [generateOpen, setGenerateOpen] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,13 +64,24 @@ export function Landings() {
             {items.length} {items.length === 1 ? "page" : "pages"}
           </div>
         </div>
-        <Button
-          iconLeft={<Plus className="w-4 h-4" />}
-          onClick={() => setPickerOpen(true)}
-          disabled={!isTauri}
-        >
-          New Landing Page
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            iconLeft={<Sparkles className="w-4 h-4" />}
+            onClick={() => setGenerateOpen(true)}
+            disabled={!isTauri}
+            title="Describe your product and let Claude rewrite a preset for it"
+          >
+            Generate with AI
+          </Button>
+          <Button
+            iconLeft={<Plus className="w-4 h-4" />}
+            onClick={() => setPickerOpen(true)}
+            disabled={!isTauri}
+          >
+            New Landing Page
+          </Button>
+        </div>
       </header>
 
       {!isTauri && (
@@ -257,6 +270,12 @@ export function Landings() {
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
         onSelect={handleSelectPreset}
+      />
+
+      <GenerateWithAIModal
+        open={generateOpen}
+        onClose={() => setGenerateOpen(false)}
+        onCreated={(id) => navigate(`/landings/${id}`)}
       />
     </div>
   );

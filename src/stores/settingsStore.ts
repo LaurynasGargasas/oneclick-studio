@@ -14,10 +14,18 @@ interface SettingsState {
   imgbbApiKey: string;
   higgsfieldApiKey: string;
   higgsfieldApiSecret: string;
+  anthropicApiKey: string;
   defaultResolution: string;
   defaultDuration: string;
   defaultAspectRatio: string;
   defaultQuality: string;
+  /** Aspect-ratio enum for the Character Creator (Higgsfield Soul V2).
+   *  One of "9:16" | "16:9" | "4:3" | "3:4" | "1:1" | "2:3" | "3:2".
+   *  Separate from `defaultAspectRatio` which is used by video gens. */
+  characterAspectRatio: string;
+  /** How many images to generate per click — string-encoded "1".."4".
+   *  Parsed and clamped to 1..4 at use time.  Defaults to "4". */
+  characterCount: string;
   themeAccent: string;
   animationIntensity: string;
   loaded: boolean;
@@ -33,10 +41,13 @@ const DEFAULTS = {
   imgbbApiKey: "",
   higgsfieldApiKey: "",
   higgsfieldApiSecret: "",
+  anthropicApiKey: "",
   defaultResolution: "720p",
   defaultDuration: "6",
   defaultAspectRatio: "16:9",
   defaultQuality: "standard",
+  characterAspectRatio: "9:16",
+  characterCount: "4",
   themeAccent: "#00f0ff",
   animationIntensity: "full",
 };
@@ -48,10 +59,13 @@ const KEY_MAP: Record<string, keyof typeof DEFAULTS> = {
   imgbb_api_key: "imgbbApiKey",
   higgsfield_api_key: "higgsfieldApiKey",
   higgsfield_api_secret: "higgsfieldApiSecret",
+  anthropic_api_key: "anthropicApiKey",
   default_resolution: "defaultResolution",
   default_duration: "defaultDuration",
   default_aspect_ratio: "defaultAspectRatio",
   default_quality: "defaultQuality",
+  character_aspect_ratio: "characterAspectRatio",
+  character_count: "characterCount",
   theme_accent: "themeAccent",
   animation_intensity: "animationIntensity",
 };

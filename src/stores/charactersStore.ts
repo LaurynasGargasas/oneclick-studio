@@ -62,8 +62,16 @@ interface SubmitArgs {
   selections: CharacterSelections;
   api_key: string;
   api_secret: string;
-  size?: string;
-  quality?: string;
+  /** Higgsfield Soul V2 aspect-ratio enum.  One of "9:16" | "16:9" |
+   *  "4:3" | "3:4" | "1:1" | "2:3" | "3:2".  Defaults to "9:16" if
+   *  omitted (hero-shot portrait).  Resolution is hardcoded to 1080p
+   *  in the Rust command. */
+  aspect_ratio?: string;
+  /** How many parallel single-image submits to fire.  Clamped to [1, 4]
+   *  internally — values outside that range will be silently snapped.
+   *  Each submit gets its own random seed (batch_size=1 per call) so
+   *  the N images are genuinely diverse, not near-duplicates. */
+  count?: number;
 }
 
 interface CharactersState {
@@ -211,13 +219,18 @@ export const useCharacters = create<CharactersState>((set, get) => ({
     }
   },
 
-  async submit({ prompt, selections, api_key, api_secret, size, quality }) {
+  async submit({ prompt, selections, api_key, api_secret, aspect_ratio, count }) {
     const generation_id = uuid();
     const optionsJson = JSON.stringify(selections);
     const now = Date.now();
 
-    // 1) Show 4 placeholder tiles immediately as the new "current" generation.
-    const placeholders: CharacterImage[] = Array.from({ length: 4 }, () => ({
+    // Clamp count to [1, 4].  Higgsfield bills per image and each submit
+    // is `batch_size=1` so an unbounded count would scale spend linearly
+    // — capping at 4 matches the UI and prevents accidents.
+    const n = Math.max(1, Math.min(4, Math.floor(count ?? 4)));
+
+    // 1) Show N placeholder tiles immediately as the new "current" generation.
+    const placeholders: CharacterImage[] = Array.from({ length: n }, () => ({
       id: "tmp-" + uuid(),
       generation_id,
       job_set_id: null,
@@ -245,8 +258,7 @@ export const useCharacters = create<CharactersState>((set, get) => ({
           apiKey: api_key,
           apiSecret: api_secret,
           prompt,
-          widthAndHeight: size ?? "1536x2048",
-          quality: quality ?? "1080p",
+          aspectRatio: aspect_ratio ?? "9:16",
           batchSize: 1,
         });
         const job = js.jobs[0];

@@ -168,12 +168,41 @@ export function CharacterCreator() {
         selections: liveSelections,
         api_key: settings.higgsfieldApiKey,
         api_secret: settings.higgsfieldApiSecret,
-        size: "1536x2048",
-        quality: "1080p",
+        aspect_ratio: settings.characterAspectRatio,
+        count: characterCount,
       });
     } catch {
       // toast already shown by store
     }
+  }
+
+  // Parse + clamp the persisted count.  Settings stores it as a string so
+  // the DB layer doesn't care about types; UI / submit need a real number.
+  const characterCount: number = Math.max(
+    1,
+    Math.min(4, Number.parseInt(settings.characterCount, 10) || 4),
+  );
+
+  async function setCharacterCount(n: number): Promise<void> {
+    await settings.set("character_count", String(Math.max(1, Math.min(4, n))));
+  }
+
+  // Higgsfield Soul V2 supports a closed enum of aspect ratios.  Keep this
+  // in sync with the dropdown options in the Soul V2 Standard playground
+  // (https://platform.higgsfield.ai → Soul V2 Standard → Aspect Ratio).
+  // 9:16 is the default — best for UGC hero shots on TikTok / Reels / Stories.
+  const ASPECT_RATIOS: Array<{ value: string; label: string; hint: string }> = [
+    { value: "9:16", label: "9:16", hint: "Vertical · TikTok / Reels / Stories" },
+    { value: "3:4", label: "3:4", hint: "Portrait · Classic" },
+    { value: "2:3", label: "2:3", hint: "Portrait · Print" },
+    { value: "1:1", label: "1:1", hint: "Square · Avatar / testimonial" },
+    { value: "4:3", label: "4:3", hint: "Landscape · Editorial" },
+    { value: "3:2", label: "3:2", hint: "Landscape · DSLR" },
+    { value: "16:9", label: "16:9", hint: "Wide · Hero banner" },
+  ];
+
+  async function setAspectRatio(value: string): Promise<void> {
+    await settings.set("character_aspect_ratio", value);
   }
 
   function openImage(img: CharacterImage) {
@@ -250,7 +279,7 @@ export function CharacterCreator() {
             disabled={!canGenerate}
             onClick={() => void handleGenerate()}
           >
-            Generate 4 Images
+            Generate {characterCount} {characterCount === 1 ? "Image" : "Images"}
           </Button>
         </div>
       </div>
@@ -304,10 +333,10 @@ export function CharacterCreator() {
                 <Slider
                   value={age}
                   onChange={setAge}
-                  min={1}
-                  max={100}
+                  min={18}
+                  max={99}
                   step={1}
-                  ticks={[10, 25, 50, 75, 100]}
+                  ticks={[20, 35, 50, 65, 85]}
                 />
               )}
             </div>
@@ -463,14 +492,79 @@ export function CharacterCreator() {
               </span>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+
+          {/* Output controls — aspect ratio + image count.  Both persist
+              to settings so choices survive app restarts.  Resolution is
+              fixed to 1080p backend-side. */}
+          <div className="mb-3 grid grid-cols-[1fr_auto] gap-x-4 gap-y-3 items-end">
+            <div>
+              <div className="hud-label text-fg-dim mb-2">Aspect Ratio</div>
+              <div className="flex flex-wrap gap-1.5">
+                {ASPECT_RATIOS.map((r) => {
+                  const active = settings.characterAspectRatio === r.value;
+                  return (
+                    <button
+                      key={r.value}
+                      type="button"
+                      title={r.hint}
+                      onClick={() => void setAspectRatio(r.value)}
+                      className={cn(
+                        "font-mono text-[0.65rem] uppercase tracking-[0.1em] px-2.5 py-1",
+                        "border transition-colors hud-focus",
+                        active
+                          ? "bg-hud-cyan/15 border-hud-cyan text-hud-cyan"
+                          : "border-border-hud text-fg-muted hover:text-fg hover:border-fg-dim",
+                      )}
+                    >
+                      {r.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <div className="hud-label text-fg-dim mb-2">Images</div>
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4].map((n) => {
+                  const active = characterCount === n;
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      title={`Generate ${n} ${n === 1 ? "image" : "images"} per click`}
+                      onClick={() => void setCharacterCount(n)}
+                      className={cn(
+                        "font-mono text-[0.65rem] uppercase tracking-[0.1em] px-2.5 py-1",
+                        "border transition-colors hud-focus min-w-[2rem]",
+                        active
+                          ? "bg-hud-cyan/15 border-hud-cyan text-hud-cyan"
+                          : "border-border-hud text-fg-muted hover:text-fg hover:border-fg-dim",
+                      )}
+                    >
+                      {n}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Output grid — 1-up when count is 1 (image gets full width),
+              2-col otherwise (2 across, 2 rows for 3 or 4). */}
+          <div
+            className={cn(
+              "grid gap-3",
+              characterCount === 1 ? "grid-cols-1" : "grid-cols-2",
+            )}
+          >
             {(characters.images.length > 0
               ? characters.images
-              : Array.from({ length: 4 }).map(() => null)
+              : Array.from({ length: characterCount }).map(() => null)
             ).map((img, i) => (
               <ImageTile
                 key={img?.id ?? `empty-${i}`}
                 img={img}
+                aspectRatio={settings.characterAspectRatio}
                 onClick={() => img && openImage(img)}
               />
             ))}
@@ -596,16 +690,35 @@ function HistoryThumb({
 // One tile in the current 2x2 grid
 // ---------------------------------------------------------------------------
 
+/** Turn Higgsfield's "W:H" enum into a CSS aspect-ratio string ("W/H").
+ *  Tailwind's `aspect-[X]` arbitrary values must be static at compile
+ *  time, so we apply this via inline `style` instead. */
+function aspectToCss(value: string): string {
+  const [w, h] = value.split(":").map((n) => Number(n));
+  return Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0
+    ? `${w}/${h}`
+    : "3/4";
+}
+
 function ImageTile({
   img,
   onClick,
+  aspectRatio,
 }: {
   img: CharacterImage | null;
   onClick: () => void;
+  /** Higgsfield "W:H" enum — drives the tile's CSS aspect-ratio so the
+   *  placeholder / loading state already shows the right shape before
+   *  the image lands. */
+  aspectRatio: string;
 }) {
+  const aspect = { aspectRatio: aspectToCss(aspectRatio) };
   if (!img) {
     return (
-      <div className="aspect-[3/4] border border-border-hud bg-bg-elevated/20 flex items-center justify-center">
+      <div
+        style={aspect}
+        className="border border-border-hud bg-bg-elevated/20 flex items-center justify-center"
+      >
         <span className="font-mono text-[0.6rem] text-fg-dim uppercase tracking-[0.1em]">
           Empty
         </span>
@@ -617,7 +730,8 @@ function ImageTile({
       <button
         type="button"
         onClick={onClick}
-        className="group relative aspect-[3/4] border border-border-hud overflow-hidden hud-focus"
+        style={aspect}
+        className="group relative border border-border-hud overflow-hidden hud-focus"
       >
         <img
           src={img.image_url}
@@ -630,7 +744,10 @@ function ImageTile({
   }
   if (img.status === "failed" || img.status === "nsfw" || img.status === "canceled") {
     return (
-      <div className="aspect-[3/4] border border-hud-red/40 bg-hud-red/5 flex flex-col items-center justify-center gap-1 p-2 text-center">
+      <div
+        style={aspect}
+        className="border border-hud-red/40 bg-hud-red/5 flex flex-col items-center justify-center gap-1 p-2 text-center"
+      >
         <AlertTriangle className="w-4 h-4 text-hud-red" />
         <span className="font-mono text-[0.6rem] text-hud-red uppercase tracking-[0.1em]">
           {img.status}
@@ -644,7 +761,10 @@ function ImageTile({
     );
   }
   return (
-    <div className="aspect-[3/4] border border-border-hud bg-bg-elevated/30 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
+    <div
+      style={aspect}
+      className="border border-border-hud bg-bg-elevated/30 flex flex-col items-center justify-center gap-2 relative overflow-hidden"
+    >
       <div className="absolute inset-0 bg-gradient-to-br from-hud-cyan/0 via-hud-cyan/5 to-hud-cyan/0 animate-pulse" />
       <Loader2 className="w-5 h-5 text-hud-cyan animate-spin" />
       <span className="font-mono text-[0.6rem] text-fg-dim uppercase tracking-[0.1em]">

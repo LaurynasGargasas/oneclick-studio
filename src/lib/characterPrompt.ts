@@ -1,34 +1,51 @@
-// Character Creator — option schema + deterministic prompt assembler.
+// Character Creator — option schema + Soul V2-tuned prompt assembler.
 //
-// Prompt-engineering notes (learned the hard way):
+// Rewrite history:
+//   - v0.1.4: introduced clothing-first ordering + "fully clothed" guard
+//             against bodyType phrases pulling toward shirtless imagery.
+//   - v0.1.7: full rewrite for Higgsfield Soul V2.
 //
-// 1) Diffusion models (Soul 2.0 included) attend more strongly to tokens
-//    near the START of the prompt.  We therefore put CLOTHING right after
-//    the subject — not buried in the middle — so it doesn't get ignored.
+// Soul V2 prompting principles (from Higgsfield blog + selfielab + Chase
+// Jarvis tier guides; full sources captured in research notes):
 //
-// 2) "Bulky muscular build" type tokens pull hard toward shirtless / gym
-//    training-data imagery.  We always inject a "fully clothed" affirmation
-//    even when no specific garment is chosen, to neutralise that bias.
+// 1) **75-word cap.**  Overlong prompts dilute the Soul tag.  Our template
+//    averages 50-80 words assembled; we cap individual option phrases
+//    short to keep total under 75 typical.
 //
-// 3) Vague garments ("lab coat", "chef outfit") leave the model freedom to
-//    misinterpret. We use specific descriptors ("buttoned white lab coat
-//    over clothes", "chef's white double-breasted jacket") so the actual
-//    garment renders correctly.
+// 2) **Order matters.**  Canonical Soul V2 clause order:
+//    subject → hair → skin → face-details → wardrobe → prop → pose →
+//    environment → lighting → medium → closer.  We follow this exactly.
 //
-// 4) Style suffix is anti-"studio" — we want documentary / smartphone
-//    aesthetic for UGC, with explicit "natural skin texture" to prevent
-//    over-smoothed retouched look the model would otherwise default to.
+// 3) **Camera-medium tokens are native.**  Soul V2 adjusts grain, color
+//    science, dynamic range automatically when given a medium token like
+//    "shot on iPhone, natural film grain" or "Kodak Portra 400."  The
+//    old long DEFAULT_SUFFIX was working against this — replaced with
+//    tight per-style {lighting, medium, closer} blocks (see STYLE_BLOCKS
+//    below).
 //
-// Final assembly order:
+// 4) **High-signal photoreal phrases** (verbatim from Higgsfield/selfielab):
+//      - skin:    "clear natural complexion, visible pores, no visible makeup"
+//      - eyes:    "bright catchlights in both eyes" (folded into lighting)
+//      - hands:   verb-anchored grip ("right hand gripping skillet handle")
+//      - pose:    action verb-led ("leaning over counter, mid-stir")
+//      - lighting: "soft window-side morning light", "phone flash slightly
+//                   overexposed", "soft even studio lighting"
+//      - closer:  "no retouching, no professional makeup, no signage"
 //
-//   <age> <ethnicity> <gender>,
-//   fully clothed [wearing <clothes>],
-//   <profession context>,
-//   <environment>,
-//   <body build>,
-//   <hair>,
-//   <face details>,
-//   <organic style suffix>
+// 5) **Anti-patterns we now AVOID**:
+//      - "8k", "hyperrealistic", "masterpiece", "ultra-detailed" — dilutes
+//      - "perfect"/"flawless" anything → triggers plastic AI skin
+//      - "professional photography" → stock-photo polish, opposite of UGC
+//      - long demographic chains ("Caucasian American Midwestern white woman")
+//      - stacked meta-instructions ("vlog-style realism + documentary moment
+//        + candid unposed" — pick ONE)
+//      - "looks exactly like a real photograph" → meta-noise
+//      - profession-uniform stacking ("chef coat + apron + toque")
+//
+// 6) **enhance_prompt: false** (set in character.rs).  Higgsfield's auto-
+//    enhancer is known to hallucinate ("transports subjects to unexpected
+//    locations") — keeping it off so our carefully-ordered tokens land
+//    intact.
 
 // ---------------------------------------------------------------------------
 // Schema types
@@ -64,6 +81,23 @@ export type OptionGroup = SingleSelectGroup | MultiSelectGroup;
 
 // ---------------------------------------------------------------------------
 // The schema
+//
+// Phrase conventions for Soul V2:
+//   - bodyType:    inline adjective ("athletic build") — placed BEFORE
+//                  the gender noun in subject_core so it reads naturally
+//   - hairColor:   one word ("blonde") — paired with hairStyle below
+//   - hairStyle:   contains the noun ("hair"/"cut"/"bald") so it can
+//                  stand alone if the user only picks a style
+//   - accessories: prop-style ones keep "wearing"; descriptor ones (freckles)
+//                  start with "with" — the joiner reads naturally
+//   - facialHair:  starts with "with" (joined like accessories)
+//   - clothes:     bare noun phrase — buildPrompt prepends "wearing"
+//   - profession:  bare noun — placed as attributive in subject_core
+//   - environment: bare noun phrase — buildPrompt prepends "in"
+//   - props:       verb-anchored ("holding", "gripping") to keep prop in-hand
+//   - pose:        action verb-led
+//   - imageStyle:  sentinel — actual lighting + medium + closer resolved
+//                  via STYLE_BLOCKS below
 // ---------------------------------------------------------------------------
 
 export const GROUPS: OptionGroup[] = [
@@ -94,13 +128,16 @@ export const GROUPS: OptionGroup[] = [
     group: "bodyType",
     label: "Body Type",
     allowOther: true,
-    otherTemplate: (t) => `with a ${t.trim()} build`,
+    // Inline adjective: "athletic 30yo Italian woman".  Drops the v0.1.4
+    // "with a ... build" suffix-style phrasing — Soul V2 prefers tighter
+    // adjective stacks over verbose participial clauses.
+    otherTemplate: (t) => `${t.trim()}-build`,
     options: [
-      // Phrased so it sits naturally AFTER clothing without implying nudity.
-      { id: "slim", label: "Slim", phrase: "with a lean slim build" },
-      { id: "athletic", label: "Athletic", phrase: "with an athletic build" },
-      { id: "bulky", label: "Bulky", phrase: "with a broad, heavily-built frame" },
-      { id: "fat", label: "Fat", phrase: "with a stocky heavyset build" },
+      { id: "slim", label: "Slim", phrase: "slim" },
+      { id: "athletic", label: "Athletic", phrase: "athletic" },
+      { id: "muscular", label: "Extremely Muscular", phrase: "extremely muscular" },
+      { id: "bulky", label: "Bulky", phrase: "broad heavyset" },
+      { id: "fat", label: "Fat", phrase: "heavyset" },
     ],
   },
   {
@@ -111,7 +148,7 @@ export const GROUPS: OptionGroup[] = [
     otherTemplate: (t) => t.trim(),
     options: [
       { id: "blonde", label: "Blonde", phrase: "blonde" },
-      { id: "brown", label: "Brown", phrase: "brown" },
+      { id: "brown", label: "Brown", phrase: "dark brown" },
       { id: "gray", label: "Gray", phrase: "gray" },
       { id: "black", label: "Black", phrase: "black" },
       { id: "ginger", label: "Ginger", phrase: "ginger" },
@@ -123,18 +160,22 @@ export const GROUPS: OptionGroup[] = [
     label: "Hair Style",
     allowOther: true,
     otherTemplate: (t) => t.trim(),
+    // Behavior-led phrasing where the style supports it ("low messy bun
+    // with loose face-framing pieces" reads way better on Soul V2 than
+    // bare "bun").  Each option still contains the noun so it can stand
+    // alone when no color is picked.
     options: [
       { id: "short", label: "Short", phrase: "short hair" },
-      { id: "long", label: "Long", phrase: "long hair" },
+      { id: "long", label: "Long", phrase: "long flowing hair" },
       { id: "professional", label: "Professional", phrase: "neatly styled hair" },
-      { id: "laidback", label: "Laid Back", phrase: "casually messy hair" },
+      { id: "laidback", label: "Laid Back", phrase: "casually messy hair, slightly tousled" },
       { id: "bald", label: "Bald", phrase: "bald" },
-      { id: "buzz", label: "Buzz Cut", phrase: "very short buzz cut" },
-      { id: "curly", label: "Curly", phrase: "curly hair" },
-      { id: "wavy", label: "Wavy", phrase: "wavy hair" },
+      { id: "buzz", label: "Buzz Cut", phrase: "short buzz cut" },
+      { id: "curly", label: "Curly", phrase: "curly hair with natural texture" },
+      { id: "wavy", label: "Wavy", phrase: "loose wavy hair" },
       { id: "straight", label: "Straight", phrase: "straight hair" },
-      { id: "ponytail", label: "Ponytail", phrase: "hair tied back in a ponytail" },
-      { id: "bun", label: "Bun", phrase: "hair tied up in a bun" },
+      { id: "ponytail", label: "Ponytail", phrase: "hair tied back in a low ponytail" },
+      { id: "bun", label: "Bun", phrase: "low messy bun with loose face-framing pieces" },
       { id: "braids", label: "Braids", phrase: "braided hair" },
       { id: "afro", label: "Afro", phrase: "afro hair" },
     ],
@@ -144,43 +185,28 @@ export const GROUPS: OptionGroup[] = [
     group: "accessories",
     label: "Accessories",
     allowOther: true,
+    // Mix of "wearing" (for items) and "with" (for descriptors) so the
+    // joined sentence reads naturally.
     options: [
       { id: "glasses", label: "Glasses", phrase: "wearing prescription glasses" },
       { id: "sunglasses", label: "Sunglasses", phrase: "wearing dark sunglasses" },
-      { id: "freckles", label: "Freckles", phrase: "with freckles across the nose and cheeks" },
-      { id: "chefhat", label: "Chef Hat", phrase: "wearing a tall white chef's toque" },
-      { id: "hat", label: "Hat", phrase: "wearing a hat" },
+      { id: "freckles", label: "Freckles", phrase: "with light freckles across the nose" },
+      { id: "chefhat", label: "Chef Hat", phrase: "wearing a white chef's toque" },
+      { id: "hat", label: "Hat", phrase: "wearing a cap" },
     ],
   },
-  // Props — items the subject is holding / using.  Multi-select so a chef can
-  // hold a pan AND a wooden spoon.  Phrasing always starts with "holding" so
-  // the model puts the prop in-hand rather than placing it loose on a counter.
+  // Props — free-text only in v0.1.7.  The pre-baked cookware list was
+  // too narrow for the wider character-creator use case; users now type
+  // what the subject is holding via the "Other" field, and buildPrompt
+  // wraps it with "holding " so Soul V2 puts it in-hand vs floating loose.
   {
     kind: "multi",
     group: "props",
     label: "Props",
     allowOther: true,
-    options: [
-      // Pans
-      { id: "cast-iron-skillet", label: "Cast Iron Skillet",
-        phrase: "holding a well-seasoned black cast iron skillet" },
-      { id: "stainless-pan", label: "Stainless Steel Pan",
-        phrase: "holding a brushed stainless steel frying pan" },
-      { id: "nonstick-pan", label: "Non-Stick Pan",
-        phrase: "holding a black non-stick frying pan" },
-      { id: "ceramic-pan", label: "Ceramic-Coated Pan",
-        phrase: "holding a matte white ceramic-coated pan" },
-      // Utensils
-      { id: "chef-knife", label: "Chef's Knife",
-        phrase: "holding a chef's knife" },
-      { id: "tongs", label: "Tongs",
-        phrase: "holding stainless steel kitchen tongs" },
-      { id: "whisk", label: "Whisk",
-        phrase: "holding a wire balloon whisk" },
-    ],
+    options: [],
   },
-  // Pose — how the subject is captured.  Single-select.  Wrapped so it reads
-  // as a body-language descriptor right after the action/environment.
+  // Pose — natural-action verbs over "posing for camera" phrasing.
   {
     kind: "single",
     group: "pose",
@@ -188,34 +214,39 @@ export const GROUPS: OptionGroup[] = [
     allowOther: true,
     otherTemplate: (t) => t.trim(),
     options: [
-      { id: "showcase-product", label: "Showcase to Camera",
-        phrase: "holding the product up to the camera with both hands, presenting it directly to the viewer" },
-      { id: "cooking-action", label: "Cooking Action",
-        phrase: "actively cooking in the pan, captured mid-stir motion" },
-      { id: "pour-action", label: "Pouring Action",
-        phrase: "pouring food into the pan, mid-motion" },
-      { id: "close-hands", label: "Close-Up Hands",
-        phrase: "close-up shot focused on the hands gripping the pan" },
-      { id: "side-cooking", label: "Side Profile Cooking",
-        phrase: "captured in side profile while cooking attentively" },
-      { id: "look-camera", label: "Looking at Camera",
-        phrase: "looking directly into the camera with a friendly expression while cooking" },
-      { id: "pointing", label: "Pointing at Product",
-        phrase: "pointing at the product with a confident smile" },
+      // testimonial-first ordering — testimonial is the most useful default
+      // for landing-page hero shots (subject facing camera, explaining).
       { id: "testimonial", label: "Testimonial Pose",
-        phrase: "centered facing the camera in a testimonial-style pose, mid-gesture as if explaining" },
+        phrase: "facing camera mid-gesture, waist-up" },
+      { id: "showcase-product", label: "Showcase to Camera",
+        phrase: "presenting the product to the camera, slight three-quarter angle" },
+      { id: "cooking-action", label: "Cooking Action",
+        phrase: "leaning over counter mid-stir motion" },
+      { id: "side-cooking", label: "Side Profile Cooking",
+        phrase: "side profile, focused on the cooking, candid moment" },
+      { id: "look-camera", label: "Looking at Camera",
+        phrase: "soft eye contact with the camera, mid-laugh" },
+      { id: "pointing", label: "Pointing at Product",
+        phrase: "gesturing at the product with a relaxed smile" },
       { id: "reaction", label: "Reaction Shot",
-        phrase: "showing genuine surprise and delight while looking at the product" },
-      { id: "thumbs-up", label: "Thumbs Up",
-        phrase: "giving a thumbs-up with one hand while holding the product" },
+        phrase: "surprised reaction, eyes wide, mid-laugh" },
     ],
   },
   {
     kind: "single",
     group: "facialHair",
     label: "Facial Hair",
+    allowOther: true,
+    // Custom facial hair — user supplies the phrase verbatim (e.g.
+    // "with a goatee", "with a handlebar mustache").  Bare text is fine
+    // for Soul V2; the face-details join handles the comma.
+    otherTemplate: (t) => `with ${t.trim()}`,
     options: [
-      { id: "clean", label: "Clean Shaved", phrase: "clean shaven face" },
+      // "None" replaces v0.1.6's "Clean Shaved" label — clearer that this
+      // is the "no facial hair" pick.  Phrase still emits "clean-shaven"
+      // so the prompt explicitly states the absence (Soul V2 needs the
+      // explicit token; just omitting the clause is weaker).
+      { id: "clean", label: "None", phrase: "clean-shaven" },
       { id: "stubble", label: "Stubble", phrase: "with light stubble" },
       { id: "beard", label: "Beard", phrase: "with a full beard" },
       { id: "mustache", label: "Mustache", phrase: "with a thick mustache" },
@@ -226,23 +257,24 @@ export const GROUPS: OptionGroup[] = [
     group: "clothes",
     label: "Clothes",
     allowOther: true,
-    // Strong directive — model should render the actual garment, not invent one.
-    otherTemplate: (t) => `wearing ${t.trim()}`,
+    // Material-led, shorter phrasing.  Avoid the v0.1.4 "chef coat + apron"
+    // stacking trap that triggers AI-stock-photo template aesthetic.
+    otherTemplate: (t) => t.trim(),
     options: [
       {
         id: "chef",
         label: "Chef Outfit",
-        phrase: "wearing a chef's white double-breasted jacket and apron",
+        phrase: "white chef's jacket over a tee",
       },
       {
         id: "labcoat",
         label: "Lab Coat",
-        phrase: "wearing a buttoned white lab coat over a shirt",
+        phrase: "buttoned white lab coat",
       },
       {
         id: "casual",
         label: "Casual",
-        phrase: "wearing an everyday casual t-shirt and jeans",
+        phrase: "soft cotton tee and faded jeans",
       },
     ],
   },
@@ -251,11 +283,14 @@ export const GROUPS: OptionGroup[] = [
     group: "profession",
     label: "Profession",
     allowOther: true,
-    otherTemplate: (t) => `${t.trim()} at work`,
+    // Bare noun — buildPrompt inserts as attributive ("30yo Italian chef")
+    // rather than tacking on "at work" which Soul V2 reads as a separate
+    // (vague) directive.
+    otherTemplate: (t) => t.trim(),
     options: [
-      { id: "chef", label: "Chef", phrase: "a chef at work" },
-      { id: "doctor", label: "Doctor", phrase: "a doctor at work" },
-      { id: "ugc", label: "UGC", phrase: "a content creator filming a casual UGC video" },
+      { id: "chef", label: "Chef", phrase: "chef" },
+      { id: "doctor", label: "Doctor", phrase: "doctor" },
+      { id: "ugc", label: "UGC", phrase: "content creator" },
     ],
   },
   {
@@ -263,33 +298,38 @@ export const GROUPS: OptionGroup[] = [
     group: "environment",
     label: "Environment",
     allowOther: true,
-    otherTemplate: (t) => `in ${t.trim()}`,
+    // Bare noun phrase — buildPrompt prepends "in".
+    otherTemplate: (t) => t.trim(),
     options: [
-      { id: "office", label: "Office", phrase: "in a modern open-plan office" },
+      { id: "office", label: "Office", phrase: "a modern open-plan office" },
       {
         id: "prokitchen",
         label: "Professional Kitchen",
-        phrase:
-          "in a busy professional restaurant kitchen with stainless steel surfaces",
+        phrase: "a busy restaurant kitchen, stainless surfaces",
       },
       {
         id: "homekitchen",
         label: "Home Kitchen",
-        phrase: "in a typical home kitchen with countertops and cabinets",
+        phrase: "a sunlit home kitchen",
       },
-      { id: "home", label: "Home", phrase: "at home in a casual living room" },
+      { id: "home", label: "Home", phrase: "a casual home living room" },
       {
         id: "prostudio",
         label: "Professional Studio",
-        phrase: "in a professional photo studio with backdrop and softbox lighting",
+        phrase: "a clean photo studio with neutral backdrop",
       },
     ],
   },
-  // Image Style is special: each option REPLACES the prompt's tail-end style
-  // suffix (lighting / camera / aesthetic descriptors).  The body of the
-  // prompt — subject, clothing, profession, environment, body, hair, face —
-  // is unaffected.  This means picking a style never breaks the v0.1.4
-  // clothing fix.  See applyImageStyleSuffix() below for the lookup.
+  // Image Style is special: each option resolves to a {lighting, medium,
+  // closer} triple at prompt-assembly time (see STYLE_BLOCKS below).
+  // v0.1.7 redesign: three specific named-camera presets + Other.  Named
+  // hardware tokens ("iPhone 17 Pro", "Canon EOS R5") land more
+  // consistently on Soul V2 than generic terms ("smartphone",
+  // "professional camera") — Higgsfield is camera-medium-aware natively.
+  //
+  // Legacy IDs (vlog/iphone/editorial/disposable/professional) from
+  // pre-0.1.7 characters fall through to DEFAULT_STYLE_BLOCK at render
+  // time — non-breaking but those characters lose their original style.
   {
     kind: "single",
     group: "imageStyle",
@@ -297,45 +337,74 @@ export const GROUPS: OptionGroup[] = [
     allowOther: true,
     otherTemplate: (t) => t.trim(),
     options: [
-      {
-        id: "professional",
-        label: "Professional Face Profile",
-        // Sentinel — actual phrase resolved by IMAGE_STYLE_SUFFIXES below.
-        phrase: "__style:professional",
-      },
-      { id: "iphone", label: "iPhone Selfie", phrase: "__style:iphone" },
-      { id: "vlog", label: "Vlog", phrase: "__style:vlog" },
+      // Default — listed first.  Modern phone-camera aesthetic, 4K video
+      // frame look, the cleanest "real person filmed on a phone" baseline.
+      { id: "iphone-pro", label: "iPhone 17 Pro 4K Photo", phrase: "__style:iphone-pro" },
+      // Pro camera with a SPECIFIC named body + lens — Soul V2 reads the
+      // hardware token and adjusts grain/color science accordingly.
+      { id: "pro-camera", label: "Professional Camera (Canon EOS R5)", phrase: "__style:pro-camera" },
+      // Selfie framing — first-person POV, slight wide-angle distortion
+      // characteristic of phone front cameras.
+      { id: "iphone-selfie", label: "iPhone 17 Selfie", phrase: "__style:iphone-selfie" },
     ],
   },
 ];
 
 // ---------------------------------------------------------------------------
-// Style-suffix templates (one per Image Style option)
+// Style blocks — {lighting, medium, closer} triple per Image Style option.
+//
+// Higgsfield's own guidance: prompt the *medium* (iPhone / disposable /
+// film stock), not abstract "photoreal."  Soul V2 adjusts grain, color
+// science, and dynamic range to match.  Each block emits exactly three
+// short clauses appended at the tail end of the assembled prompt — no
+// stacked meta-instructions.
 // ---------------------------------------------------------------------------
 
-const DEFAULT_SUFFIX =
-  "candid unposed everyday photo, natural ambient indoor lighting, " +
-  "natural skin texture and pores, unfiltered and unedited, no retouching, " +
-  "no professional makeup, ordinary documentary moment, slight everyday " +
-  "imperfections, casual smartphone snapshot aesthetic, looks exactly like " +
-  "a real photograph, authentic and grounded, vlog-style realism";
+interface StyleBlock {
+  lighting: string;
+  medium: string;
+  /** Short negative directives — always present, replaces v0.1.4's noisy
+   *  "candid unposed everyday photo + slight imperfections + vlog-style
+   *  realism + looks exactly like a real photograph" stack. */
+  closer: string;
+}
 
-const IMAGE_STYLE_SUFFIXES: Record<string, string> = {
-  professional:
-    "professional studio headshot photograph, soft even studio lighting, " +
-    "sharp focus on the eyes, neutral clean background, polished and refined, " +
-    "shallow depth of field from a high-quality DSLR camera, natural skin " +
-    "texture preserved, looks like a real corporate headshot",
+// v0.1.7: "no subtitles" added — Soul V2 sometimes hallucinates
+// captioning/text overlays on UGC-style outputs (TikTok/Reels muscle
+// memory in the training set).  Explicit negative directive kills it.
+const COMMON_CLOSER =
+  "no retouching, no professional makeup, no signage, no subtitles";
 
-  iphone:
-    "iPhone selfie photograph held at arm's length, casual handheld smartphone " +
-    "framing, slight wide-angle lens distortion typical of front-facing phone " +
-    "cameras, natural everyday indoor lighting, raw and unedited, authentic " +
-    "real selfie aesthetic, point-of-view shot, looks exactly like an actual " +
-    "phone selfie a real person would post",
-
-  vlog: DEFAULT_SUFFIX,
+const STYLE_BLOCKS: Record<string, StyleBlock> = {
+  // Default + first option.  Named hardware token ("iPhone 17 Pro")
+  // gives Soul V2 a strong anchor — 4K mode + computational HDR look,
+  // sharp focus on the subject with natural depth-of-field falloff.
+  "iphone-pro": {
+    lighting: "natural ambient lighting, true-to-life dynamic range",
+    medium: "shot on iPhone 17 Pro, 4K photo, sharp focus, natural depth of field",
+    closer: COMMON_CLOSER,
+  },
+  // Pro camera with specific body + lens.  Higgsfield's docs explicitly
+  // call out named cameras/films as "responds intelligently" — Canon
+  // EOS R5 + 50mm f/1.4 + Kodak Portra 400 is a known photoreal
+  // sweet spot.  Trimmed of redundant adjectives ("portrait lens",
+  // "color science", "shallow depth of field" — the f/1.4 token already
+  // signals bokeh) to keep heavy prompts under the 75-word cap.
+  "pro-camera": {
+    lighting: "soft natural light, bright catchlights",
+    medium: "shot on Canon EOS R5, 50mm f/1.4, Kodak Portra 400",
+    closer: COMMON_CLOSER,
+  },
+  // Front-camera selfie — slight wide-angle distortion is the tell that
+  // makes it read as a real phone selfie vs a posed portrait.
+  "iphone-selfie": {
+    lighting: "natural ambient lighting, even facial lighting",
+    medium: "iPhone 17 front camera selfie, slight wide-angle distortion, natural film grain",
+    closer: COMMON_CLOSER,
+  },
 };
+
+const DEFAULT_STYLE_BLOCK: StyleBlock = STYLE_BLOCKS["iphone-pro"];
 
 // ---------------------------------------------------------------------------
 // Selection state shape
@@ -406,107 +475,151 @@ function resolveSingle(
   return findOption(group, value)?.phrase;
 }
 
+/** Join verb-anchored prop phrases without the redundant "holding X,
+ *  holding Y" double-verb echo.  First prop keeps its full phrase; later
+ *  props drop their leading verb if it matches the first one.  This
+ *  produces "gripping skillet, also holding knife" instead of "gripping
+ *  skillet, holding knife" — small but reads more like real description. */
+function joinProps(phrases: string[]): string {
+  if (phrases.length === 0) return "";
+  if (phrases.length === 1) return phrases[0];
+  return phrases
+    .map((p, i) => (i === 0 ? p : `also ${p}`))
+    .join(", ");
+}
+
+function resolveStyleBlock(
+  imageStyle: string | undefined,
+  imageStyleOther: string | undefined,
+): StyleBlock {
+  if (!imageStyle) return DEFAULT_STYLE_BLOCK;
+  if (imageStyle === "other") {
+    const text = imageStyleOther?.trim();
+    // "Other" is a free-text override: user types the whole tail-end
+    // styling themselves.  We surface it as a single medium clause and
+    // skip lighting + closer (the user took responsibility).
+    return text && text.length > 0
+      ? { lighting: "", medium: text, closer: "" }
+      : DEFAULT_STYLE_BLOCK;
+  }
+  return STYLE_BLOCKS[imageStyle] ?? DEFAULT_STYLE_BLOCK;
+}
+
 /**
- * Build the structured prompt from a selection state.  Empty selections are
- * skipped silently — the prompt only mentions what the user actually picked.
+ * Build a Soul V2-tuned prompt from selections.  Follows the canonical
+ * Higgsfield clause order: subject → hair → skin → face-details →
+ * wardrobe → prop → pose → environment → lighting → medium → closer.
+ *
+ * Targets ≤75 words assembled (Soul V2's documented optimum).  Empty
+ * selections are skipped — the prompt only mentions what the user picked.
+ * The skin clause is always emitted; it's the highest-impact photoreal
+ * lever and costs only 8 tokens.
  */
 export function buildPrompt(s: CharacterSelections): string {
-  const parts: string[] = [];
+  const clauses: string[] = [];
 
-  // 1. Subject — first clause, always present if anything is selected.
+  // ── 1. Subject core ──────────────────────────────────────────────────
+  // Format: "<body> <age>-year-old <ethnicity> <profession|gender>, soft natural smile"
+  //
+  // Profession (if picked) replaces the bare gender noun as a more
+  // specific attributive — "30yo Italian chef" tells Soul V2 more than
+  // "30yo Italian woman".  Gender still lands implicitly via name/face
+  // training.  Body adjective leads so it stacks naturally onto the
+  // noun: "athletic 30yo Italian chef".
+  //
+  // We append a default expression ("soft natural smile") only when the
+  // pose doesn't already encode one — the pose phrase is more specific
+  // when present (e.g. "mid-laugh", "surprised reaction").
   const subjectBits: string[] = [];
+  const body = resolveSingle("bodyType", s.bodyType, s.bodyTypeOther);
+  if (body) subjectBits.push(body);
   if (typeof s.age === "number") subjectBits.push(`${s.age}-year-old`);
   const eth = resolveSingle("ethnicity", s.ethnicity, s.ethnicityOther);
   if (eth) subjectBits.push(eth);
-  const gen = findOption("gender", s.gender);
-  if (gen) subjectBits.push(gen.phrase);
-  const subject = subjectBits.join(" ");
-  if (subject) parts.push(subject);
-
-  // 2. Clothing — LEAD position so the model attends to it strongly.
-  //    Always emit "fully clothed" even when nothing specific is picked,
-  //    to neutralise body-type biases that pull toward shirtless imagery.
-  const clothesPhrase = resolveSingle("clothes", s.clothes, s.clothesOther);
-  if (clothesPhrase) {
-    parts.push(`fully clothed, ${clothesPhrase}`);
-  } else {
-    parts.push("fully clothed in everyday clothing");
-  }
-
-  // 3. Props (held items) — placed right after clothing so the model attends
-  //    to them with similar weight.  Multi-select: comma-joined.
-  const propsBits: string[] = [];
-  for (const p of s.props) {
-    const opt = findOption("props", p);
-    if (opt) propsBits.push(opt.phrase);
-  }
-  if (s.propsOther && s.propsOther.trim()) {
-    propsBits.push(`also holding ${s.propsOther.trim()}`);
-  }
-  if (propsBits.length > 0) parts.push(propsBits.join(", "));
-
-  // 4. Profession context (action / role)
   const prof = resolveSingle("profession", s.profession, s.professionOther);
-  if (prof) parts.push(prof);
-
-  // 5. Pose / camera framing — body language descriptor.
+  const gen = findOption("gender", s.gender)?.phrase;
+  if (prof) {
+    // "athletic 30yo Italian chef" — gender becomes implicit
+    subjectBits.push(prof);
+  } else if (gen) {
+    subjectBits.push(gen);
+  }
+  let subjectCore = subjectBits.join(" ").trim();
+  // Append a baseline expression unless pose carries one.  Cheap +
+  // prevents the dead "looking forward into space" default.
   const pose = resolveSingle("pose", s.pose, s.poseOther);
-  if (pose) parts.push(pose);
+  if (subjectCore && !pose) {
+    subjectCore += ", soft natural smile";
+  }
+  if (subjectCore) clauses.push(subjectCore);
 
-  // 6. Environment / setting
-  const env = resolveSingle("environment", s.environment, s.environmentOther);
-  if (env) parts.push(env);
-
-  // 7. Body — placed AFTER clothing so it reads as physique under the outfit
-  //    rather than a standalone subject (which can imply nudity).
-  const body = resolveSingle("bodyType", s.bodyType, s.bodyTypeOther);
-  if (body) parts.push(body);
-
-  // 6. Hair: "<color> <style>" — bald overrides color
+  // ── 2. Hair (color + style, both optional) ───────────────────────────
   if (s.hairStyle === "bald") {
-    parts.push("bald");
+    clauses.push("bald");
   } else {
-    const hairBits: string[] = [];
     const hc = resolveSingle("hairColor", s.hairColor, s.hairColorOther);
     const hs = resolveSingle("hairStyle", s.hairStyle, s.hairStyleOther);
-    if (hc) hairBits.push(hc);
-    if (hs) hairBits.push(hs);
-    if (hairBits.length > 0) parts.push(hairBits.join(" "));
+    if (hc && hs) clauses.push(`${hc} ${hs}`);
+    else if (hc) clauses.push(`${hc} hair`);          // v0.1.7 bugfix
+    else if (hs) clauses.push(hs);
   }
 
-  // 7. Face features (accessories + facial hair)
+  // ── 3. Skin (always emit — Soul V2's #1 photoreal lever) ─────────────
+  // Verbatim from Higgsfield/selfielab guidance.  Cheap (8 tokens) and
+  // single-handedly responsible for avoiding the plastic-AI-skin look.
+  clauses.push("clear natural complexion, visible pores, no visible makeup");
+
+  // ── 4. Face details (accessories + facial hair) ──────────────────────
+  // Mixed "wearing"/"with" prefixes per option already; join with commas.
   const faceBits: string[] = [];
   for (const a of s.accessories) {
     const opt = findOption("accessories", a);
     if (opt) faceBits.push(opt.phrase);
   }
   if (s.accessoriesOther && s.accessoriesOther.trim()) {
-    faceBits.push(`also wearing ${s.accessoriesOther.trim()}`);
+    faceBits.push(`also ${s.accessoriesOther.trim()}`);
   }
   const fh = findOption("facialHair", s.facialHair);
   if (fh) faceBits.push(fh.phrase);
-  if (faceBits.length > 0) parts.push(faceBits.join(", "));
+  if (faceBits.length > 0) clauses.push(faceBits.join(", "));
 
-  // 8. Style suffix — driven by Image Style if set, else the default
-  //    documentary/smartphone suffix from v0.1.4.  This is the ONLY part of
-  //    the prompt the Image Style affects, so the v0.1.4 clothing safeguards
-  //    above stay intact regardless of style choice.
-  const styleSuffix = resolveStyleSuffix(s.imageStyle, s.imageStyleOther);
-
-  if (parts.length === 0) return styleSuffix;
-  return `${parts.join(", ")}, ${styleSuffix}`;
-}
-
-function resolveStyleSuffix(
-  imageStyle: string | undefined,
-  imageStyleOther: string | undefined,
-): string {
-  if (!imageStyle) return DEFAULT_SUFFIX;
-  if (imageStyle === "other") {
-    const text = imageStyleOther?.trim();
-    return text && text.length > 0 ? text : DEFAULT_SUFFIX;
+  // ── 5. Wardrobe ──────────────────────────────────────────────────────
+  // Always emit something — without a wardrobe clause Soul V2 may invent
+  // one, and the bodyType phrase ("athletic") can pull toward shirtless
+  // gym imagery (v0.1.4 issue still present in V2).
+  const clothesPhrase = resolveSingle("clothes", s.clothes, s.clothesOther);
+  if (clothesPhrase) {
+    clauses.push(`wearing ${clothesPhrase}`);
+  } else {
+    clauses.push("wearing everyday casual clothing");
   }
-  return IMAGE_STYLE_SUFFIXES[imageStyle] ?? DEFAULT_SUFFIX;
+
+  // ── 6. Prop in-hand (verb-anchored) ──────────────────────────────────
+  const propsBits: string[] = [];
+  for (const p of s.props) {
+    const opt = findOption("props", p);
+    if (opt) propsBits.push(opt.phrase);
+  }
+  if (s.propsOther && s.propsOther.trim()) {
+    propsBits.push(`holding ${s.propsOther.trim()}`);
+  }
+  const propsClause = joinProps(propsBits);
+  if (propsClause) clauses.push(propsClause);
+
+  // ── 7. Pose (action-verb-led) ────────────────────────────────────────
+  if (pose) clauses.push(pose);
+
+  // ── 8. Environment ───────────────────────────────────────────────────
+  const env = resolveSingle("environment", s.environment, s.environmentOther);
+  if (env) clauses.push(`in ${env}`);
+
+  // ── 9–11. Lighting, medium, closer (from style block) ────────────────
+  const sty = resolveStyleBlock(s.imageStyle, s.imageStyleOther);
+  if (sty.lighting) clauses.push(sty.lighting);
+  if (sty.medium) clauses.push(sty.medium);
+  if (sty.closer) clauses.push(sty.closer);
+
+  return clauses.join(", ");
 }
 
 /** Whether the user has picked enough to make a meaningful generation. */

@@ -22,8 +22,15 @@ import { useLandings } from "@/stores/landingsStore";
 import { withAlpha } from "@/lib/projectColors";
 import { cn } from "@/lib/cn";
 import type { LandingDocument } from "@/lib/landingTypes";
-import { loadFamilyCss } from "@/components/landing/families";
-import { attachMediaHandlers } from "@/components/landing/landingEditing";
+import { loadFamilyCssForEditor } from "@/components/landing/families";
+import {
+  attachMediaHandlers,
+  executeScripts,
+  transformInlineMediaToContainer,
+} from "@/components/landing/landingEditing";
+import { attachSectionReorder } from "@/components/landing/landingReorder";
+import { serializeCanvas } from "@/components/landing/landingSerialize";
+import { FormattingToolbar } from "@/components/landing/FormattingToolbar";
 import { ExportMenu } from "@/components/landing/ExportMenu";
 import { SnippetPalette } from "@/components/landing/SnippetPalette";
 import {
@@ -58,10 +65,12 @@ export function LandingPageEditor() {
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Lazy-load the family stylesheet for the active preset's family.
+  // Editor variant: width @media → @container so the mobile-preview
+  // toggle (which only narrows the canvas) reflows correctly.
   const docCssFamily = landing?.doc.meta?.css_family ?? null;
   useEffect(() => {
     let cancelled = false;
-    void loadFamilyCss(docCssFamily).then((css) => {
+    void loadFamilyCssForEditor(docCssFamily).then((css) => {
       if (!cancelled) setFamilyCss(css);
     });
     return () => {
@@ -70,28 +79,166 @@ export function LandingPageEditor() {
   }, [docCssFamily]);
 
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [canvasEl, setCanvasEl] = useState<HTMLDivElement | null>(null);
   const renderedForRef = useRef<string | null>(null);
   const latestDocRef = useRef<LandingDocument | null>(null);
+  const detachersRef = useRef<Array<() => void>>([]);
   // Keep the latest document on a ref so save handlers don't need to be
   // re-bound when React re-renders the editor.
   latestDocRef.current = landing?.doc ?? null;
 
+  // ── Undo / redo history ───────────────────────────────────────────
+  // Snapshot-based: every meaningful change pushes the prior html onto
+  // `undoStack`.  Cmd/Ctrl-Z pops one off, restores it, and pushes the
+  // current state onto `redoStack`.  Cmd/Ctrl-Shift-Z does the inverse.
+  //
+  // Typing isn't snapshotted per-keystroke (too expensive); instead a
+  // 700ms debounced `input` listener captures a snapshot after a typing
+  // burst.  Structural mutations (snippet insert, image replace, section
+  // reorder, formatting toolbar) hit saveSnapshot synchronously and
+  // capture their own snapshots.
+  const undoStackRef = useRef<string[]>([]);
+  const redoStackRef = useRef<string[]>([]);
+  const lastHtmlRef = useRef<string>("");
+  const typingTimerRef = useRef<number | null>(null);
+  const restoringRef = useRef(false);
+
+  const MAX_HISTORY = 100;
+
+  function pushHistory(nextHtml: string) {
+    if (nextHtml === lastHtmlRef.current) return;
+    if (lastHtmlRef.current !== "") {
+      undoStackRef.current.push(lastHtmlRef.current);
+      if (undoStackRef.current.length > MAX_HISTORY) {
+        undoStackRef.current.shift();
+      }
+    }
+    // Any fresh change invalidates the redo branch.
+    redoStackRef.current = [];
+    lastHtmlRef.current = nextHtml;
+  }
+
+  function applyHtml(html: string) {
+    const el = canvasRef.current;
+    const current = latestDocRef.current;
+    if (!el || !current || !landing) return;
+    restoringRef.current = true;
+    el.innerHTML = html;
+    transformInlineMediaToContainer(el);
+    lastHtmlRef.current = html;
+    executeScripts(el);
+    attachAll(el);
+    void updateLanding(landing.id, { doc: { ...current, html } });
+    // Allow input events to fire again next tick.
+    requestAnimationFrame(() => {
+      restoringRef.current = false;
+    });
+  }
+
+  function undo() {
+    if (undoStackRef.current.length === 0) return;
+    const prev = undoStackRef.current.pop()!;
+    redoStackRef.current.push(lastHtmlRef.current);
+    applyHtml(prev);
+  }
+
+  function redo() {
+    if (redoStackRef.current.length === 0) return;
+    const next = redoStackRef.current.pop()!;
+    undoStackRef.current.push(lastHtmlRef.current);
+    applyHtml(next);
+  }
+
+  function setCanvasRef(node: HTMLDivElement | null) {
+    canvasRef.current = node;
+    setCanvasEl(node);
+  }
+
+  function detachAll() {
+    detachersRef.current.forEach((fn) => {
+      try {
+        fn();
+      } catch {
+        /* ignore */
+      }
+    });
+    detachersRef.current = [];
+  }
+
+  function attachAll(el: HTMLElement) {
+    detachAll();
+    detachersRef.current.push(
+      attachMediaHandlers(el, { onChange: saveSnapshot }),
+      attachSectionReorder(el, { onChange: saveSnapshot }),
+    );
+  }
+
   // Initial render of the document HTML into the canvas.  We avoid React's
   // controlled-rendering for the HTML body so contentEditable edits don't
   // get wiped by re-renders; instead we imperatively set innerHTML once
-  // per landing and re-attach media handlers.
+  // per landing and re-attach media + reorder handlers.
   useEffect(() => {
     const el = canvasRef.current;
     if (!el || !landing) return;
     if (renderedForRef.current === landing.id) return;
     el.innerHTML = landing.doc.html;
+    transformInlineMediaToContainer(el);
     renderedForRef.current = landing.id;
-    const detach = attachMediaHandlers(el, { onChange: saveSnapshot });
+    lastHtmlRef.current = landing.doc.html;
+    undoStackRef.current = [];
+    redoStackRef.current = [];
+    executeScripts(el);
+    attachAll(el);
     return () => {
-      detach();
+      detachAll();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [landing?.id]);
+
+  // Debounced typing snapshot: after 700ms of no input, capture state
+  // so Cmd-Z gives the user chunk-sized undos rather than wiping the
+  // whole typing burst.
+  useEffect(() => {
+    if (!canvasEl) return;
+    function onInput() {
+      if (restoringRef.current) return;
+      if (typingTimerRef.current) {
+        window.clearTimeout(typingTimerRef.current);
+      }
+      typingTimerRef.current = window.setTimeout(() => {
+        saveSnapshot();
+      }, 700);
+    }
+    canvasEl.addEventListener("input", onInput);
+    return () => {
+      canvasEl.removeEventListener("input", onInput);
+      if (typingTimerRef.current) {
+        window.clearTimeout(typingTimerRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvasEl]);
+
+  // Cmd/Ctrl-Z (undo) + Cmd/Ctrl-Shift-Z or Cmd/Ctrl-Y (redo).  We
+  // always preventDefault so the browser's native contentEditable undo
+  // doesn't fire alongside ours — keeps history coherent.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const cmd = e.metaKey || e.ctrlKey;
+      if (!cmd) return;
+      const key = e.key.toLowerCase();
+      if (key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      } else if ((key === "z" && e.shiftKey) || key === "y") {
+        e.preventDefault();
+        redo();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (editingName && nameInputRef.current) {
@@ -104,8 +251,10 @@ export function LandingPageEditor() {
     const el = canvasRef.current;
     const current = latestDocRef.current;
     if (!el || !current || !landing) return;
-    const html = el.innerHTML;
+    if (restoringRef.current) return;
+    const html = serializeCanvas(el);
     if (html === current.html) return;
+    pushHistory(html);
     void updateLanding(landing.id, { doc: { ...current, html } });
   }
 
@@ -113,9 +262,12 @@ export function LandingPageEditor() {
     const el = canvasRef.current;
     if (!el) return;
     insertSnippetIntoCanvas(el, snippet.html);
-    // Re-attach media handlers so dropped images/videos inside the snippet
-    // become interactive.  Replaces previous bindings (idempotent).
-    attachMediaHandlers(el, { onChange: saveSnapshot });
+    // If the snippet bundles inline styles with @media queries, rewrite
+    // them to @container so they react to canvas width.
+    transformInlineMediaToContainer(el);
+    // Re-bind handlers so the newly-inserted DOM also picks up
+    // section-reorder and media drag/drop.
+    attachAll(el);
     saveSnapshot();
   }
 
@@ -333,20 +485,27 @@ export function LandingPageEditor() {
       >
         {familyCss && <style dangerouslySetInnerHTML={{ __html: familyCss }} />}
         <div
-          ref={canvasRef}
+          ref={setCanvasRef}
           contentEditable
           suppressContentEditableWarning
           spellCheck={false}
           onBlur={saveSnapshot}
           data-lp-family={cssFamily ?? undefined}
           className="lp-canvas relative outline-none focus:outline-none"
+          // `container-type: inline-size` makes the canvas a container-
+          // query context, so the width breakpoints rewritten from @media
+          // to @container in loadFamilyCss() fire based on canvas width
+          // rather than viewport width.  Without this, mobile preview is
+          // just a clipped desktop layout.
+          style={{ containerType: "inline-size" }}
         />
       </div>
 
       <p className="mt-4 text-center font-mono text-[0.65rem] uppercase tracking-[0.15em] text-fg-dim">
-        Click any text to edit · Click or drag a file onto any image / video to replace · Auto-saves on blur · Insert blocks with the + button
+        Click any text to edit · Select text to format · Drag the handle to reorder a section · Drop a file on any image / video to replace · + to insert blocks · ⌘Z / ⌃Z to undo
       </p>
 
+      <FormattingToolbar canvas={canvasEl} onChange={saveSnapshot} />
       <SnippetPalette onPick={handleInsertSnippet} />
 
       <SaveAsPresetModal
