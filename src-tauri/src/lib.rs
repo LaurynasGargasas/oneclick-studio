@@ -59,6 +59,24 @@ pub fn run() {
             sql: include_str!("../migrations/009_landing_presets.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 10,
+            description: "anthropic_key",
+            sql: include_str!("../migrations/010_anthropic_key.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 11,
+            description: "character_aspect_ratio",
+            sql: include_str!("../migrations/011_character_aspect_ratio.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 12,
+            description: "character_count",
+            sql: include_str!("../migrations/012_character_count.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

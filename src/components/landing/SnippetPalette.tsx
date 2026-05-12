@@ -1,8 +1,14 @@
 // Floating "+" launcher on the landing-page editor.  Opens a popover
 // listing snippet blocks (headline, image+text, CTA, etc.) that get
 // inserted at the current cursor position when clicked.
+//
+// Rendered via createPortal under document.body so the framer-motion
+// route transition's `transform` doesn't create a containing block
+// for our `position: fixed` element (which would otherwise make the
+// button scroll with the editor content).
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { SNIPPETS, type Snippet } from "./landingSnippets";
@@ -17,6 +23,7 @@ const CATEGORIES: Snippet["category"][] = [
   "Lists",
   "CTA",
   "Layout",
+  "Social Proof",
 ];
 
 export function SnippetPalette({ onPick }: SnippetPaletteProps) {
@@ -44,8 +51,12 @@ export function SnippetPalette({ onPick }: SnippetPaletteProps) {
     setOpen(false);
   }
 
-  return (
-    <div className="fixed bottom-6 right-6 z-40" ref={ref}>
+  return createPortal(
+    <div
+      className="fixed bottom-6 right-6 z-[1000]"
+      ref={ref}
+      style={{ position: "fixed" }}
+    >
       {open && (
         <div className="absolute bottom-14 right-0 w-[320px] max-h-[60vh] overflow-y-auto bg-bg-panel border border-border-strong shadow-2xl">
           <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-bg-panel border-b border-border-hud">
@@ -97,6 +108,7 @@ export function SnippetPalette({ onPick }: SnippetPaletteProps) {
       >
         <Plus className="w-6 h-6" strokeWidth={2} />
       </button>
-    </div>
+    </div>,
+    document.body,
   );
 }

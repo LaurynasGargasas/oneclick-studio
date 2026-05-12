@@ -1522,3 +1522,138 @@
 [data-lp-family="ten-reasons"] .hat-badge:hover .lp-editor-chrome {
   opacity: 1;
 }
+
+/* === Trusted-slider fallback ==========================================
+   The source page uses jQuery + Slick to lay the testimonial cards out
+   in a 7-up horizontal track.  We don't ship jQuery/Slick, so without
+   any override the cards stack vertically at full size — every video
+   ends up the height of the viewport and overlaps the next one.
+   Force a clean responsive grid so the section is usable even without
+   the Slick runtime.
+   ====================================================================== */
+[data-lp-family="ten-reasons"] .trusted-slider,
+[data-lp-family="ten-reasons"] .trusted-slider .slick-list,
+[data-lp-family="ten-reasons"] .trusted-slider .slick-track {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  width: 100% !important;
+  float: none !important;
+}
+[data-lp-family="ten-reasons"] .trusted-slide,
+[data-lp-family="ten-reasons"] .trusted-slider .slick-slide {
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  float: none !important;
+  display: block !important;
+  aspect-ratio: 9 / 16;
+  position: relative;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+[data-lp-family="ten-reasons"] .trusted-slide video,
+[data-lp-family="ten-reasons"] .trusted-slide iframe,
+[data-lp-family="ten-reasons"] .trusted-slide .video-container,
+[data-lp-family="ten-reasons"] .trusted-slide .video-container video,
+[data-lp-family="ten-reasons"] .trusted-slide .video-container iframe {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border: none !important;
+}
+[data-lp-family="ten-reasons"] .trusted-slide .trusted-slide-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+  color: #fff;
+  z-index: 2;
+  pointer-events: none;
+}
+[data-lp-family="ten-reasons"] .trusted-slide .quote {
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+  padding-bottom: 6px !important;
+  margin: 0 !important;
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+[data-lp-family="ten-reasons"] .trusted-slide .stars {
+  font-size: 12px !important;
+}
+
+/* Compact the section padding so the grid doesn't push the layout
+   way down vs the original Slick view. */
+[data-lp-family="ten-reasons"] .trusted-slider-section-wrapper {
+  padding: 48px 16px !important;
+}
+
+@container (max-width: 749px) {
+  [data-lp-family="ten-reasons"] .trusted-slider,
+  [data-lp-family="ten-reasons"] .trusted-slider .slick-list,
+  [data-lp-family="ten-reasons"] .trusted-slider .slick-track {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  [data-lp-family="ten-reasons"] .trusted-slider-section-wrapper {
+    padding: 32px 12px !important;
+  }
+}
+
+/* === atb (announcement timer bar) — mobile-fit override =================
+   The original mobile rules apply `grid-template-columns: 1fr` to a flex
+   container (no effect) and `display:none` on the CTA — leaving a half-
+   broken layout that still overflows 420px.  Force a flex-column stack
+   that keeps the message, timer, and CTA all visible and properly sized.
+   ====================================================================== */
+@container (max-width: 749px) {
+  [data-lp-family="ten-reasons"] .atb .atb-inner {
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
+    align-items: center !important;
+  }
+  [data-lp-family="ten-reasons"] .atb .atb-left {
+    text-align: center !important;
+  }
+  [data-lp-family="ten-reasons"] .atb .atb-topline {
+    font-size: 13px !important;
+  }
+  [data-lp-family="ten-reasons"] .atb .atb-subline {
+    font-size: 11px !important;
+  }
+  [data-lp-family="ten-reasons"] .atb .atb-timer {
+    gap: 4px !important;
+  }
+  [data-lp-family="ten-reasons"] .atb .atb-seg {
+    min-width: 36px !important;
+    padding: 4px 6px !important;
+  }
+  [data-lp-family="ten-reasons"] .atb .atb-num {
+    font-size: 14px !important;
+  }
+  [data-lp-family="ten-reasons"] .atb .atb-lbl {
+    font-size: 9px !important;
+  }
+  [data-lp-family="ten-reasons"] .atb .atb-cta {
+    display: inline-flex !important;       /* unhide the CTA */
+    margin: 0 !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    gap: 6px;
+    width: fit-content;
+  }
+  [data-lp-family="ten-reasons"] .atb .atb-cta svg {
+    width: 18px;
+    height: 18px;
+  }
+}
