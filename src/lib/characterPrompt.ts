@@ -166,7 +166,7 @@ export const GROUPS: OptionGroup[] = [
     // alone when no color is picked.
     options: [
       { id: "short", label: "Short", phrase: "short hair" },
-      { id: "long", label: "Long", phrase: "long flowing hair" },
+      { id: "long", label: "Long", phrase: "long hair" },
       { id: "professional", label: "Professional", phrase: "neatly styled hair" },
       { id: "laidback", label: "Laid Back", phrase: "casually messy hair, slightly tousled" },
       { id: "bald", label: "Bald", phrase: "bald" },
@@ -175,7 +175,7 @@ export const GROUPS: OptionGroup[] = [
       { id: "wavy", label: "Wavy", phrase: "loose wavy hair" },
       { id: "straight", label: "Straight", phrase: "straight hair" },
       { id: "ponytail", label: "Ponytail", phrase: "hair tied back in a low ponytail" },
-      { id: "bun", label: "Bun", phrase: "low messy bun with loose face-framing pieces" },
+      { id: "bun", label: "Bun", phrase: "low messy bun" },
       { id: "braids", label: "Braids", phrase: "braided hair" },
       { id: "afro", label: "Afro", phrase: "afro hair" },
     ],
@@ -190,7 +190,7 @@ export const GROUPS: OptionGroup[] = [
     options: [
       { id: "glasses", label: "Glasses", phrase: "wearing prescription glasses" },
       { id: "sunglasses", label: "Sunglasses", phrase: "wearing dark sunglasses" },
-      { id: "freckles", label: "Freckles", phrase: "with light freckles across the nose" },
+      { id: "freckles", label: "Freckles", phrase: "with light freckles" },
       { id: "chefhat", label: "Chef Hat", phrase: "wearing a white chef's toque" },
       { id: "hat", label: "Hat", phrase: "wearing a cap" },
     ],
@@ -259,12 +259,29 @@ export const GROUPS: OptionGroup[] = [
     allowOther: true,
     // Material-led, shorter phrasing.  Avoid the v0.1.4 "chef coat + apron"
     // stacking trap that triggers AI-stock-photo template aesthetic.
-    otherTemplate: (t) => t.trim(),
+    //
+    // Free-text input gets wrapped — bare user input like "home chef"
+    // pasted raw made Soul V2 render "Home Chef" as a literal brand
+    // logo on an apron.  v0.1.11 tried "no brand logos, no text on
+    // clothing" — failed because the words "brand"/"logo"/"text" in
+    // the prompt triggered the very thing they were trying to negate
+    // (don't-think-of-an-elephant problem).  v0.1.12 reframes to
+    // positive-only: "plain unmarked" never mentions text/brand/logo.
+    otherTemplate: (t) => `plain unmarked outfit inspired by ${t.trim()}`,
     options: [
       {
         id: "chef",
         label: "Chef Outfit",
-        phrase: "white chef's jacket over a tee",
+        phrase: "white chef's jacket over a plain tee",
+      },
+      {
+        id: "homecook",
+        label: "Home Cook",
+        // Distinct from the pro-kitchen "Chef Outfit" — casual apron-over-
+        // tee for home-cooking content.  "Plain unmarked" replaces v0.1.11's
+        // "no brand logos, no text on clothing" — positive framing avoids
+        // priming Soul V2 to generate text-on-apron in the first place.
+        phrase: "plain unmarked linen apron over a solid-color cotton tee",
       },
       {
         id: "labcoat",
@@ -369,20 +386,42 @@ interface StyleBlock {
   closer: string;
 }
 
-// Negative directives appended to every prompt.  History of growth:
-//   v0.1.7 added "no subtitles" — Soul V2 hallucinates caption text
-//     on UGC outputs (TikTok/Reels muscle memory in training data).
-//   v0.1.10 broadened: real-world outputs showed Soul V2 generating
-//     full Instagram-story UI chrome — usernames, profile-pic circles,
-//     close buttons, gibberish caption text — not just captions.
-//     "no subtitles" was too narrow.  Now covers three failure modes:
-//       - "no text overlays" → gibberish captions, hallucinated text
-//       - "no watermarks"    → usernames, handles, "@" tags, logos
-//       - "no app interface" → close buttons, UI chrome, story frames
-//   "no retouching" + "no professional makeup" stay — they're the
-//   plastic-skin guards from v0.1.7.
+// Closer — POSITIVE-ONLY framing.  Lessons-learned:
+//
+//   v0.1.7  "no subtitles" — kills hallucinated caption text.
+//   v0.1.10 broadened to "no text overlays / no watermarks / no app
+//     interface" after Soul V2 generated full Instagram story UI.
+//   v0.1.11 added brand-specific negatives ("no Instagram", "no
+//     TikTok") after v0.1.10 still failed in production.
+//   v0.1.12 (this) Brand-specific negatives ALSO failed.  Diffusion
+//     models have a "don't think of an elephant" problem — writing
+//     "no Instagram UI" puts the Instagram token in the prompt, and
+//     the model attends to it more than the "no".  Writing "no text
+//     on clothing" similarly triggers text generation.  Switched to
+//     positive-only framing: never mention the unwanted concept at
+//     all, instead describe what we WANT.  "standalone photograph"
+//     replaces "no Instagram"; "plain unmarked garments" replaces
+//     "no brand logos or text"; "natural undisturbed skin" replaces
+//     "no makeup or retouching".
+// Closer (positive only).  "plain unmarked solid-color garments" is
+// stronger than just "plain unmarked" — adds another descriptor of
+// the SURFACE (solid-color = uniform, no print) without ever mentioning
+// the unwanted concepts (text / brand / logo) that would prime the
+// model.  See COMMON_NEGATIVE_PROMPT below for the separate-field
+// negative guidance that complements this.
 const COMMON_CLOSER =
-  "no retouching, no professional makeup, no text overlays, no watermarks, no app interface";
+  "standalone photograph, plain unmarked solid-color garments, smooth fabric surface, natural undisturbed skin, soft genuine expression";
+
+/** Negative-prompt directive list — what we WANT THE MODEL TO AVOID.
+ *  Sent as a separate `negative_prompt` field on Soul V2 requests
+ *  (Higgsfield may or may not honor it; harmless either way).  Kept
+ *  separate from the positive prompt so the unwanted tokens don't
+ *  prime the model via the "don't think of elephant" effect.  When
+ *  Higgsfield ignores it, the positive descriptors in COMMON_CLOSER
+ *  carry the load.  When honored, this is the real negative-guidance
+ *  signal. */
+export const COMMON_NEGATIVE_PROMPT =
+  "text on clothing, brand logos, watermarks, captions, usernames, profile pictures, Instagram UI, TikTok UI, Snapchat UI, story interface, app chrome, close button, makeup, retouching, plastic skin, hyperrealistic, ultra-detailed, 8k, masterpiece";
 
 // The word "selfie" co-occurs heavily with social-media imagery in
 // Soul V2's training data → easy to drift into "Instagram story
@@ -394,10 +433,14 @@ const STYLE_BLOCKS: Record<string, StyleBlock> = {
   // Default + first option.  Named hardware token ("iPhone 17 Pro")
   // gives Soul V2 a strong anchor — 4K mode + computational HDR look,
   // sharp focus on the subject with natural depth-of-field falloff.
-  // "candid photograph" leads to disambiguate from app screenshots.
+  //
+  // v0.1.12: Dropped "candid" (Instagram-coded in training data).
+  // Lead with "third-person photograph" to immediately disambiguate
+  // from the iPhone-selfie style and from Instagram-story framing.
+  // The closer's "standalone photograph" reinforces this further.
   "iphone-pro": {
     lighting: "natural ambient lighting, true-to-life dynamic range",
-    medium: "candid photograph on iPhone 17 Pro, 4K, sharp focus, natural depth of field",
+    medium: "third-person photograph captured on iPhone 17 Pro in 4K mode, sharp focus, natural depth of field",
     closer: COMMON_CLOSER,
   },
   // Pro camera with specific body + lens.  Higgsfield's docs explicitly
@@ -582,9 +625,12 @@ export function buildPrompt(s: CharacterSelections): string {
   }
 
   // ── 3. Skin (always emit — Soul V2's #1 photoreal lever) ─────────────
-  // Verbatim from Higgsfield/selfielab guidance.  Cheap (8 tokens) and
-  // single-handedly responsible for avoiding the plastic-AI-skin look.
-  clauses.push("clear natural complexion, visible pores, no visible makeup");
+  // Trimmed in v0.1.11: "no visible makeup" moved to the closer (which
+  // now says "no makeup or retouching" globally), saving 3 words for
+  // the heavier negatives (Instagram UI, brand logos).  Verbatim from
+  // Higgsfield/selfielab guidance — single-handedly responsible for
+  // avoiding the plastic-AI-skin look.
+  clauses.push("natural complexion with visible pores");
 
   // ── 4. Face details (accessories + facial hair) ──────────────────────
   // Mixed "wearing"/"with" prefixes per option already; join with commas.
@@ -601,14 +647,18 @@ export function buildPrompt(s: CharacterSelections): string {
   if (faceBits.length > 0) clauses.push(faceBits.join(", "));
 
   // ── 5. Wardrobe ──────────────────────────────────────────────────────
-  // Always emit something — without a wardrobe clause Soul V2 may invent
-  // one, and the bodyType phrase ("athletic") can pull toward shirtless
-  // gym imagery (v0.1.4 issue still present in V2).
+  // Always emit something AND always lead with "fully clothed".  The
+  // body-type adjectives (athletic / muscular / bulky) co-occur with
+  // gym/fitness imagery in Soul V2's training data and reliably pull
+  // outputs toward shirtless even when a clothing clause exists.  The
+  // v0.1.4 "fully clothed" prefix was the original guard against this
+  // — got dropped in v0.1.7's rewrite, re-added in response to a
+  // real-world failure (athletic male + clothing override → shirtless).
   const clothesPhrase = resolveSingle("clothes", s.clothes, s.clothesOther);
   if (clothesPhrase) {
-    clauses.push(`wearing ${clothesPhrase}`);
+    clauses.push(`fully clothed, wearing ${clothesPhrase}`);
   } else {
-    clauses.push("wearing everyday casual clothing");
+    clauses.push("fully clothed in everyday casual clothing");
   }
 
   // ── 6. Prop in-hand (verb-anchored) ──────────────────────────────────

@@ -159,15 +159,32 @@ const FORBIDDEN: string[] = [
 ];
 
 const REQUIRED: string[] = [
-  "no visible makeup",
+  // Photoreal lever (skin clause).
   "visible pores",
-  "no retouching",
-  // v0.1.10 — broadened Instagram-UI guards.  Replaces v0.1.7's
-  // "no subtitles" alone, which only caught caption text but missed
-  // usernames (watermarks) + story-UI chrome (app interface).
-  "no text overlays",
-  "no watermarks",
-  "no app interface",
+  // v0.1.12 — positive-only closer phrases.  We REMOVED v0.1.11's
+  // negative directives ("no makeup or retouching", "no Instagram UI",
+  // etc.) because they trigger the very things they negate in diffusion
+  // models (the "don't think of an elephant" problem).  Positive
+  // descriptors describe what we WANT.
+  "standalone photograph",
+  "plain unmarked solid-color garments",
+  "smooth fabric surface",
+  "natural undisturbed skin",
+  // Shirtless guard from v0.1.11 — body-type adjectives (athletic,
+  // muscular, bulky) reliably pull toward shirtless gym imagery
+  // without it.  Positive directive, safe to keep.
+  "fully clothed",
+];
+
+// Words that previously appeared in our negative directives but should
+// now be ABSENT from the prompt entirely.  Mentioning them at all —
+// even with "no" in front — primes Soul V2 to generate them.
+const MUST_NOT_APPEAR: string[] = [
+  "Instagram",
+  "TikTok",
+  "screenshot",     // "not a screenshot" included this token — drop
+  "brand logos",    // triggers logo generation
+  "no text",        // triggers text generation
 ];
 
 for (const c of cases) {
@@ -189,6 +206,13 @@ for (const c of cases) {
     check(
       `${c.name}: contains "${must}"`,
       prompt.toLowerCase().includes(must.toLowerCase()),
+    );
+  }
+  for (const tabu of MUST_NOT_APPEAR) {
+    check(
+      `${c.name}: does NOT contain "${tabu}"`,
+      !prompt.toLowerCase().includes(tabu.toLowerCase()),
+      "trigger word leaked into the prompt",
     );
   }
 
