@@ -396,29 +396,42 @@ pub async fn poll_character_batch(
         .text()
         .await
         .map_err(|e| format!("Read poll body: {e}"))?;
-    // Log every poll response in dev builds — useful for diagnosing
-    // schema drift on Higgsfield's side or extract_result_url misses.
-    // Gated to `debug_assertions` so release users don't see the spam:
-    // this fires on every poll tick (every few seconds) per in-flight image.
-    #[cfg(debug_assertions)]
-    eprintln!("[soul-v2-poll] {raw}");
-
     let parsed: StatusV2Response = serde_json::from_str(&raw).map_err(|e| {
         let preview: String = raw.chars().take(500).collect();
         format!("Parse poll response: {e}.  Body preview: {preview}")
     })?;
 
     let result_url = extract_result_url(&parsed.extra);
-    // Synthesize the V1-shaped JobSet.  Status terms ("queued",
-    // "in_progress", "completed", "failed", "nsfw") are passed through —
-    // mapStatus on the JS side handles the enum normalization.  If V2
-    // uses a status we haven't seen, mapStatus's default branch sends it
-    // to "in_progress" (safe — just keeps polling).
+
+    // v0.1.8 fix: URL-presence-equals-completed.  Soul V2's status
+    // terminology may not match V1's (we've seen "succeeded", "running",
+    // "finished" in the wild) — when V2 returns a status string our JS
+    // mapStatus doesn't recognize, the poll loop spins forever.  When
+    // a result URL is in the response the request is DONE, regardless
+    // of what V2 named the state.  We override the status to "completed"
+    // so the JS isTerminal check fires reliably.
+    //
+    // Diagnostic log (dev only): status + whether a URL was found.
+    // Catches future schema drift fast.
+    #[cfg(debug_assertions)]
+    eprintln!(
+        "[soul-v2-poll] status={} url_found={} request={}",
+        parsed.status,
+        result_url.is_some(),
+        parsed.request_id.as_deref().unwrap_or(&job_set_id),
+    );
+
+    let normalized_status = if result_url.is_some() {
+        "completed".to_owned()
+    } else {
+        parsed.status
+    };
+
     Ok(JobSet {
         id: parsed.request_id.clone().unwrap_or_else(|| job_set_id.clone()),
         jobs: vec![Job {
             id: parsed.request_id.unwrap_or(job_set_id),
-            status: parsed.status,
+            status: normalized_status,
             results: result_url.map(|url| JobResults {
                 raw: Some(JobResult {
                     url,
