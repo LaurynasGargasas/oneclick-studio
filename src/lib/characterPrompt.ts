@@ -131,7 +131,12 @@ export const GROUPS: OptionGroup[] = [
     // Inline adjective: "athletic 30yo Italian woman".  Drops the v0.1.4
     // "with a ... build" suffix-style phrasing — Soul V2 prefers tighter
     // adjective stacks over verbose participial clauses.
-    otherTemplate: (t) => `${t.trim()}-build`,
+    //
+    // v0.1.12 bugfix: was `${t}-build` producing "tall-build" which
+    // reads as a hyphenated compound, not an adjective.  Preset
+    // options ("slim", "athletic", "broad heavyset") don't carry the
+    // "-build" suffix either — Other should match.
+    otherTemplate: (t) => t.trim(),
     options: [
       { id: "slim", label: "Slim", phrase: "slim" },
       { id: "athletic", label: "Athletic", phrase: "athletic" },
@@ -596,14 +601,17 @@ export function buildPrompt(s: CharacterSelections): string {
   if (typeof s.age === "number") subjectBits.push(`${s.age}-year-old`);
   const eth = resolveSingle("ethnicity", s.ethnicity, s.ethnicityOther);
   if (eth) subjectBits.push(eth);
-  const prof = resolveSingle("profession", s.profession, s.professionOther);
+  // BUG FIX: v0.1.7 → v0.1.11 had a misguided optimization that
+  // REPLACED gender with profession when both were picked (rationale:
+  // "athletic 30yo Italian chef" reads natural).  Result: Soul V2 had
+  // to infer gender from the profession noun alone, and defaulted to
+  // male regardless of what the user picked.  v0.1.12 always emits
+  // both — "athletic 30yo Italian female chef" — gender lands
+  // explicitly and the prompt still reads grammatically.
   const gen = findOption("gender", s.gender)?.phrase;
-  if (prof) {
-    // "athletic 30yo Italian chef" — gender becomes implicit
-    subjectBits.push(prof);
-  } else if (gen) {
-    subjectBits.push(gen);
-  }
+  if (gen) subjectBits.push(gen);
+  const prof = resolveSingle("profession", s.profession, s.professionOther);
+  if (prof) subjectBits.push(prof);
   let subjectCore = subjectBits.join(" ").trim();
   // Append a baseline expression unless pose carries one.  Cheap +
   // prevents the dead "looking forward into space" default.
