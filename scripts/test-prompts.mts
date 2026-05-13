@@ -162,7 +162,12 @@ const REQUIRED: string[] = [
   "no visible makeup",
   "visible pores",
   "no retouching",
-  "no subtitles",   // v0.1.7 — kills hallucinated caption overlays
+  // v0.1.10 — broadened Instagram-UI guards.  Replaces v0.1.7's
+  // "no subtitles" alone, which only caught caption text but missed
+  // usernames (watermarks) + story-UI chrome (app interface).
+  "no text overlays",
+  "no watermarks",
+  "no app interface",
 ];
 
 for (const c of cases) {

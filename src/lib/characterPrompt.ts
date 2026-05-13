@@ -369,19 +369,35 @@ interface StyleBlock {
   closer: string;
 }
 
-// v0.1.7: "no subtitles" added — Soul V2 sometimes hallucinates
-// captioning/text overlays on UGC-style outputs (TikTok/Reels muscle
-// memory in the training set).  Explicit negative directive kills it.
+// Negative directives appended to every prompt.  History of growth:
+//   v0.1.7 added "no subtitles" — Soul V2 hallucinates caption text
+//     on UGC outputs (TikTok/Reels muscle memory in training data).
+//   v0.1.10 broadened: real-world outputs showed Soul V2 generating
+//     full Instagram-story UI chrome — usernames, profile-pic circles,
+//     close buttons, gibberish caption text — not just captions.
+//     "no subtitles" was too narrow.  Now covers three failure modes:
+//       - "no text overlays" → gibberish captions, hallucinated text
+//       - "no watermarks"    → usernames, handles, "@" tags, logos
+//       - "no app interface" → close buttons, UI chrome, story frames
+//   "no retouching" + "no professional makeup" stay — they're the
+//   plastic-skin guards from v0.1.7.
 const COMMON_CLOSER =
-  "no retouching, no professional makeup, no signage, no subtitles";
+  "no retouching, no professional makeup, no text overlays, no watermarks, no app interface";
 
+// The word "selfie" co-occurs heavily with social-media imagery in
+// Soul V2's training data → easy to drift into "Instagram story
+// screenshot" framing (UI chrome, gibberish captions, profile pic).
+// "candid photograph" prefixes pull the output back toward a real
+// photo and away from a screenshot.  Combined with the broader closer
+// negatives above, this kills the Instagram-story drift seen in v0.1.9.
 const STYLE_BLOCKS: Record<string, StyleBlock> = {
   // Default + first option.  Named hardware token ("iPhone 17 Pro")
   // gives Soul V2 a strong anchor — 4K mode + computational HDR look,
   // sharp focus on the subject with natural depth-of-field falloff.
+  // "candid photograph" leads to disambiguate from app screenshots.
   "iphone-pro": {
     lighting: "natural ambient lighting, true-to-life dynamic range",
-    medium: "shot on iPhone 17 Pro, 4K photo, sharp focus, natural depth of field",
+    medium: "candid photograph on iPhone 17 Pro, 4K, sharp focus, natural depth of field",
     closer: COMMON_CLOSER,
   },
   // Pro camera with specific body + lens.  Higgsfield's docs explicitly
@@ -396,10 +412,11 @@ const STYLE_BLOCKS: Record<string, StyleBlock> = {
     closer: COMMON_CLOSER,
   },
   // Front-camera selfie — slight wide-angle distortion is the tell that
-  // makes it read as a real phone selfie vs a posed portrait.
+  // makes it read as a real phone selfie vs a posed portrait.  "candid
+  // selfie photograph" lead disambiguates from Instagram story screenshot.
   "iphone-selfie": {
     lighting: "natural ambient lighting, even facial lighting",
-    medium: "iPhone 17 front camera selfie, slight wide-angle distortion, natural film grain",
+    medium: "candid iPhone 17 front-camera selfie photograph, slight wide-angle distortion, natural grain",
     closer: COMMON_CLOSER,
   },
 };
