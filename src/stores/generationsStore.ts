@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { resolvePrompt } from "@/lib/tagResolver";
 import { toast } from "@/stores/toastStore";
 import type { ContentItem, DirectReference, ApiCredentials } from "@/lib/tagResolver";
+import { VIDEO_POLL_INTERVAL_MS } from "@/lib/config";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -507,7 +508,10 @@ export const useGenerations = create<GenerationsState>((set, get) => ({
   // ---- polling lifecycle ---------------------------------------------------
   startPolling(generationId, api) {
     if (intervals.has(generationId)) return;
-    const iv = setInterval(() => void get().poll(generationId, api), 5000);
+    const iv = setInterval(
+      () => void get().poll(generationId, api),
+      VIDEO_POLL_INTERVAL_MS,
+    );
     intervals.set(generationId, iv);
     set((s) => {
       const next = new Set(s.pollingIds);

@@ -23,6 +23,11 @@ import { isTauri } from "@/lib/tauri";
 import { getDb } from "@/lib/db";
 import { toast } from "@/stores/toastStore";
 import type { CharacterSelections } from "@/lib/characterPrompt";
+import {
+  CHARACTER_MAX_POLLS,
+  CHARACTER_POLL_INITIAL_DELAY_MS,
+  CHARACTER_POLL_INTERVAL_MS,
+} from "@/lib/config";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -203,12 +208,9 @@ interface PoolEntry {
   polls: number;
 }
 
-/** Maximum poll ticks before we force a "polling timed out" failure on
- *  an in-flight image.  At the 2.5s tick interval that's ~10 minutes —
- *  comfortably longer than Higgsfield's typical 30–90s latency, short
- *  enough that a stuck job surfaces as an error instead of an infinite
- *  spinner. */
-const MAX_POLLS = 240;
+// MAX_POLLS / poll interval / initial delay all come from src/lib/config.ts
+// — tune there if Higgsfield's typical latency changes.
+const MAX_POLLS = CHARACTER_MAX_POLLS;
 
 let pollTimer: number | null = null;
 const pollingPool: Map<string /* imageId */, PoolEntry> = new Map();
@@ -457,7 +459,7 @@ function ensurePollingLoop(
         if (entry.polls > MAX_POLLS) {
           patchImage(set, imageId, {
             status: "failed",
-            error_message: `Polling timed out after ${MAX_POLLS} attempts (~${Math.round((MAX_POLLS * 2.5) / 60)} min).  Job may be stuck or returning a status this app doesn't recognize.`,
+            error_message: `Polling timed out after ${MAX_POLLS} attempts (~${Math.round((MAX_POLLS * CHARACTER_POLL_INTERVAL_MS) / 60000)} min).  Job may be stuck or returning a status this app doesn't recognize.`,
           });
           const fresh = get().history.find((h) => h.id === imageId);
           if (fresh) await persistImage(fresh);
@@ -526,8 +528,8 @@ function ensurePollingLoop(
       return;
     }
 
-    pollTimer = window.setTimeout(tick, 2500) as unknown as number;
+    pollTimer = window.setTimeout(tick, CHARACTER_POLL_INTERVAL_MS) as unknown as number;
   };
 
-  pollTimer = window.setTimeout(tick, 1500) as unknown as number;
+  pollTimer = window.setTimeout(tick, CHARACTER_POLL_INITIAL_DELAY_MS) as unknown as number;
 }

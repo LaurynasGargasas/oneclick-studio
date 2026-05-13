@@ -336,7 +336,14 @@ pub async fn submit_generation(
         .map_err(|e| format!("Network error: {e}"))?;
 
     let status = resp.status();
-    let raw = resp.text().await.unwrap_or_default();
+    // Propagate body-read errors instead of swallowing to empty string.
+    // The old `unwrap_or_default()` silently masked network drops mid-
+    // response and produced a misleading "Parse error: empty body"
+    // message — we now report the real IO error.
+    let raw = resp
+        .text()
+        .await
+        .map_err(|e| format!("Failed to read response body: {e}"))?;
     log::info!("submit_generation response {status}: {raw}");
 
     if !status.is_success() {
@@ -381,7 +388,10 @@ pub async fn poll_generation(
         .map_err(|e| format!("Network error: {e}"))?;
 
     let status_code = resp.status();
-    let raw = resp.text().await.unwrap_or_default();
+    let raw = resp
+        .text()
+        .await
+        .map_err(|e| format!("Failed to read response body: {e}"))?;
     log::info!("poll_generation {task_id} → {status_code}: {raw}");
 
     if !status_code.is_success() {

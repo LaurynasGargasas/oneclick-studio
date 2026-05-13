@@ -1,4 +1,8 @@
 import { create } from "zustand";
+import {
+  DEFAULT_TOAST_DURATION_MS,
+  TOAST_DURATIONS,
+} from "@/lib/config";
 
 export type ToastVariant = "success" | "error" | "warning" | "info";
 
@@ -22,7 +26,11 @@ export const useToastStore = create<ToastState>((set) => ({
 
   push(t) {
     const id = Math.random().toString(36).slice(2, 10);
-    const item: ToastItem = { ...t, id, duration: t.duration ?? 4500 };
+    const item: ToastItem = {
+      ...t,
+      id,
+      duration: t.duration ?? DEFAULT_TOAST_DURATION_MS,
+    };
     set((s) => ({ items: [...s.items, item] }));
     if (item.duration > 0) {
       setTimeout(
@@ -37,14 +45,24 @@ export const useToastStore = create<ToastState>((set) => ({
   },
 }));
 
-// Callable outside React components (e.g. from Zustand stores)
+// Callable outside React components (e.g. from Zustand stores).
+// Durations come from a single source (TOAST_DURATIONS in config.ts);
+// edit there to change globally.
 export const toast = {
   success: (title: string, body?: string) =>
-    useToastStore.getState().push({ variant: "success", title, body, duration: 4500 }),
+    useToastStore
+      .getState()
+      .push({ variant: "success", title, body, duration: TOAST_DURATIONS.success }),
   error: (title: string, body?: string) =>
-    useToastStore.getState().push({ variant: "error", title, body, duration: 6000 }),
+    useToastStore
+      .getState()
+      .push({ variant: "error", title, body, duration: TOAST_DURATIONS.error }),
   warning: (title: string, body?: string) =>
-    useToastStore.getState().push({ variant: "warning", title, body, duration: 5000 }),
+    useToastStore
+      .getState()
+      .push({ variant: "warning", title, body, duration: TOAST_DURATIONS.warning }),
   info: (title: string, body?: string) =>
-    useToastStore.getState().push({ variant: "info", title, body, duration: 4000 }),
+    useToastStore
+      .getState()
+      .push({ variant: "info", title, body, duration: TOAST_DURATIONS.info }),
 };

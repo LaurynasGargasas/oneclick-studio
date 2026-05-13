@@ -1,6 +1,12 @@
 use base64::{engine::general_purpose, Engine};
 use reqwest::multipart;
 
+// imgbb's free image-hosting API.  Public, no app registration — the
+// per-user key in the query string is the only auth.  Centralized
+// here so future host changes (e.g. switching to Cloudinary) are a
+// one-line edit.
+const IMGBB_UPLOAD_URL: &str = "https://api.imgbb.com/1/upload";
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -114,7 +120,10 @@ async fn upload_bytes(
         .map_err(|e| format!("Network error: {e}"))?;
 
     let status = resp.status();
-    let raw = resp.text().await.unwrap_or_default();
+    let raw = resp
+        .text()
+        .await
+        .map_err(|e| format!("Failed to read upload response: {e}"))?;
     log::info!("upload_bytes response {status}: {raw}");
 
     if !status.is_success() {
@@ -232,14 +241,17 @@ pub async fn upload_to_imgbb(
 
     let client = reqwest::Client::new();
     let resp = client
-        .post(format!("https://api.imgbb.com/1/upload?key={imgbb_key}"))
+        .post(format!("{IMGBB_UPLOAD_URL}?key={imgbb_key}"))
         .form(&[("image", b64)])
         .send()
         .await
         .map_err(|e| format!("imgbb network error: {e}"))?;
 
     let status = resp.status();
-    let raw = resp.text().await.unwrap_or_default();
+    let raw = resp
+        .text()
+        .await
+        .map_err(|e| format!("Failed to read imgbb response: {e}"))?;
     log::info!("upload_to_imgbb response {status}: {raw}");
 
     if !status.is_success() {
