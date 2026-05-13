@@ -248,6 +248,52 @@ for (const c of cases) {
       prompt.toLowerCase().includes("extremely muscular"),
     );
   }
+
+  // ── SELECTION FIDELITY ASSERTIONS ────────────────────────────────────
+  // Every picked option MUST show up in the prompt somewhere.  Catches
+  // regressions like v0.1.7's gender-replaced-by-profession bug where
+  // a critical selection (gender) was silently dropped when another
+  // option (profession) was also set.
+
+  // Gender — was being dropped when profession picked.  Always required.
+  if (c.sel.gender) {
+    check(
+      `${c.name}: gender "${c.sel.gender}" appears in prompt`,
+      prompt.toLowerCase().includes(c.sel.gender),
+    );
+  }
+
+  // Profession — bare noun ("chef", "doctor", "content creator").
+  if (c.sel.profession) {
+    const profMap: Record<string, string> = {
+      chef: "chef",
+      doctor: "doctor",
+      ugc: "content creator",
+    };
+    const expected = profMap[c.sel.profession];
+    if (expected) {
+      check(
+        `${c.name}: profession "${expected}" appears in prompt`,
+        prompt.toLowerCase().includes(expected),
+      );
+    }
+  }
+
+  // Age — should appear as "N-year-old".
+  if (typeof c.sel.age === "number") {
+    check(
+      `${c.name}: age "${c.sel.age}-year-old" appears in prompt`,
+      prompt.toLowerCase().includes(`${c.sel.age}-year-old`),
+    );
+  }
+
+  // Ethnicity — preset phrases are short tokens (black/white/japanese/mexican).
+  if (c.sel.ethnicity && c.sel.ethnicity !== "other") {
+    check(
+      `${c.name}: ethnicity "${c.sel.ethnicity}" appears in prompt`,
+      prompt.toLowerCase().includes(c.sel.ethnicity),
+    );
+  }
 }
 
 console.log(`\n${pass} passed · ${fail} failed`);
