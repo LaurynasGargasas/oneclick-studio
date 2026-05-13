@@ -9,6 +9,8 @@
 // HTML's FAQ accordions, countdown timers, sticky CTAs, and the
 // ranking-page carousel never wake up.
 
+import { toast } from "@/stores/toastStore";
+
 /**
  * Rewrite every inline `<style>` inside `root` so width-based @media
  * queries become @container queries.  The editor canvas is a container
@@ -125,6 +127,23 @@ export function attachMediaHandlers(
       el.style.outline = "";
       el.style.outlineOffset = "";
     };
+    // Wrap replaceMedia + the subsequent onChange call so a failure
+    // (corrupt file, FileReader error) surfaces as a user-visible
+    // toast instead of an unhandled promise rejection logging to a
+    // console no one looks at.
+    const swapMedia = (file: File): void => {
+      void replaceMedia(el, file)
+        .then(onChange)
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error("[landing] media replace failed:", err);
+          toast.error(
+            "Couldn't replace media",
+            err instanceof Error ? err.message : String(err),
+          );
+        });
+    };
+
     const onDrop = (e: DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
@@ -132,7 +151,7 @@ export function attachMediaHandlers(
       el.style.outlineOffset = "";
       const file = e.dataTransfer?.files?.[0];
       if (!file) return;
-      void replaceMedia(el, file).then(onChange);
+      swapMedia(file);
     };
     const onClick = (e: MouseEvent) => {
       e.preventDefault();
@@ -143,7 +162,7 @@ export function attachMediaHandlers(
       input.addEventListener("change", () => {
         const file = input.files?.[0];
         if (!file) return;
-        void replaceMedia(el, file).then(onChange);
+        swapMedia(file);
       });
       input.click();
     };

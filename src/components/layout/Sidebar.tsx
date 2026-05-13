@@ -4,6 +4,7 @@ import { Film, Folder, Boxes, Settings as SettingsIcon, Sparkles, Wand2, UserCog
 import { cn } from "@/lib/cn";
 import { useSettings } from "@/stores/settingsStore";
 import { useGenerations } from "@/stores/generationsStore";
+import { useVersion } from "@/lib/version";
 
 const NAV_ITEMS = [
   { to: "/", label: "Feed", icon: Film, end: true },
@@ -19,6 +20,7 @@ export function Sidebar() {
   const apiKey = useSettings((s) => s.apiKey);
   const apiConfigured = apiKey.length > 0;
   const renderingCount = useGenerations((s) => s.pollingIds.size);
+  const version = useVersion();
 
   return (
     <aside className="relative flex flex-col w-[220px] flex-shrink-0 border-r border-border-hud bg-bg-panel/40 backdrop-blur-md">
@@ -38,7 +40,9 @@ export function Sidebar() {
           </div>
         </div>
         <div className="mt-3 flex items-center gap-2">
-          <span className="font-mono text-[0.55rem] tracking-[0.15em] text-fg-dim">v0.1.0</span>
+          <span className="font-mono text-[0.55rem] tracking-[0.15em] text-fg-dim">
+            {version ? `v${version}` : ""}
+          </span>
           <span className="flex-1 h-px bg-border-hud" />
           <span className="font-mono text-[0.55rem] tracking-[0.15em] text-fg-dim">BUILD.A1</span>
         </div>

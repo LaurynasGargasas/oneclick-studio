@@ -2,6 +2,11 @@
 // canvas.  Kept deliberately small and unopinionated — the active
 // preset's family CSS takes care of styling once the snippet is in.
 
+import {
+  PLACEHOLDER_IMAGE_URL_HERO,
+  PLACEHOLDER_IMAGE_URL_SECTION,
+} from "@/lib/config";
+
 export interface Snippet {
   id: string;
   label: string;
@@ -63,7 +68,7 @@ export const SNIPPETS: Snippet[] = [
     label: "Image (full-width)",
     category: "Media",
     html: `<figure style="margin:32px 0;">
-  <img src="https://placehold.co/1200x600/e5e7eb/64748b?text=Drop+an+image" alt="" style="display:block;width:100%;height:auto;border-radius:6px;" />
+  <img src="${PLACEHOLDER_IMAGE_URL_HERO}" alt="" style="display:block;width:100%;height:auto;border-radius:6px;" />
   <figcaption style="margin-top:8px;text-align:center;font-size:0.9em;color:#64748b;font-style:italic;">Caption goes here</figcaption>
 </figure>`,
   },
@@ -72,7 +77,7 @@ export const SNIPPETS: Snippet[] = [
     label: "Image + Text (image left)",
     category: "Media",
     html: `<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center;margin:32px 0;">
-  <img src="https://placehold.co/600x400/e5e7eb/64748b?text=Drop+an+image" alt="" style="display:block;width:100%;height:auto;border-radius:6px;" />
+  <img src="${PLACEHOLDER_IMAGE_URL_SECTION}" alt="" style="display:block;width:100%;height:auto;border-radius:6px;" />
   <div>
     <h3 style="margin:0 0 8px;">Heading</h3>
     <p style="margin:0;">Body text that sits beside the image.  Click to edit.</p>
@@ -88,7 +93,7 @@ export const SNIPPETS: Snippet[] = [
     <h3 style="margin:0 0 8px;">Heading</h3>
     <p style="margin:0;">Body text that sits beside the image.  Click to edit.</p>
   </div>
-  <img src="https://placehold.co/600x400/e5e7eb/64748b?text=Drop+an+image" alt="" style="display:block;width:100%;height:auto;border-radius:6px;" />
+  <img src="${PLACEHOLDER_IMAGE_URL_SECTION}" alt="" style="display:block;width:100%;height:auto;border-radius:6px;" />
 </div>`,
   },
   {

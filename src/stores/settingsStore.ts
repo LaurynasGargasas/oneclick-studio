@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { isTauri } from "@/lib/tauri";
 import { getDb } from "@/lib/db";
+import { DEFAULT_BYTEPLUS_ENDPOINT } from "@/lib/config";
 
 interface SettingsRow {
   key: string;
@@ -35,7 +36,7 @@ interface SettingsState {
 }
 
 const DEFAULTS = {
-  apiEndpoint: "https://ark.ap-southeast.bytepluses.com/api/v3",
+  apiEndpoint: DEFAULT_BYTEPLUS_ENDPOINT,
   apiKey: "",
   modelId: "seedance-1-0-lite-t2v-250528",
   imgbbApiKey: "",

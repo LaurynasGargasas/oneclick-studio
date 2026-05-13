@@ -9,6 +9,7 @@ import { useSettings } from "@/stores/settingsStore";
 import { useGenerations } from "@/stores/generationsStore";
 import { toast } from "@/stores/toastStore";
 import { isTauri } from "@/lib/tauri";
+import { DEFAULT_BYTEPLUS_ENDPOINT } from "@/lib/config";
 
 type TestState = "idle" | "testing" | "ok" | "fail";
 
@@ -213,7 +214,7 @@ export function Settings() {
             mono
             value={endpoint}
             onChange={(e) => setEndpoint(e.target.value)}
-            placeholder="https://ark.ap-southeast.bytepluses.com/api/v3"
+            placeholder={DEFAULT_BYTEPLUS_ENDPOINT}
             hint="BytePlus ModelArk base URL. Override for China endpoint or proxy."
           />
           <HudInput
