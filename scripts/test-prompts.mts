@@ -159,15 +159,21 @@ const FORBIDDEN: string[] = [
 ];
 
 const REQUIRED: string[] = [
-  "no visible makeup",
+  // Photoreal lever (skin clause).
   "visible pores",
-  "no retouching",
-  // v0.1.10 — broadened Instagram-UI guards.  Replaces v0.1.7's
-  // "no subtitles" alone, which only caught caption text but missed
-  // usernames (watermarks) + story-UI chrome (app interface).
-  "no text overlays",
-  "no watermarks",
-  "no app interface",
+  // Plastic-skin + retouching guards (now merged into one closer phrase
+  // in v0.1.11).
+  "no makeup or retouching",
+  // Anti-screenshot framing — replaces v0.1.10's "no app interface".
+  // Brand-specific negatives land harder than abstract terms.
+  "raw photo not a screenshot",
+  "no Instagram UI",
+  // Anti-brand-text on garments.  Added after a user's "home chef"
+  // free-text clothing was rendered as a literal "Home Chef" apron logo.
+  "no brand logos or text on clothing",
+  // Shirtless guard restored — body-type adjectives (athletic, muscular,
+  // bulky) reliably pull toward shirtless gym imagery without it.
+  "fully clothed",
 ];
 
 for (const c of cases) {
