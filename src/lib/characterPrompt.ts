@@ -403,8 +403,25 @@ interface StyleBlock {
 //     replaces "no Instagram"; "plain unmarked garments" replaces
 //     "no brand logos or text"; "natural undisturbed skin" replaces
 //     "no makeup or retouching".
+// Closer (positive only).  "plain unmarked solid-color garments" is
+// stronger than just "plain unmarked" — adds another descriptor of
+// the SURFACE (solid-color = uniform, no print) without ever mentioning
+// the unwanted concepts (text / brand / logo) that would prime the
+// model.  See COMMON_NEGATIVE_PROMPT below for the separate-field
+// negative guidance that complements this.
 const COMMON_CLOSER =
-  "standalone photograph, plain unmarked garments, natural undisturbed skin, soft genuine expression";
+  "standalone photograph, plain unmarked solid-color garments, smooth fabric surface, natural undisturbed skin, soft genuine expression";
+
+/** Negative-prompt directive list — what we WANT THE MODEL TO AVOID.
+ *  Sent as a separate `negative_prompt` field on Soul V2 requests
+ *  (Higgsfield may or may not honor it; harmless either way).  Kept
+ *  separate from the positive prompt so the unwanted tokens don't
+ *  prime the model via the "don't think of elephant" effect.  When
+ *  Higgsfield ignores it, the positive descriptors in COMMON_CLOSER
+ *  carry the load.  When honored, this is the real negative-guidance
+ *  signal. */
+export const COMMON_NEGATIVE_PROMPT =
+  "text on clothing, brand logos, watermarks, captions, usernames, profile pictures, Instagram UI, TikTok UI, Snapchat UI, story interface, app chrome, close button, makeup, retouching, plastic skin, hyperrealistic, ultra-detailed, 8k, masterpiece";
 
 // The word "selfie" co-occurs heavily with social-media imagery in
 // Soul V2's training data → easy to drift into "Instagram story

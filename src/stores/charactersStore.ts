@@ -23,6 +23,7 @@ import { isTauri } from "@/lib/tauri";
 import { getDb } from "@/lib/db";
 import { toast } from "@/stores/toastStore";
 import type { CharacterSelections } from "@/lib/characterPrompt";
+import { COMMON_NEGATIVE_PROMPT } from "@/lib/characterPrompt";
 import {
   CHARACTER_MAX_POLLS,
   CHARACTER_POLL_INITIAL_DELAY_MS,
@@ -308,6 +309,13 @@ export const useCharacters = create<CharactersState>((set, get) => ({
           apiKey: api_key,
           apiSecret: api_secret,
           prompt,
+          // Separate negative-prompt field — keeps unwanted-concept
+          // tokens out of the positive prompt where they'd prime the
+          // model.  Soul V2 may or may not honor this (Higgsfield
+          // doesn't publicly document support), but it's harmless to
+          // send and is the proper architectural place for negatives
+          // if/when Higgsfield exposes it officially.
+          negativePrompt: COMMON_NEGATIVE_PROMPT,
           aspectRatio: aspect_ratio ?? "9:16",
           batchSize: 1,
         });

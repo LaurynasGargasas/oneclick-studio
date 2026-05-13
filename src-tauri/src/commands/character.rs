@@ -50,9 +50,18 @@ const REQUEST_STATUS_PATH_TMPL: &str = "/requests/{}/status";
 
 /// Soul V2 request body.  Flat — no `params` wrapper like V1 had.
 /// `enhance_prompt` is intentionally always `false`; see file header.
+///
+/// `negative_prompt` is sent only when JS provides one.  Higgsfield's
+/// playground UI doesn't expose this field, so it's unclear whether
+/// Soul V2 honors it.  Sending it is harmless either way: unsupported
+/// fields are silently ignored, and if it IS supported we get proper
+/// negative guidance (avoids the "don't think of elephant" problem of
+/// inline negatives in the positive prompt).
 #[derive(Debug, Serialize)]
 struct SoulV2Request<'a> {
     prompt: &'a str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    negative_prompt: Option<&'a str>,
     batch_size: u32,
     resolution: &'a str,
     aspect_ratio: &'a str,
@@ -301,6 +310,13 @@ async fn parse_error(resp: reqwest::Response) -> String {
 /// release.  Resolution is fixed to 1080p (the highest quality tier we ship
 /// — V2's other option is 720p, exposed only if we later want a "draft"
 /// mode).
+// `negative_prompt` is an optional list of concepts the model should
+// avoid (e.g. "Instagram UI, text on clothing, brand logos").  Sent
+// as a separate field from `prompt` so the negative tokens don't
+// appear in the positive prompt (the "don't think of elephant"
+// problem with inline negatives).  Whether Soul V2 honors it is TBD —
+// Higgsfield's playground doesn't expose the field, but unknown
+// fields are silently ignored so trying is harmless.
 #[tauri::command]
 pub async fn submit_character_batch(
     api_key: String,
@@ -308,6 +324,7 @@ pub async fn submit_character_batch(
     prompt: String,
     aspect_ratio: Option<String>,
     batch_size: Option<u32>,
+    negative_prompt: Option<String>,
 ) -> Result<JobSet, String> {
     if api_key.trim().is_empty() || api_secret.trim().is_empty() {
         return Err("Higgsfield credentials missing — set them in Settings.".into());
@@ -315,9 +332,13 @@ pub async fn submit_character_batch(
 
     let aspect = aspect_ratio.unwrap_or_else(|| "9:16".to_owned()); // hero-shot default
     let batch = batch_size.unwrap_or(1);
+    let neg = negative_prompt
+        .as_deref()
+        .filter(|s| !s.trim().is_empty());
 
     let body = SoulV2Request {
         prompt: &prompt,
+        negative_prompt: neg,
         batch_size: batch,
         resolution: "1080p",
         aspect_ratio: &aspect,

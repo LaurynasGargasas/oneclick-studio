@@ -167,7 +167,8 @@ const REQUIRED: string[] = [
   // models (the "don't think of an elephant" problem).  Positive
   // descriptors describe what we WANT.
   "standalone photograph",
-  "plain unmarked garments",
+  "plain unmarked solid-color garments",
+  "smooth fabric surface",
   "natural undisturbed skin",
   // Shirtless guard from v0.1.11 — body-type adjectives (athletic,
   // muscular, bulky) reliably pull toward shirtless gym imagery
