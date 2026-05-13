@@ -99,16 +99,52 @@ interface CharactersState {
 // Helpers
 // ---------------------------------------------------------------------------
 
+// v0.1.8: expanded to handle Soul V2's broader status vocabulary.
+// Higgsfield V1 used the compact enum on the left; V2 emits a wider mix
+// ("running", "succeeded", "in_queue" etc.) that previously fell into
+// the "in_progress" default and made polling spin forever.  The Rust
+// poll command also overrides status to "completed" when a URL is
+// present (URL-equals-done belt-and-suspenders) — see character.rs.
 function mapStatus(raw: string): CharacterImageStatus {
-  switch (raw) {
+  switch (raw.toLowerCase()) {
     case "queued":
+    case "in_queue":
+    case "pending":
+    case "waiting":
+      return "queued";
     case "in_progress":
+    case "running":
+    case "processing":
+    case "rendering":
+    case "started":
+      return "in_progress";
     case "completed":
+    case "succeeded":
+    case "success":
+    case "finished":
+    case "done":
+    case "complete":
+      return "completed";
     case "failed":
+    case "failure":
+    case "error":
+    case "errored":
+      return "failed";
     case "nsfw":
+    case "blocked":
+    case "content_policy_violation":
+    case "moderation":
+      return "nsfw";
     case "canceled":
-      return raw;
+    case "cancelled":
+      return "canceled";
     default:
+      // Unknown status — log loudly so we catch schema drift, but keep
+      // polling (don't terminate on an unrecognized value).  The poll
+      // loop's max-poll cap (see ensurePollingLoop) prevents this from
+      // spinning forever even if the status is permanently weird.
+      // eslint-disable-next-line no-console
+      console.warn("[characters] unknown status from API:", raw);
       return "in_progress";
   }
 }
@@ -160,7 +196,19 @@ interface PoolEntry {
   generationId: string;
   apiKey: string;
   apiSecret: string;
+  /** Number of poll ticks this image has been alive in the pool.  When
+   *  it exceeds MAX_POLLS the image is force-failed with a clear error
+   *  instead of polling forever — protects against unknown status terms
+   *  or Higgsfield jobs that genuinely never finish. */
+  polls: number;
 }
+
+/** Maximum poll ticks before we force a "polling timed out" failure on
+ *  an in-flight image.  At the 2.5s tick interval that's ~10 minutes —
+ *  comfortably longer than Higgsfield's typical 30–90s latency, short
+ *  enough that a stuck job surfaces as an error instead of an infinite
+ *  spinner. */
+const MAX_POLLS = 240;
 
 let pollTimer: number | null = null;
 const pollingPool: Map<string /* imageId */, PoolEntry> = new Map();
@@ -317,6 +365,7 @@ export const useCharacters = create<CharactersState>((set, get) => ({
           generationId: generation_id,
           apiKey: api_key,
           apiSecret: api_secret,
+          polls: 0,
         });
       }
     }
@@ -397,6 +446,25 @@ function ensurePollingLoop(
     const entries = Array.from(pollingPool.entries());
     await Promise.all(
       entries.map(async ([imageId, entry]) => {
+        // Increment first so a thrown poll still counts toward the cap.
+        entry.polls += 1;
+
+        // Poll-count timeout: if Higgsfield never reports completion
+        // within MAX_POLLS ticks, force-fail the image so the tile shows
+        // an actionable error instead of an infinite spinner.  Most
+        // commonly fires on truly stuck jobs or unrecognized status
+        // values that would otherwise spin forever.
+        if (entry.polls > MAX_POLLS) {
+          patchImage(set, imageId, {
+            status: "failed",
+            error_message: `Polling timed out after ${MAX_POLLS} attempts (~${Math.round((MAX_POLLS * 2.5) / 60)} min).  Job may be stuck or returning a status this app doesn't recognize.`,
+          });
+          const fresh = get().history.find((h) => h.id === imageId);
+          if (fresh) await persistImage(fresh);
+          pollingPool.delete(imageId);
+          return;
+        }
+
         try {
           const js = await invoke<JobSet>("poll_character_batch", {
             apiKey: entry.apiKey,
@@ -405,8 +473,16 @@ function ensurePollingLoop(
           });
           const job = js.jobs[0];
           if (!job) return;
-          const status = mapStatus(job.status);
           const url = job.results?.raw?.url ?? null;
+          // URL-equals-done belt-and-suspenders.  The Rust poll already
+          // overrides status to "completed" when a URL is present, but
+          // we replicate the rule on the JS side so the check is robust
+          // even if the user is on an older Rust binary (during dev
+          // hot-reload of just the JS) or a future schema change slips
+          // through somewhere.
+          const status: CharacterImageStatus = url
+            ? "completed"
+            : mapStatus(job.status);
           patchImage(set, imageId, { status, image_url: url });
 
           const fresh = get().history.find((h) => h.id === imageId);
@@ -416,7 +492,8 @@ function ensurePollingLoop(
             pollingPool.delete(imageId);
           }
         } catch (e) {
-          // transient — keep polling
+          // transient — keep polling (count still incremented above so
+          // we don't loop forever on a permanently-failing endpoint)
           console.warn("poll error for", imageId, e);
         }
       }),
