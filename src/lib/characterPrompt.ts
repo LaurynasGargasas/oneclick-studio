@@ -262,23 +262,26 @@ export const GROUPS: OptionGroup[] = [
     //
     // Free-text input gets wrapped — bare user input like "home chef"
     // pasted raw made Soul V2 render "Home Chef" as a literal brand
-    // logo on an apron.  "Outfit inspired by X, no brand logos" guides
-    // the model to interpret the term as a *style* rather than text to
-    // print on the garment.
-    otherTemplate: (t) => `outfit inspired by ${t.trim()}, no brand logos, no text on clothing`,
+    // logo on an apron.  v0.1.11 tried "no brand logos, no text on
+    // clothing" — failed because the words "brand"/"logo"/"text" in
+    // the prompt triggered the very thing they were trying to negate
+    // (don't-think-of-an-elephant problem).  v0.1.12 reframes to
+    // positive-only: "plain unmarked" never mentions text/brand/logo.
+    otherTemplate: (t) => `plain unmarked outfit inspired by ${t.trim()}`,
     options: [
       {
         id: "chef",
         label: "Chef Outfit",
-        phrase: "white chef's jacket over a tee",
+        phrase: "white chef's jacket over a plain tee",
       },
       {
         id: "homecook",
         label: "Home Cook",
-        // Distinct from the pro-kitchen "Chef Outfit" — casual apron-over-tee
-        // for home-cooking content.  Anti-brand-text guard inline so the
-        // model doesn't stamp "HOME COOK" on the apron.
-        phrase: "plain linen apron over a casual cotton tee, no brand logos, no text on clothing",
+        // Distinct from the pro-kitchen "Chef Outfit" — casual apron-over-
+        // tee for home-cooking content.  "Plain unmarked" replaces v0.1.11's
+        // "no brand logos, no text on clothing" — positive framing avoids
+        // priming Soul V2 to generate text-on-apron in the first place.
+        phrase: "plain unmarked linen apron over a solid-color cotton tee",
       },
       {
         id: "labcoat",
@@ -383,20 +386,25 @@ interface StyleBlock {
   closer: string;
 }
 
-// Negative directives appended to every prompt.  History of growth:
+// Closer — POSITIVE-ONLY framing.  Lessons-learned:
+//
 //   v0.1.7  "no subtitles" — kills hallucinated caption text.
 //   v0.1.10 broadened to "no text overlays / no watermarks / no app
-//     interface" after Soul V2 generated full Instagram story UI
-//     (usernames, profile circles, close buttons).
-//   v0.1.11 Real-world test still produced Instagram chrome despite
-//     the v0.1.10 guards — "no app interface" was too abstract.
-//     Switched to brand-specific negatives ("no Instagram", "no
-//     TikTok") which land harder than generic terms.  Reordered to
-//     put photoreal/anti-screenshot directives first so they get
-//     more attention at the end of the prompt where Soul V2's
-//     attention has decayed.
+//     interface" after Soul V2 generated full Instagram story UI.
+//   v0.1.11 added brand-specific negatives ("no Instagram", "no
+//     TikTok") after v0.1.10 still failed in production.
+//   v0.1.12 (this) Brand-specific negatives ALSO failed.  Diffusion
+//     models have a "don't think of an elephant" problem — writing
+//     "no Instagram UI" puts the Instagram token in the prompt, and
+//     the model attends to it more than the "no".  Writing "no text
+//     on clothing" similarly triggers text generation.  Switched to
+//     positive-only framing: never mention the unwanted concept at
+//     all, instead describe what we WANT.  "standalone photograph"
+//     replaces "no Instagram"; "plain unmarked garments" replaces
+//     "no brand logos or text"; "natural undisturbed skin" replaces
+//     "no makeup or retouching".
 const COMMON_CLOSER =
-  "raw photo not a screenshot, no Instagram UI, no brand logos or text on clothing, no makeup or retouching";
+  "standalone photograph, plain unmarked garments, natural undisturbed skin, soft genuine expression";
 
 // The word "selfie" co-occurs heavily with social-media imagery in
 // Soul V2's training data → easy to drift into "Instagram story
@@ -408,10 +416,14 @@ const STYLE_BLOCKS: Record<string, StyleBlock> = {
   // Default + first option.  Named hardware token ("iPhone 17 Pro")
   // gives Soul V2 a strong anchor — 4K mode + computational HDR look,
   // sharp focus on the subject with natural depth-of-field falloff.
-  // "candid photograph" leads to disambiguate from app screenshots.
+  //
+  // v0.1.12: Dropped "candid" (Instagram-coded in training data).
+  // Lead with "third-person photograph" to immediately disambiguate
+  // from the iPhone-selfie style and from Instagram-story framing.
+  // The closer's "standalone photograph" reinforces this further.
   "iphone-pro": {
     lighting: "natural ambient lighting, true-to-life dynamic range",
-    medium: "candid photograph on iPhone 17 Pro, 4K, sharp focus, natural depth of field",
+    medium: "third-person photograph captured on iPhone 17 Pro in 4K mode, sharp focus, natural depth of field",
     closer: COMMON_CLOSER,
   },
   // Pro camera with specific body + lens.  Higgsfield's docs explicitly
