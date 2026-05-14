@@ -98,6 +98,13 @@ interface CharactersState {
   load: () => Promise<void>;
   submit: (args: SubmitArgs) => Promise<string>;
   cancelAllPolling: () => void;
+  /** Force-fail every character that's stuck in a non-terminal state
+   *  AND clear the in-memory polling pool.  Used to recover from
+   *  orphan images (e.g. a generation that was in-flight when the
+   *  app got killed — its DB row stays "in_progress" forever because
+   *  the in-memory pool is empty on restart, so MAX_POLLS never
+   *  triggers).  Surfaces in the UI as a "Reset Stuck" button. */
+  resetStuck: () => Promise<number>;
   clearCurrent: () => void;
 }
 
@@ -403,6 +410,64 @@ export const useCharacters = create<CharactersState>((set, get) => ({
       pollTimer = null;
     }
     set({ inFlightCount: 0 });
+  },
+
+  async resetStuck() {
+    // 1) Stop any active polling — clean slate.
+    pollingPool.clear();
+    announcedGenerations.clear();
+    if (pollTimer != null) {
+      clearTimeout(pollTimer);
+      pollTimer = null;
+    }
+
+    // 2) Force-fail every DB row in a non-terminal state.  These are
+    //    images that were in-flight when the app died, or jobs whose
+    //    status field Higgsfield returned in a form we don't recognize.
+    //    Marking them "canceled" frees the tile + lets the user retry.
+    let updated = 0;
+    if (isTauri) {
+      try {
+        const db = await getDb();
+        const stuckIds = await db.select<Array<{ id: string }>>(
+          "SELECT id FROM characters WHERE status IN ('queued', 'in_progress')",
+        );
+        updated = stuckIds.length;
+        if (updated > 0) {
+          await db.execute(
+            "UPDATE characters SET status = 'canceled', error_message = 'Reset by user' WHERE status IN ('queued', 'in_progress')",
+          );
+        }
+      } catch (e) {
+        console.error("Failed to reset stuck characters in DB:", e);
+        toast.error("Reset failed", String(e));
+        return 0;
+      }
+    }
+
+    // 3) Patch in-memory state so the UI reflects the cancelation
+    //    without needing a full reload.
+    set((s) => {
+      const fix = (img: CharacterImage): CharacterImage =>
+        isTerminal(img.status)
+          ? img
+          : { ...img, status: "canceled", error_message: "Reset by user" };
+      return {
+        images: s.images.map(fix),
+        history: s.history.map(fix),
+        inFlightCount: 0,
+      };
+    });
+
+    if (updated > 0) {
+      toast.success(
+        "Reset",
+        `${updated} stuck image${updated === 1 ? "" : "s"} canceled — you can generate again.`,
+      );
+    } else {
+      toast.info("Nothing to reset", "No stuck generations found.");
+    }
+    return updated;
   },
 
   clearCurrent() {

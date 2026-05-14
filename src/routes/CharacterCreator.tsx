@@ -75,6 +75,7 @@ type OtherField =
   | "bodyTypeOther"
   | "hairColorOther"
   | "hairStyleOther"
+  | "facialHairOther"
   | "clothesOther"
   | "professionOther"
   | "environmentOther"
@@ -88,6 +89,7 @@ const GROUP_TO_OTHER_FIELD: Record<string, OtherField> = {
   bodyType: "bodyTypeOther",
   hairColor: "hairColorOther",
   hairStyle: "hairStyleOther",
+  facialHair: "facialHairOther",
   clothes: "clothesOther",
   profession: "professionOther",
   environment: "environmentOther",
@@ -265,10 +267,26 @@ export function CharacterCreator() {
         </div>
         <div className="flex items-center gap-2">
           {inFlightCount > 0 && (
-            <span className="flex items-center gap-1.5 font-mono text-[0.6rem] uppercase tracking-[0.1em] text-hud-amber">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              {inFlightCount} in flight
-            </span>
+            <>
+              <span className="flex items-center gap-1.5 font-mono text-[0.6rem] uppercase tracking-[0.1em] text-hud-amber">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                {inFlightCount} in flight
+              </span>
+              {/* Reset stuck generations.  Surfaces only when something
+                  is in flight.  Marks every non-terminal character
+                  ("queued" / "in_progress") as canceled in the DB so the
+                  UI tiles release and the user can retry — recovers from
+                  orphan polls left behind when the app was restarted
+                  mid-generation. */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void characters.resetStuck()}
+                title="Force-fail every stuck generation (orphan polls from a previous session)"
+              >
+                Reset Stuck
+              </Button>
+            </>
           )}
           <Button variant="ghost" onClick={clearAll}>
             Clear

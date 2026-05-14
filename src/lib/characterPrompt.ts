@@ -495,6 +495,14 @@ export interface CharacterSelections {
   bodyTypeOther?: string;
   hairColorOther?: string;
   hairStyleOther?: string;
+  // BUG FIX v0.1.13: facialHairOther was missing.  The schema had
+  // `allowOther: true` and `otherTemplate` set on the facialHair group,
+  // but the selection state had no slot to store the user's typed
+  // value AND the OtherField type / GROUP_TO_OTHER_FIELD map in
+  // CharacterCreator didn't include facialHair — so the OptionChips
+  // "Other" input was a controlled component with no onChange wiring,
+  // making it appear un-writable to the user.
+  facialHairOther?: string;
   clothesOther?: string;
   professionOther?: string;
   environmentOther?: string;
@@ -650,8 +658,11 @@ export function buildPrompt(s: CharacterSelections): string {
   if (s.accessoriesOther && s.accessoriesOther.trim()) {
     faceBits.push(`also ${s.accessoriesOther.trim()}`);
   }
-  const fh = findOption("facialHair", s.facialHair);
-  if (fh) faceBits.push(fh.phrase);
+  // v0.1.13: was `findOption(...)` which skipped the "other" branch.
+  // resolveSingle honors `s.facialHair === "other"` by feeding the user's
+  // typed value through the group's otherTemplate (`with ${t.trim()}`).
+  const fh = resolveSingle("facialHair", s.facialHair, s.facialHairOther);
+  if (fh) faceBits.push(fh);
   if (faceBits.length > 0) clauses.push(faceBits.join(", "));
 
   // ── 5. Wardrobe ──────────────────────────────────────────────────────
